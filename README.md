@@ -1,2 +1,3 @@
-# whale
-coding_whale_study
+# 코딩웨일 과외
+
+---
