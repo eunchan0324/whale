@@ -202,78 +202,369 @@ public class star {
 //        System.out.println("              * * *      ");
 
         // r = 15 일 때
-        System.out.println("                              *  *  *  *  *  *"); // 가로 5+1(중앙선) 개
-        System.out.println("                        *  *  *  *  *  *  *  *"); // 2 >> 10/5?
-        System.out.println("                  *  *  *  *  *  *  *  *  *  *"); // 3
-        System.out.println("               *  *  *  *  *  *  *  *  *  *  *"); // 4
-        System.out.println("            *  *  *  *  *  *  *  *  *  *  *  *");
-        System.out.println("         *  *  *  *  *  *  *  *  *  *  *  *  *");
-        System.out.println("      *  *  *  *  *  *  *  *  *  *  *  *  *  *"); // 7
-        System.out.println("      *  *  *  *  *  *  *  *  *  *  *  *  *  *"); // 8
-        System.out.println("   *  *  *  *  *  *  *  *  *  *  *  *  *  *  *"); // 9
-        System.out.println("   *  *  *  *  *  *  *  *  *  *  *  *  *  *  *"); // 10
-        System.out.println("*  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *"); // 11
-        System.out.println("*  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *"); // 12
-        System.out.println("*  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *"); // 13
-        System.out.println("*  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *"); // 14
-        System.out.println("*  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *"); // 15줄 째
-        System.out.println("*  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *"); // 중간 선 /15+1줄
+//        System.out.println("                              *  *  *  *  *  *"); // 가로 5+1(중앙선) 개
+//        System.out.println("                        *  *  *  *  *  *  *  *"); // 2 >> 10/5?
+//        System.out.println("                  *  *  *  *  *  *  *  *  *  *"); // 3
+//        System.out.println("               *  *  *  *  *  *  *  *  *  *  *"); // 4
+//        System.out.println("            *  *  *  *  *  *  *  *  *  *  *  *");
+//        System.out.println("         *  *  *  *  *  *  *  *  *  *  *  *  *");
+//        System.out.println("      *  *  *  *  *  *  *  *  *  *  *  *  *  *"); // 7
+//        System.out.println("      *  *  *  *  *  *  *  *  *  *  *  *  *  *"); // 8
+//        System.out.println("   *  *  *  *  *  *  *  *  *  *  *  *  *  *  *"); // 9
+//        System.out.println("   *  *  *  *  *  *  *  *  *  *  *  *  *  *  *"); // 10
+//        System.out.println("*  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *"); // 11
+//        System.out.println("*  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *"); // 12
+//        System.out.println("*  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *"); // 13
+//        System.out.println("*  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *"); // 14
+//        System.out.println("*  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *"); // 15줄 째
+//        System.out.println("*  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *"); // 중간 선 /15+1줄
+//
+//        System.out.println();
+//        System.out.println();
+//
+//
+//        System.out.println("                              *  *  *  *  *  *  *  *  *  *  *");
+//        System.out.println("                        *  *  *  *  *  *  *  *  *  *  *  *  *  *  *");
+//        System.out.println("                  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *");
+//        System.out.println("               *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *");
+//        System.out.println("            *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *");
+//        System.out.println("         *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *");
+//        System.out.println("      *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *");
+//        System.out.println("      *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *");
+//        System.out.println("   *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *");
+//        System.out.println("   *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *");
+//        System.out.println("*  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *");
+//        System.out.println("*  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *");
+//        System.out.println("*  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *");
+//        System.out.println("*  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *");
+//        System.out.println("*  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *");
+//        System.out.println("*  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *");
+//
+//        System.out.println();
+//        System.out.println();
+//
+//
+//        System.out.println("                              *  *  *  *  *  *  *  *  *  *  *");
+//        System.out.println("                        *  *  *  *  *  *  *  *  *  *  *  *  *  *  *");
+//        System.out.println("                  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *");
+//        System.out.println("               *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *");
+//        System.out.println("            *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *");
+//        System.out.println("         *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *");
+//        System.out.println("      *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *");
+//        System.out.println("      *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *");
+//        System.out.println("   *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *");
+//        System.out.println("   *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *");
+//        System.out.println("*  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *");
+//        System.out.println("*  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *");
+//        System.out.println("*  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *");
+//        System.out.println("*  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *");
+//        System.out.println("*  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *");
+//        System.out.println("*  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *");
+//        System.out.println("*  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *");
+//        System.out.println("*  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *");
+//        System.out.println("*  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *");
+//        System.out.println("*  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *");
+//        System.out.println("*  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *");
+//        System.out.println("   *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *");
+//        System.out.println("   *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *");
+//        System.out.println("      *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *");
+//        System.out.println("      *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *");
+//        System.out.println("         *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *");
+//        System.out.println("            *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *");
+//        System.out.println("               *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *");
+//        System.out.println("                  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *");
+//        System.out.println("                        *  *  *  *  *  *  *  *  *  *  *  *  *  *  *");
+//        System.out.println("                              *  *  *  *  *  *  *  *  *  *  *");
+//
+//
+//        System.out.println("                              *  *  *  *  *  *  *  *  *  *  *");
+//        System.out.println("                        *  *  *  *  *  *  *  *  *  *  *  *  *  *  *");
+//        System.out.println("                  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *");
+//        System.out.println("               *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *");
+//        System.out.println("            *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *");
+//        System.out.println("         *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *");
+//        System.out.println("      *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *");
+//        System.out.println("      *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *");
+//        System.out.println("   *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *");
+//        System.out.println("   *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *");
+//        System.out.println("*  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *");
+//        System.out.println("*  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *");
+//        System.out.println("*  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *");
+//        System.out.println("*  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *");
+//        System.out.println("*  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *");
+//        System.out.println("*  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *");
+//        System.out.println("*  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *");
+//        System.out.println("*  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *");
+//        System.out.println("*  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *");
+//        System.out.println("*  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *");
+//        System.out.println("*  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *");
+//        System.out.println("   *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *");
+//        System.out.println("   *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *");
+//        System.out.println("      *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *");
+//        System.out.println("      *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *");
+//        System.out.println("         *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *");
+//        System.out.println("            *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *");
+//        System.out.println("               *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *");
+//        System.out.println("                  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *");
+//        System.out.println("                        *  *  *  *  *  *  *  *  *  *  *  *  *  *  *");
+//        System.out.println("                              *  *  *  *  *  *  *  *  *  *  *");
+
+        // r = 1
+//        System.out.println("   *  ");
+//        System.out.println("*  *  *  ");
+//        System.out.println("   *  ");
+//        System.out.println();
+//
+//        // r = 2
+//        System.out.println("      *  ");
+//        System.out.println("   *  *  *  ");
+//        System.out.println("*  *  *  *  *  ");
+//        System.out.println("   *  *  *  ");
+//        System.out.println("      *  ");
+//        System.out.println();
+
+        // r = 3 ** 이상부터 입력받자
+//        System.out.println("      *  *  *  ");
+//        System.out.println("   *  *  *  *  *  ");
+//        System.out.println("   *  *  *  *  *  ");
+//        System.out.println("*  *  *  *  *  *  *  ");
+//        System.out.println("   *  *  *  *  *  ");
+//        System.out.println("   *  *  *  *  *  ");
+//        System.out.println("      *  *  *  ");
+//        System.out.println();
+
+//        System.out.println("      *  *  ");
+//        System.out.println("   *  *  *  ");
+//        System.out.println("   *  *  *  ");
+//        System.out.println("*  *  *  *  ");
+//        System.out.println();
+
+
+        // r = 4
+//        System.out.println("         *  *  *  ");
+//        System.out.println("      *  *  *  *  *  ");
+//        System.out.println("   *  *  *  *  *  *  *  ");
+//        System.out.println("   *  *  *  *  *  *  *  ");
+//        System.out.println("*  *  *  *  *  *  *  *  *  ");
+//        System.out.println("   *  *  *  *  *  *  *  ");
+//        System.out.println("   *  *  *  *  *  *  *  ");
+//        System.out.println("      *  *  *  *  *  ");
+//        System.out.println("         *  *  *  ");
+//        System.out.println();
+
+        // r = 5
+//        System.out.println("         *  *  *  *  *  ");
+//        System.out.println("      *  *  *  *  *  *  *  ");
+//        System.out.println("   *  *  *  *  *  *  *  *  *  ");
+//        System.out.println("   *  *  *  *  *  *  *  *  *  ");
+//        System.out.println("   *  *  *  *  *  *  *  *  *  ");
+//        System.out.println("*  *  *  *  *  *  *  *  *  *  *  ");
+//        System.out.println("   *  *  *  *  *  *  *  *  *  ");
+//        System.out.println("   *  *  *  *  *  *  *  *  *  ");
+//        System.out.println("   *  *  *  *  *  *  *  *  *  ");
+//        System.out.println("      *  *  *  *  *  *  *  ");
+//        System.out.println("         *  *  *  *  *  ");
+//        System.out.println();
+
+        // r = 6
+//        System.out.println("            *  *  *  *  *  ");
+//        System.out.println("         *  *  *  *  *  *  *  ");
+//        System.out.println("      *  *  *  *  *  *  *  *  *  ");
+//        System.out.println("   *  *  *  *  *  *  *  *  *  *  *  ");
+//        System.out.println("   *  *  *  *  *  *  *  *  *  *  *  ");
+//        System.out.println("   *  *  *  *  *  *  *  *  *  *  *  ");
+//        System.out.println("*  *  *  *  *  *  *  *  *  *  *  *  *  ");
+//        System.out.println("   *  *  *  *  *  *  *  *  *  *  *  ");
+//        System.out.println("   *  *  *  *  *  *  *  *  *  *  *  ");
+//        System.out.println("   *  *  *  *  *  *  *  *  *  *  *  ");
+//        System.out.println("      *  *  *  *  *  *  *  *  *  ");
+//        System.out.println("         *  *  *  *  *  *  *  ");
+//        System.out.println("            *  *  *  *  *  ");
+//        System.out.println();
+
+        // r = 7
+//        System.out.println("               *  *  *  *  *  ");
+//        System.out.println("         *  *  *  *  *  *  *  *  *  ");
+//        System.out.println("      *  *  *  *  *  *  *  *  *  *  *  ");
+//        System.out.println("      *  *  *  *  *  *  *  *  *  *  *  ");
+//        System.out.println("   *  *  *  *  *  *  *  *  *  *  *  *  *  ");
+//        System.out.println("   *  *  *  *  *  *  *  *  *  *  *  *  *  ");
+//        System.out.println("   *  *  *  *  *  *  *  *  *  *  *  *  *  ");
+//        System.out.println("*  *  *  *  *  *  *  *  *  *  *  *  *  *  *  ");
+//        System.out.println("   *  *  *  *  *  *  *  *  *  *  *  *  *  ");
+//        System.out.println("   *  *  *  *  *  *  *  *  *  *  *  *  *  ");
+//        System.out.println("   *  *  *  *  *  *  *  *  *  *  *  *  *  ");
+//        System.out.println("      *  *  *  *  *  *  *  *  *  *  *  ");
+//        System.out.println("      *  *  *  *  *  *  *  *  *  *  *  ");
+//        System.out.println("         *  *  *  *  *  *  *  *  *  ");
+//        System.out.println("               *  *  *  *  *  ");
+//        System.out.println();
+
+        // r = 8
+//        System.out.println("               *  *  *  *  *  *  *  ");
+//        System.out.println("            *  *  *  *  *  *  *  *  *  ");
+//        System.out.println("         *  *  *  *  *  *  *  *  *  *  *  ");
+//        System.out.println("      *  *  *  *  *  *  *  *  *  *  *  *  *  ");
+//        System.out.println("   *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  ");
+//        System.out.println("   *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  ");
+//        System.out.println("   *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  ");
+//        System.out.println("   *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  ");
+//        System.out.println("*  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  ");
+//        System.out.println("   *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  ");
+//        System.out.println("   *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  ");
+//        System.out.println("   *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  ");
+//        System.out.println("   *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  ");
+//        System.out.println("      *  *  *  *  *  *  *  *  *  *  *  *  *  ");
+//        System.out.println("         *  *  *  *  *  *  *  *  *  *  *  ");
+//        System.out.println("            *  *  *  *  *  *  *  *  *  ");
+//        System.out.println("               *  *  *  *  *  *  *  ");
+//        System.out.println();
+
+//        // 상좌
+//        System.out.println("      *  *  ");
+//        System.out.println("   *  *  *  ");
+//        System.out.println("   *  *  *  ");
+//        System.out.println("*  *  *  *  ");
+//
+//        // 상우
+//        System.out.println("*  ");
+//        System.out.println("*  *  ");
+//        System.out.println("*  *  ");
+//        System.out.println("*  *  *  ");
+//
+//        // 하좌
+//        System.out.println("   *  *  *  ");
+//        System.out.println("   *  *  *  ");
+//        System.out.println("      *  *  ");
+//
+//        // 하우
+//        System.out.println("*  *  ");
+//        System.out.println("*  *  ");
+//        System.out.println("*  ");
+
 
         Scanner sc = new Scanner(System.in);
         System.out.print("반지름을 입력하세요 : ");
         int r = sc.nextInt();
 
-        int Stars = r / 3; // 5
-        int Gaps = r - (r / 3); // 10
-        int centerStar = 1;
-        int addStars = Stars;
+        int fixLength = 1;
+
+        // r이 3일 때
+        int gap34 = 2;
+        int star34 = 1;
+        int rstar = 1;
+        int bgap34 = 1;
+        int bstar34 = 2;
+        int brstar34 = 2;
 
 
-        for (int i = 1; i <= r; i++) {
-            for (int j = 1; j <= Gaps; j++) {
-                System.out.print("   ");
-            }
-            for (int j = 1; j <= Stars; j++) {
-                System.out.print("*  ");
-            }
-
-            if (i <= r / Stars) {
-                Gaps -= 2;
-                Stars += 2;
-            } else if (i < r / 2) {
-                Gaps -= 1;
-                Stars += 1;
-            } else if (i < r / 2 + 1) {
-                // 아무일도 없음
-            } else if (i < r / 2 + 2) {
-                Gaps -= 1;
-                Stars += 1;
-            } else if (i < r/2 + 3) {
-                // 아무일도 없음
-            } else if (i < r/2 + 4) {
-                Gaps -= 1;
-                Stars += 1;
-
-            }
-
-            for (int j = 1; j <= centerStar; j++) {
-                System.out.print("*  ");
-            }
-
-            for (int j = 1; j <= addStars; j++) {
-                System.out.print("*  ");
+        if (r == 3) {
+            // 상
+            for (int i = 1; i <= r + 1; i++) {
+                for (int j = 1; j <= gap34; j++) {
+                    System.out.print("   ");
+                }
+                for (int j = 1; j <= star34; j++) {
+                    System.out.print("*  ");
+                }
+                if (i == 1 || i == 3) {
+                    gap34 -= 1;
+                    star34 += 1;
+                }
+                for (int j = 1; j <= fixLength; j++) {
+                    System.out.print("*  ");
+                }
+                for (int j = 1; j <= rstar; j++) {
+                    System.out.print("*  ");
+                }
+                if (i == 1 || i == 3) {
+                    rstar += 1;
+                }
+                System.out.println();
             }
 
-            System.out.println();
+            // 하
+            for (int i = 1; i <= r; i++) {
+                for (int j = 1; j <= bgap34; j++) {
+                    System.out.print("   ");
+                }
+                for (int j = 1; j <= bstar34; j++) {
+                    System.out.print("*  ");
+                }
+
+                if (i == 2) {
+                    bgap34 += 1;
+                    bstar34 -= 1;
+                }
+
+                for (int j = 1; j <= fixLength; j++) {
+                    System.out.print("*  ");
+                }
+
+                for (int j = 1; j <= brstar34; j++) {
+                    System.out.print("*  ");
+                }
+
+                if (i == 2) {
+                    brstar34 -= 1;
+                }
+
+                System.out.println();
+            }
         }
 
 
+//        int Stars = r / 3; // 5
+//        int Gaps = r - (r / 3); // 10
+//        int centerStar = 1;
+//        int addStars = Stars;
+//
+//
+//        for (int i = 1; i <= r; i++) {
+//            for (int j = 1; j <= Gaps; j++) {
+//                System.out.print("   ");
+//            }
+//            for (int j = 1; j <= Stars; j++) {
+//                System.out.print("*  ");
+//            }
+//
+//            if (i <= r / Stars) {
+//                Gaps -= 2;
+//                Stars += 2;
+//            } else if (i < r / 2) {
+//                Gaps -= 1;
+//                Stars += 1;
+//            } else if (i < r / 2 + 1) {
+//                // 아무일도 없음
+//            } else if (i < r / 2 + 2) {
+//                Gaps -= 1;
+//                Stars += 1;
+//            } else if (i < r/2 + 3) {
+//                // 아무일도 없음
+//            } else if (i < r/2 + 4) {
+//                Gaps -= 1;
+//                Stars += 1;
+//
+//            }
+//
+//            for (int j = 1; j <= centerStar; j++) {
+//                System.out.print("*  ");
+//            }
+//
+//            for (int j = 1; j <= addStars; j++) {
+//                System.out.print("*  ");
+//            }
+//
+//            System.out.println();
+//        }
+
+
 //
 //
 //
 //
-        // 별 별찍기 (오각형)
-        // 하드 코딩
+// 별 별찍기 (오각형)
+// 하드 코딩
 //        System.out.println("                         *"); // 공백 25개
 //        System.out.println("                        ***");
 //        System.out.println("                       *****");
@@ -334,7 +625,7 @@ public class star {
 //        System.out.println("    **               **");
 
 
-        // 별찍기 반복문
+// 별찍기 반복문
 //        Scanner sc = new Scanner(System.in);
 //        System.out.print("(세로)길이를 입력하세요 (4이상, 짝수만) : ");
 //        int length = sc.nextInt();
