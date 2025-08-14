@@ -2,6 +2,8 @@ import java.util.Scanner;
 import java.time.LocalDate;
 import java.time.DayOfWeek;
 
+
+
 public class Main {
     public static void main(String[] args) {
         // 시뮬레이터 시작, 역할 선택
@@ -18,6 +20,7 @@ public class Main {
 
 
         // 역할에 따라서 가게, 손님 if 나누기
+        // 사장님이라면?
         if (role == 1) {
 
             // 가게라면, 사장과 알바의 역할이 나뉘어지고, 선택
@@ -64,7 +67,10 @@ public class Main {
             }
 
 
-        } else if (role == 2) {
+        }
+
+        // 손님이라면?
+        else if (role == 2) {
             // 메뉴,가격 변수 저장
             String menu1 = "아메리카노";
             int price1 = 4000;
@@ -90,6 +96,9 @@ public class Main {
             System.out.println("1. " + menu1 + " - " + price1 + "원");
             System.out.println("2. " + menu2 + " - " + price2 + "원");
             System.out.println("3. " + menu3 + " - " + price3 + "원");
+
+            // 오늘의 추천 메뉴
+            printTodaySpecial();
 
             // 메뉴 입력 받기
             Scanner sc1 = new Scanner((System.in));
@@ -195,5 +204,17 @@ public class Main {
         }
 
 
+    }
+    public static void printTodaySpecial() {
+        DayOfWeek day = LocalDate.now().getDayOfWeek();
+
+        switch (day) {
+            case MONDAY -> System.out.println("월요일 추천 메뉴 : 따뜻한 아메리카노");
+            case TUESDAY -> System.out.println("화요일 추천 메뉴 : 달달한 라떼");
+            case WEDNESDAY -> System.out.println("수요일 추천 메뉴 : 상큼한 아이스티");
+            case THURSDAY -> System.out.println("목요일 추천 메뉴 : 디카페인 커피");
+            case FRIDAY -> System.out.println("금요일 추천 메뉴 : 초코 라떼");
+            default -> System.out.println("주말 추천 : 시그니처 메뉴 전부 할인!");
+        }
     }
 }
