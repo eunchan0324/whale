@@ -1,10 +1,177 @@
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Scanner;
 
+// menu 클래스 생성
+class Menu {
+    private String menuName;
+    private int menuPrice;
+    private String menuOption;
+
+    public Menu() {
+    }
+
+    public Menu(String menuName, int menuPrice, String menuOption) {
+        this.menuName = menuName;
+        this.menuPrice = menuPrice;
+        this.menuOption = menuOption;
+    }
+
+    public String getMenuName() {
+        return menuName;
+    }
+
+    public void setMenuName(String menuName) {
+        this.menuName = menuName;
+    }
+
+    public int getMenuPrice() {
+        return menuPrice;
+    }
+
+    public void setMenuPrice(int menuPrice) {
+        this.menuPrice = menuPrice;
+    }
+
+    public String getMenuOption() {
+        return menuOption;
+    }
+
+    public void setMenuOption(String menuOption) {
+        this.menuOption = menuOption;
+    }
+
+    @Override
+    public String toString() {
+        return "[1. 메뉴 이름 = '" + menuName + '\'' + ", 2. 가격 =" + menuPrice + '원' + ", 3. 옵션 '" + menuOption + '\'' +
+                ']';
+    }
+}
+
+
+//class Menu2 {
+//    ArrayList<Integer> menuPrice = new ArrayList<>();
+//    ArrayList<String> menuOption = new ArrayList<>();
+//
+//
+//    public void menuPriceCreate(int price) {
+//        menuPrice.add(price);
+//    }
+//
+//    public void menuOptionCreate(String option) {
+//        menuOption.add(option);
+//    }
+//}
+
+
+class MenuList {
+    private ArrayList<Menu> menus = new ArrayList<>();
+
+    // Create
+    public void menuCreate(String name, int price, String option) {
+        Menu menu = new Menu(name, price, option); // 메뉴 생성
+        menus.add(menu);
+    }
+
+    // Read
+    public void menuListCheck() {
+        // 메뉴가 아무것도 등록되지 않았다면
+        if (menus.isEmpty()) {
+            System.out.println("등록된 메뉴가 없습니다. 메인 메뉴로 돌아갑니다.");
+            System.out.println();
+        }
+
+        // 메뉴가 1개 이상 등록되어있다면
+        else {
+            System.out.println("[현재 등록된 메뉴 목록]");
+            for (int i = 0; i < menus.size(); i++) {
+                System.out.println(menus.get(i));
+            }
+            System.out.println();
+        }
+
+    }
+
+    // Edit
+    public void menuEdit(String 수정할메뉴) {
+        Scanner sc = new Scanner(System.in);
+        boolean checker = false;
+
+        for (int i = 0; i < menus.size(); i++) {
+            if (menus.get(i).getMenuName().equals(수정할메뉴)) {
+                System.out.println("수정할 메뉴는 \"" + menus.get(i) + "\" 입니다.");
+                System.out.println();
+
+                System.out.print("수정할 항목의 번호를 입력해주세요 (1.메뉴명 2.가격 3.옵션) : ");
+                int 수정할항목 = sc.nextInt();
+
+
+                if (수정할항목 == 1) {
+                    sc.nextLine();
+                    System.out.print("수정할 메뉴명을 입력해주세요 : ");
+                    String 수정할메뉴명 = sc.nextLine();
+
+                    menus.get(i).setMenuName(수정할메뉴명);
+                    System.out.println("메뉴명이 수정되었습니다.");
+                    System.out.println();
+                }
+
+                if (수정할항목 == 2) {
+                    sc.nextLine();
+                    System.out.print("수정할 가격을 입력해주세요 (숫자만) : ");
+                    int 수정할가격 = sc.nextInt();
+
+                    menus.get(i).setMenuPrice(수정할가격);
+                    System.out.println("메뉴 가격이 수정되었습니다.");
+                    System.out.println();
+                }
+
+                if (수정할항목 == 3) {
+                    sc.nextLine();
+                    System.out.println("옵션은 다음과 같습니다");
+                    System.out.println("  1. 커피류(coffee)\n" +
+                            "  2. 라떼류(latte)\n" +
+                            "  3. 차류(tea)");
+                    System.out.print("수정할 옵션을 입력해주세요 (숫자만) : ");
+                    String 수정할옵션 = sc.nextLine();
+
+                    menus.get(i).setMenuOption(수정할옵션);
+                    System.out.println("메뉴 옵션이 수정되었습니다.");
+                    System.out.println();
+                }
+                checker = true;
+                break;
+            }
+        }
+
+        if (checker == false) {
+            System.out.println("입력한 메뉴명이 정확하지 않습니다. 다시 입력해주세요.");
+        }
+    }
+
+//    public void menuDelete(String 삭제할메뉴) {
+//        for (int i = 0; i < menuName.size(); i++) {
+//            if (menuName.get(i).equals(삭제할메뉴)) {
+////                removeMenu(i, menuName, menuPrice, menuOption);
+//                menuName.remove(i);
+//                menuPrice.remove(i);
+//                menuOption.remove(i);
+//            }
+//        }
+//    }
+
+            }
+
+//public static void removeMenu(int i, ArrayList<String> menuName, ArrayList<Integer> menuPrice, ArrayList<String> menuOption) {
+//    menuName.remove(i);
+//    menuPrice.remove(i);
+//    menuOption.remove(i);
+//        }
+//    }
+//}
 
 public class Main {
-  public static void main(String[] args) {
+    public static void main(String[] args) {
+        // 변수
 //        int 수용량 = 5; // 배열의 전체 크기
 //        String[] menuName = new String[수용량];
 //        int[] menuPrice = new int[수용량];
@@ -12,196 +179,134 @@ public class Main {
 //        int 칸 = 0; // 현재 차있는 배열의 크기
 
 
-    // 배열
-    ArrayList<String> menuName = new ArrayList<>();
-    ArrayList<Integer> menuPrice = new ArrayList<>();
-    ArrayList<String> menuOption = new ArrayList<>();
-    // + 메뉴를 담는 바구니 (메뉴 리스트) 필요
-    // 메뉴 리스트라는 클래스 만들기
-    // 메뉴 리스트 안에 같은 자료형 (배열) 이 들어감
-
-    // 클래스 이름은 : 메뉴 / 메뉴 리스트로 정하기 (영어)
+        // 배열
+//        ArrayList<Integer> menuPrice = new ArrayList<>();
+//        ArrayList<String> menuOption = new ArrayList<>();
 
 
-    // 서비스 시작
-    while (true) {
-      System.out.println("안녕하세요, 카페 주문 서비스입니다. 역할을 선택해주세요.");
-      System.out.println("1. 사장");
-      System.out.println("2. 손님");
-      System.out.println("3. 프로그램 종료");
-      System.out.print("역할을 선택해주세요 : ");
+        // 클래스
+        // + 메뉴를 담는 바구니 (메뉴 리스트) 필요
+        // 메뉴 리스트라는 클래스 만들기
+        // 메뉴 리스트 안에 같은 자료형 (배열) 이 들어감
+        // 클래스 이름은 : 메뉴 / 메뉴 리스트로 정하기 (영어)
 
-      // 역할 선택
-      Scanner sc = new Scanner(System.in);
-      int role = sc.nextInt();
-      sc.nextLine();
+        // 객체 생성 == Menu의 인스턴스 menu 생성
+//        Menu menu = new Menu();
+        // 객체 생성 == MenuList의 인스턴스 menuList 생성
+        MenuList menuList = new MenuList();
 
-      System.out.println();
 
-      // 1. 주인일 때
-      if (role == 1) {
+
+
+//         서비스 시작
         while (true) {
-          System.out.println("안녕하세요 사장님,");
-          System.out.println("1. 메뉴 등록");
-          System.out.println("2. 등록 메뉴 확인");
-          System.out.println("3. 메뉴 수정");
-          System.out.println("4. 메뉴 삭제");
-          System.out.println("5. 역할 선택으로 돌아가기");
+            System.out.println("안녕하세요, 카페 주문 서비스입니다. 역할을 선택해주세요.");
+            System.out.println("1. 사장");
+            System.out.println("2. 손님");
+            System.out.println("3. 프로그램 종료");
+            System.out.print("역할을 선택해주세요 : ");
 
-          System.out.print("할 일을 선택해주세요 : ");
-
-          int choice = sc.nextInt();
-          sc.nextLine();
-          System.out.println();
-
-          // 1-1 메뉴 등록 (Create)
-          if (choice == 1) {
-            System.out.print("메뉴 이름을 작성해주세요 : ");
-            menuName.add(sc.nextLine());
-
-            System.out.print("메뉴의 가격을 입력해주세요 : ");
-            menuPrice.add(sc.nextInt());
-
+            // 역할 선택
+            Scanner sc = new Scanner(System.in);
+            int role = sc.nextInt();
             sc.nextLine();
 
-            System.out.println("메뉴의 종류를 선택해주세요");
-            System.out.println("  1. 커피류(coffee)");
-            System.out.println("  2. 라떼류(latte)");
-            System.out.println("  3. 차류(tea)");
-            System.out.print(" : ");
-            menuOption.add(sc.nextLine());
+            System.out.println();
+
+            // 1. 주인일 때
+            if (role == 1) {
+                while (true) {
+                    System.out.println("안녕하세요 사장님,");
+                    System.out.println("1. 메뉴 등록");
+                    System.out.println("2. 등록 메뉴 확인");
+                    System.out.println("3. 메뉴 수정");
+                    System.out.println("4. 메뉴 삭제");
+                    System.out.println("5. 역할 선택으로 돌아가기");
+
+                    System.out.print("할 일을 선택해주세요 : ");
+
+                    int choice = sc.nextInt();
+                    sc.nextLine();
+                    System.out.println();
+
+
+                    // 1-1 메뉴 등록 (Create)
+                    if (choice == 1) {
+                        System.out.print("메뉴 이름을 작성해주세요 : ");
+                        String menuName = sc.nextLine();
+
+                        System.out.print("메뉴의 가격을 입력해주세요 : ");
+//                        menuPrice.add(sc.nextInt());
+//                        menu.menuPriceCreate(sc.nextInt());
+
+                        int menuPrice = sc.nextInt();
+                        sc.nextLine();
+
+                        System.out.println("메뉴의 종류를 선택해주세요");
+                        System.out.println("  1. 커피류(coffee)");
+                        System.out.println("  2. 라떼류(latte)");
+                        System.out.println("  3. 차류(tea)");
+                        System.out.print(" : ");
+                        String menuOption = sc.nextLine();
+
+//                        menuOption.add(sc.nextLine());
+//                        menu.menuOptionCreate(sc.nextLine());
 
 //                        System.out.println(칸);
 //                        칸 += 1;
 //                        System.out.println(칸);
 
-            System.out.println("등록이 완료되었습니다.");
-            System.out.println();
+                        // Menu 클래스 생성자
 
-          }
+                        menuList.menuCreate(menuName, menuPrice, menuOption);
+                        System.out.println("등록이 완료되었습니다.");
+                        System.out.println();
 
-          // 1-2. 등록 메뉴 확인 (Read)
-          if (choice == 2) {
 
-            // 메뉴가 아무것도 등록되지 않았다면
-            if (menuName.isEmpty()) {
-              System.out.println("등록된 메뉴가 없습니다.");
-              System.out.println("메인 메뉴로 돌아갑니다.");
-              System.out.println();
-            }
+                    }
 
-            // 메뉴가 1개 이상 등록되어있다면
-            else {
-              System.out.println("[현재 등록된 메뉴 목록]");
-              for (int i = 0; i < menuName.size(); i++) {
-                System.out.println("메뉴명 : " + menuName.get(i));
-                System.out.println("가격 : " + menuPrice.get(i));
-                System.out.println("옵션 : " + menuOption.get(i));
-                System.out.println("-------");
-              }
-            }
+                    // 1-2. 등록 메뉴 확인 (Read)
+                    if (choice == 2) {
+                        menuList.menuListCheck();
+                    }
 
-          }
+                    // 1-3. 메뉴 수정
+                    if (choice == 3) {
+                        System.out.println("[메뉴 수정]");
+                        System.out.println("어떤 메뉴를 수정할까요?");
+                        menuList.menuListCheck();
 
-          // 1-3. 메뉴 수정
-          if (choice == 3) {
-            System.out.println("[메뉴 수정]");
-            System.out.println("어떤 메뉴를 수정할까요?");
+                        System.out.print("수정하고 싶은 메뉴의 메뉴명을 정확하게 입력해주세요 : ");
+                        String 수정할메뉴 = sc.nextLine();
+                        menuList.menuEdit(수정할메뉴);
+                    }
 
-            for (int i = 0; i < menuName.size(); i++) {
-              System.out.println("메뉴명 : " + menuName.get(i));
-              System.out.println("가격 : " + menuPrice.get(i));
-              System.out.println("옵션 : " + menuOption.get(i));
-              System.out.println("-------");
-            }
+                    // 1-4. 메뉴 삭제
+                    if (choice == 4) {
+                        System.out.println("[메뉴 목록]");
+//                        menuList.menuListCheck();
 
-            System.out.print("수정하고 싶은 메뉴의 메뉴명을 정확하게 입력해주세요 : ");
-            String 수정할메뉴 = sc.nextLine();
+                        System.out.print("삭제할 메뉴명을 입력해주세요 : ");
+                        String 삭제할메뉴 = sc.nextLine();
+//                        menuList.menuDelete(삭제할메뉴);
 
-            for (int i = 0; i < menuName.size(); i++) {
-              if (menuName.get(i).equals(수정할메뉴)) {
-                System.out.println("수정할 메뉴는 \"" + menuName.get(i) + "\" 입니다.");
-                System.out.println("가격 : " + menuPrice.get(i));
-                System.out.println("옵션 : " + menuOption.get(i));
+                        System.out.println("선택한 메뉴가 삭제되었습니다.");
+                        System.out.println();
 
-                System.out.println();
+                    }
 
-                System.out.print("수정할 항목의 번호를 입력해주세요 (1.메뉴명 2.가격 3.옵션) : ");
-                int 수정할항목 = sc.nextInt();
 
-                if (수정할항목 == 1) {
-                  sc.nextLine();
-                  System.out.print("수정할 메뉴명을 입력해주세요 : ");
-                  String 수정할메뉴명 = sc.nextLine();
+                    // 1-5. 프로그램 종료
+                    if (choice == 5) {
+                        System.out.println("프로그램을 종료합니다.");
+                        break;
+                    }
 
-                  menuName.set(i, 수정할메뉴명);
-                  System.out.println("메뉴명이 수정되었습니다.");
-                  System.out.println();
                 }
-
-                if (수정할항목 == 2) {
-                  sc.nextLine();
-                  System.out.print("수정할 가격을 입력해주세요 (숫자만) : ");
-                  int 수정할가격 = sc.nextInt();
-
-                  menuPrice.set(i, 수정할가격);
-                  System.out.println("메뉴 가격이 수정되었습니다.");
-                  System.out.println();
-                }
-
-                if (수정할항목 == 3) {
-                  sc.nextLine();
-                  System.out.println("옵션은 다음과 같습니다");
-                  System.out.println("  1. 커피류(coffee)\n" +
-                      "  2. 라떼류(latte)\n" +
-                      "  3. 차류(tea)");
-                  System.out.print("수정할 옵션을 입력해주세요 (숫자만) : ");
-                  String 수정할옵션 = sc.nextLine();
-
-                  menuOption.set(i, 수정할옵션);
-                  System.out.println("메뉴 옵션이 수정되었습니다.");
-                  System.out.println();
-                }
-              }
             }
 
 
-          }
-
-          // 1-4. 메뉴 삭제
-          if (choice == 4) {
-            System.out.println("[메뉴 목록]");
-            for (int i = 0; i < menuName.size(); i++) {
-              System.out.println("- " + menuName.get(i));
-            }
-
-            System.out.print("삭제할 메뉴명을 입력해주세요 : ");
-
-            String 삭제할메뉴 = sc.nextLine();
-
-            for (int i = 0; i < menuName.size(); i++) {
-              if (menuName.get(i).equals(삭제할메뉴)) {
-                removeMenu(i, menuName, menuPrice, menuOption);
-              }
-            }
-
-            System.out.println("선택한 메뉴가 삭제되었습니다.");
-            System.out.println();
-
-          }
-
-
-          // 1-5. 프로그램 종료
-          if (choice == 5) {
-            System.out.println("프로그램을 종료합니다.");
-            break;
-          }
-
-        }
-      }
-
-
-      // 2. 손님일 때
+            // 2. 손님일 때
 //            if (role == 2) {
 //                while (true) {
 //                    System.out.println("안녕하세요 손님, 카페 주문 서비스입니다.");
@@ -263,18 +368,12 @@ public class Main {
 //            }
 
 
-      // 3. 프로그램 종료
-      if (role == 3) {
-        break;
-      }
+            // 3. 프로그램 종료
+            if (role == 3) {
+                break;
+            }
 
 
+        }
     }
-  }
-
-  private static void removeMenu(int i, ArrayList<String> menuName, ArrayList<Integer> menuPrice, ArrayList<String> menuOption) {
-    menuName.remove(i);
-    menuPrice.remove(i);
-    menuOption.remove(i);
-  }
 }
