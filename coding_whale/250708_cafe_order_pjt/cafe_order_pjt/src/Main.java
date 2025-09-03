@@ -2,6 +2,7 @@ import java.util.ArrayList;
 import java.util.Scanner;
 
 // menu 클래스 생성
+
 class Menu {
     private String menuName;
     private int menuPrice;
@@ -45,6 +46,134 @@ class Menu {
         return "[1. 메뉴 이름 = '" + menuName + '\'' + ", 2. 가격 =" + menuPrice + '원' + ", 3. 옵션 '" + menuOption + '\'' +
                 ']';
     }
+}
+
+class OrderMenu {
+    private Menu menu;
+    private int finalPrice;
+    private String finalOptions;
+
+    public Menu getMenu() {
+        return menu;
+    }
+
+    public int getFinalPrice() {
+        return finalPrice;
+    }
+
+    public String getFinalOptions() {
+        return finalOptions;
+    }
+
+    public String tempSelect() {
+        System.out.print("온도를 선택해주세요 (HOT | ICED) : ");
+        Scanner sc = new Scanner(System.in);
+        String temp = sc.nextLine();
+
+        return temp;
+    }
+
+    public String cupSelect() {
+        System.out.println("컵 사이즈를 입력해주세요");
+        System.out.println("Tall (355ml)");
+        System.out.println("Grande (473ml) + 500원");
+        System.out.println("Venti (591ml) + 1000원");
+        System.out.printf(" : ");
+
+        Scanner sc = new Scanner((System.in));
+        String cup = sc.nextLine();
+
+        if (cup.equals("Grande")) {
+            this.finalPrice += 500;
+        } else if (cup.equals("Venti")) {
+            this.finalPrice += 1000;
+        }
+
+        return cup;
+    }
+
+
+    public void optionSelect(String 주문할메뉴, MenuList menuList) {
+        this.menu = menuList.findMenu(주문할메뉴);
+
+        String temp = tempSelect();
+        System.out.println();
+        String cup = cupSelect();
+        System.out.println();
+
+        Scanner sc = new Scanner(System.in);
+
+        // 1번 옵션 (커피) 선택 시
+        if (menuList.findMenu(주문할메뉴).getMenuOption().equals("1")) {
+
+            System.out.println("샷 옵션을 선택해주세요");
+            System.out.println("1.기본(2샷) " + System.lineSeparator() +
+                    "2.연하게(1샷)" + System.lineSeparator() +
+                    "3.샷추가(3샷) + 500원" + System.lineSeparator() +
+                    "4.디카페인 + 1000원");
+            System.out.print(" : ");
+
+            int choiceOption = sc.nextInt();
+            sc.nextLine();
+
+            if (choiceOption == 1) {
+                this.finalPrice += menuList.findMenu(주문할메뉴).getMenuPrice();
+                this.finalOptions = "기본(2샷)";
+            } else if (choiceOption == 2) {
+                this.finalPrice += menuList.findMenu(주문할메뉴).getMenuPrice();
+                this.finalOptions = "연하게(1샷)";
+            } else if (choiceOption == 3) {
+                this.finalPrice += menuList.findMenu(주문할메뉴).getMenuPrice() + 500;
+                this.finalOptions = "샷추가(3샷)";
+            } else if (choiceOption == 4) {
+                this.finalPrice += menuList.findMenu(주문할메뉴).getMenuPrice() + 1000;
+                this.finalOptions = "디카페인";
+            }
+        } else if (menuList.findMenu(주문할메뉴).getMenuOption().equals("2")) {
+            System.out.println("우유 옵션을 선택해주세요");
+            System.out.println("1. 일반 우유");
+            System.out.println("2. 오트(귀리) + 1000원");
+            System.out.print(" : ");
+
+            int choiceOption = sc.nextInt();
+            sc.nextLine();
+
+            if (choiceOption == 1) {
+                this.finalPrice += menuList.findMenu(주문할메뉴).getMenuPrice();
+                this.finalOptions = "일반 우유";
+            } else if (choiceOption == 2) {
+                this.finalPrice += menuList.findMenu(주문할메뉴).getMenuPrice() + 1000;
+                this.finalOptions = "오트(귀리)";
+            }
+        } else if (menuList.findMenu((주문할메뉴)).getMenuOption().equals("3")) {
+            System.out.println("물 양은 선택해주세요");
+            System.out.println("1. 보통");
+            System.out.println("2. 적게");
+            System.out.print(" : ");
+
+            int choiceOption = sc.nextInt();
+            sc.nextLine();
+
+            if (choiceOption == 1) {
+                this.finalOptions = "물 양 보통";
+                this.finalPrice += menuList.findMenu(주문할메뉴).getMenuPrice();
+            } else if (choiceOption ==2) {
+                this.finalOptions = "물 양 적게";
+                this.finalPrice += menuList.findMenu(주문할메뉴).getMenuPrice();
+
+            }
+
+        }
+        System.out.println();
+        System.out.println("[최종 주문 내역 확인]");
+        System.out.println("메뉴명 : " + menu.getMenuName());
+        System.out.println("온도 : " + temp);
+        System.out.println("사이즈 : " + cup);
+        System.out.println("옵션 : " + finalOptions);
+        System.out.println("최종 가격 : " + finalPrice + "원");
+        System.out.println();
+    }
+
 }
 
 
@@ -91,7 +220,7 @@ class MenuList {
 
     }
 
-    // Edit
+    // Update
     public void menuEdit(String 수정할메뉴) {
         Scanner sc = new Scanner(System.in);
         boolean checker = false;
@@ -148,26 +277,45 @@ class MenuList {
         }
     }
 
-//    public void menuDelete(String 삭제할메뉴) {
-//        for (int i = 0; i < menuName.size(); i++) {
-//            if (menuName.get(i).equals(삭제할메뉴)) {
-////                removeMenu(i, menuName, menuPrice, menuOption);
-//                menuName.remove(i);
-//                menuPrice.remove(i);
-//                menuOption.remove(i);
-//            }
-//        }
-//    }
 
+    // Delete
+    public void menuDelete(String 삭제할메뉴) {
+        boolean checker = false;
+
+        for (int i = 0; i < menus.size(); i++) {
+            if (menus.get(i).getMenuName().equals(삭제할메뉴)) {
+                menus.remove(i);
+                System.out.println("선택한 메뉴가 삭제되었습니다.");
+                checker = true;
+                break;
             }
+        }
 
-//public static void removeMenu(int i, ArrayList<String> menuName, ArrayList<Integer> menuPrice, ArrayList<String> menuOption) {
-//    menuName.remove(i);
-//    menuPrice.remove(i);
-//    menuOption.remove(i);
-//        }
-//    }
-//}
+        if (checker == false) {
+            System.out.println("입력한 메뉴명이 정확하지 않습니다. 다시 입력해주세요.");
+        }
+    }
+
+    // Menu Empty Check
+    public boolean menuIsEmpty() {
+        if (menus.isEmpty()) {
+            return true;
+        }
+        return false;
+    }
+
+
+    // find Menu 객체 반환
+    public Menu findMenu(String 주문할메뉴) {
+        for (int i = 0; i < menus.size(); i++) {
+            if (menus.get(i).getMenuName().equals(주문할메뉴)) {
+                return menus.get(i);
+            }
+        }
+        return null;
+    }
+}
+
 
 public class Main {
     public static void main(String[] args) {
@@ -194,8 +342,6 @@ public class Main {
 //        Menu menu = new Menu();
         // 객체 생성 == MenuList의 인스턴스 menuList 생성
         MenuList menuList = new MenuList();
-
-
 
 
 //         서비스 시작
@@ -236,9 +382,6 @@ public class Main {
                         String menuName = sc.nextLine();
 
                         System.out.print("메뉴의 가격을 입력해주세요 : ");
-//                        menuPrice.add(sc.nextInt());
-//                        menu.menuPriceCreate(sc.nextInt());
-
                         int menuPrice = sc.nextInt();
                         sc.nextLine();
 
@@ -249,20 +392,10 @@ public class Main {
                         System.out.print(" : ");
                         String menuOption = sc.nextLine();
 
-//                        menuOption.add(sc.nextLine());
-//                        menu.menuOptionCreate(sc.nextLine());
-
-//                        System.out.println(칸);
-//                        칸 += 1;
-//                        System.out.println(칸);
-
                         // Menu 클래스 생성자
-
                         menuList.menuCreate(menuName, menuPrice, menuOption);
                         System.out.println("등록이 완료되었습니다.");
                         System.out.println();
-
-
                     }
 
                     // 1-2. 등록 메뉴 확인 (Read)
@@ -284,15 +417,12 @@ public class Main {
                     // 1-4. 메뉴 삭제
                     if (choice == 4) {
                         System.out.println("[메뉴 목록]");
-//                        menuList.menuListCheck();
+                        menuList.menuListCheck();
 
-                        System.out.print("삭제할 메뉴명을 입력해주세요 : ");
+                        System.out.print("삭제할 메뉴명을 정확히 입력해주세요 : ");
                         String 삭제할메뉴 = sc.nextLine();
-//                        menuList.menuDelete(삭제할메뉴);
-
-                        System.out.println("선택한 메뉴가 삭제되었습니다.");
+                        menuList.menuDelete(삭제할메뉴);
                         System.out.println();
-
                     }
 
 
@@ -307,65 +437,44 @@ public class Main {
 
 
             // 2. 손님일 때
-//            if (role == 2) {
-//                while (true) {
-//                    System.out.println("안녕하세요 손님, 카페 주문 서비스입니다.");
-//                    System.out.println("할 일을 선택해주세요.");
-//                    System.out.println("1. 메뉴 선택");
-//                    System.out.println("2. 오늘의 메뉴 추천");
-//                    System.out.println("3. 찜한 메뉴");
-//                    System.out.print(" : ");
-//
-//                    int cusChoice = sc.nextInt();
-//                    sc.nextLine();
-//
-//                    // 2-1. 메뉴 선택
-//                    if (cusChoice == 1) {
-//                        // 메뉴 안내
-//                        System.out.println("[전체 메뉴]");
-//                        System.out.println("1. " + menuName + " 가격 : " + menuPrice);
-//
-//                        System.out.println();
-//                        System.out.println("메뉴를 선택해주세요 : ");
-//
-//                        int finalMenu = sc.nextInt();
-//                        sc.nextLine();
-//                        int finalPrice = menuPrice;
-//                        String finalOption = "";
-//
-//                        if (finalMenu == 1) {
-//                            System.out.println("샷 옵션을 선택해주세요");
-//                            System.out.println("1.기본(2샷) " + System.lineSeparator() +
-//                                    "2.연하게(1샷)" + System.lineSeparator() +
-//                                    "3.샷추가(3샷) + 500원" + System.lineSeparator() +
-//                                    "4.디카페인 + 1000원");
-//                            System.out.print(" : ");
-//
-//                            int choicePrice = sc.nextInt();
-//                            sc.nextLine();
-//
-//                            if (choicePrice == 1) {
-//                                finalOption = "기본(2샷)";
-//                            } else if (choicePrice == 2) {
-//                                finalOption = "연하게(1샷)";
-//                            } else if (choicePrice == 3) {
-//                                finalOption = "샷추가(3샷)";
-//                                finalPrice += 500;
-//                            } else if (choicePrice == 4) {
-//                                finalOption = "디카페인";
-//                                finalPrice += 1000;
-//                            }
-//
-//
-//                        }
-//
-//
-//
-//                    }
-//                }
-//
-//
-//            }
+            if (role == 2) {
+                while (true) {
+                    System.out.println("안녕하세요 손님, 카페 주문 서비스입니다.");
+                    System.out.println("할 일을 선택해주세요.");
+                    System.out.println("1. 메뉴 선택");
+                    System.out.println("2. 오늘의 메뉴 추천");
+                    System.out.println("3. 찜한 메뉴");
+                    System.out.println("4. 역할 선택으로 돌아가기");
+                    System.out.print(" : ");
+
+                    int cusChoice = sc.nextInt();
+                    sc.nextLine();
+
+                    // 2-1. 메뉴 선택
+                    if (cusChoice == 1) {
+                        // 메뉴 안내
+                        System.out.println("[전체 메뉴]");
+                        if (menuList.menuIsEmpty()) {
+                            System.out.println("등록된 메뉴가 없습니다. 메인 메뉴로 돌아갑니다.");
+                            break;
+                        } else {
+                            menuList.menuListCheck();
+                            System.out.printf("주문할 메뉴명을 정확히 입력해주세요 : ");
+                            String 주문할메뉴 = sc.nextLine();
+
+                            OrderMenu orderMenu = new OrderMenu();
+                            orderMenu.optionSelect(주문할메뉴, menuList);
+
+                        }
+                    }
+
+                    if (cusChoice == 4) {
+                        System.out.println("역할 선택으로 돌아갑니다.");
+                        System.out.println();
+                        break;
+                    }
+                }
+            }
 
 
             // 3. 프로그램 종료
@@ -377,3 +486,4 @@ public class Main {
         }
     }
 }
+
