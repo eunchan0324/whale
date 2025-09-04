@@ -1,4 +1,5 @@
-import java.sql.SQLOutput;
+import org.w3c.dom.ls.LSOutput;
+
 import java.util.ArrayList;
 import java.util.Scanner;
 
@@ -7,6 +8,8 @@ class Menu {
     private String menuName;
     private int menuPrice;
     private String menuOption;
+    private String menuRecommend;
+
 
     public Menu() {
     }
@@ -15,6 +18,10 @@ class Menu {
         this.menuName = menuName;
         this.menuPrice = menuPrice;
         this.menuOption = menuOption;
+    }
+
+    public Menu(String recomReason) {
+        this.menuRecommend = recomReason;
     }
 
     public String getMenuName() {
@@ -41,15 +48,59 @@ class Menu {
         this.menuOption = menuOption;
     }
 
+    public String getMenuRecommend() {
+        return menuRecommend;
+    }
+
+    public void setMenuRecommend(String menuRecommend) {
+        this.menuRecommend = menuRecommend;
+    }
+
     @Override
     public String toString() {
-        return "[1. 메뉴 이름 = '" + menuName + '\'' + ", 2. 가격 =" + menuPrice + '원' + ", 3. 옵션 '" + menuOption + '\'' +
+        return "[1.메뉴 이름 = " + menuName +
+                ", 2.가격 = " + menuPrice + '원' +
+                ", 3.옵션 = " + menuOption +
+                ", 4.추천 여부 = " + menuRecommend +
                 ']';
     }
 }
 
 class MenuList {
     private ArrayList<Menu> menus = new ArrayList<>();
+
+    // menuRecommend
+    public void menuRecommend() {
+        System.out.println();
+        System.out.println("[추천 메뉴 등록 및 관리]");
+        menuListCheck();
+        System.out.print("등록된 메뉴 중, 추천 메뉴를 입력해주세요 : ");
+        Scanner sc = new Scanner(System.in);
+
+        String 추천메뉴명 = sc.nextLine();
+        if (findMenu(추천메뉴명) != null) {
+            System.out.println(findMenu(추천메뉴명).getMenuName() + "를 선택하였습니다. 추천 이유를 번호로 선택해주세요");
+            System.out.println("1. Best 메뉴 선정");
+            System.out.println("2. New 메뉴 선정");
+            System.out.print(" : ");
+
+            int 추천이유 = sc.nextInt();
+            sc.nextLine();
+
+            Menu 찾은메뉴 = findMenu(추천메뉴명);
+            // 추천 이류를 현 객채의 Recommend 필드에 추가
+            // Best 를 선택했다면,
+            if (추천이유 == 1) {
+                찾은메뉴.setMenuRecommend("Best");
+            } else if (추천이유 == 2) {
+                찾은메뉴.setMenuRecommend("New");
+            }
+
+
+        } else {
+            System.out.println("메뉴명이 정확하지 않습니다. 메뉴명을 정확하게 입력해주세요");
+        }
+    }
 
     // Create
     public void menuCreate(String name, int price, String option) {
@@ -318,7 +369,7 @@ class OrderHistory {
         } else {
             System.out.println("[현재 주문 내역]");
             for (int i = 0; i < orderHistory.size(); i++) {
-                System.out.println("-----주문 No." + (i+1) + "-----");
+                System.out.println("-----주문 No." + (i + 1) + "-----");
                 System.out.println("메뉴 : " + orderHistory.get(i).getMenu().getMenuName());
                 System.out.println("온도 : " + orderHistory.get(i).getFinalTemp());
                 System.out.println("컵 : " + orderHistory.get(i).getFinalCup());
@@ -397,6 +448,7 @@ public class Main {
                         System.out.println("2. 등록 메뉴 확인");
                         System.out.println("3. 메뉴 수정");
                         System.out.println("4. 메뉴 삭제");
+                        System.out.println("5. 처음으로 돌아가기");
                         System.out.print("할 일을 선택해주세요 : ");
 
                         int choice = sc.nextInt();
@@ -453,9 +505,21 @@ public class Main {
                             System.out.println();
                         }
 
+                        if (choice == 5) {
+                            break;
+                        }
 
-                    } else if (menuSelect == 2) {
+
+                    }
+
+                    // 주문 내역 확인
+                    else if (menuSelect == 2) {
                         orderHistory.OrderCheck();
+                    }
+
+                    // 추천 메뉴 등록 및 관리
+                    else if (menuSelect == 3) {
+                        menuList.menuRecommend();
                     }
 
                     // 1-6. 역할 선택으로 돌아가기
