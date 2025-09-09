@@ -1,7 +1,79 @@
 import java.util.ArrayList;
 import java.util.Scanner;
 
-// menu 클래스 생성
+class User {
+  private String id;
+  private String password;
+  private String role;
+
+  User(String id, String password, String role) {
+    this.id = id;
+    this.password = password;
+    this.role = role;
+  }
+
+  public String getId() {
+    return id;
+  }
+
+  public void setId(String id) {
+    this.id = id;
+  }
+
+  public String getPassword() {
+    return password;
+  }
+
+  public void setPassword(String password) {
+    this.password = password;
+  }
+
+  public String getRole() {
+    return role;
+  }
+
+  public void setRole(String role) {
+    this.role = role;
+  }
+
+}
+
+class UserList {
+  ArrayList<User> userlist = new ArrayList<>();
+
+  Scanner sc = new Scanner(System.in);
+  public void login() {
+    System.out.println("[회원가입]");
+    System.out.print("ID를 입력해주세요 (4~12자 사이 / 영문,숫자만 허용) : ");
+    String id = sc.nextLine();
+
+    System.out.println("입력한 ID : " + idCheck(id));
+
+
+
+  }
+
+  public String idCheck(String id) {
+
+    // 중복 확인
+    for (int i = 0; i < userlist.size(); i++) {
+      if (id.equals(userlist.get(i).getId())) {
+        System.out.println("중복된 아이디입니다. 다시 입력해주세요.");
+        System.out.println();
+        break;
+      }
+    }
+
+    // 유효성 검사
+    if (id.length()  )
+
+    return id;
+  }
+
+  public void
+}
+
+
 class Menu {
   private String menuName;
   private int menuPrice;
@@ -541,19 +613,39 @@ public class Main {
     MenuList menuList = new MenuList();
     OrderHistory orderHistory = new OrderHistory();
     MyMenu myMenu = new MyMenu();
+    UserList userList = new UserList();
 
+    Scanner sc = new Scanner(System.in);
 
 //         서비스 시작
     while (true) {
       System.out.println();
-      System.out.println("안녕하세요, 카페 주문 서비스입니다. 역할을 선택해주세요.");
+      System.out.println("안녕하세요, 카페 주문 서비스입니다.");
+      System.out.println("1. 회원가입");
+      System.out.println("2. 로그인");
+      System.out.println("3. 로그아웃");
+      System.out.println("4. 프로그램 종료");
+      System.out.print("메뉴를 선택해주세요 : ");
+      int loginChoice = sc.nextInt();
+      sc.nextLine();
+
+      if (loginChoice == 1) {
+        userList.login();
+      } else if (loginChoice == 2) {
+
+      } else if (loginChoice == 3) {
+
+      } else if (loginChoice == 4) {
+        break;
+      }
+
+//      System.out.println("안녕하세요, 카페 주문 서비스입니다. 역할을 선택해주세요.");
       System.out.println("1. 사장");
       System.out.println("2. 손님");
       System.out.println("3. 프로그램 종료");
       System.out.print("역할을 선택해주세요 : ");
 
       // 역할 선택
-      Scanner sc = new Scanner(System.in);
       int role = sc.nextInt();
       sc.nextLine();
 
@@ -673,7 +765,7 @@ public class Main {
           System.out.println("할 일을 선택해주세요.");
           System.out.println("1. 메뉴 선택");
           System.out.println("2. 주문 내역 확인 ");
-          System.out.println("3. 오늘의 메뉴 추천");
+          System.out.println("3. 오늘의 메뉴 확인");
           System.out.println("4. 나만의 메뉴 (찜)");
           System.out.println("5. 역할 선택으로 돌아가기");
           System.out.print(" : ");
