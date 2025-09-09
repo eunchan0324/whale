@@ -36,6 +36,14 @@ class User {
         this.role = role;
     }
 
+    @Override
+    public String toString() {
+        return "User{" +
+                "id='" + id + '\'' +
+                ", password='" + password + '\'' +
+                ", role='" + role + '\'' +
+                '}';
+    }
 }
 
 class UserList {
@@ -179,27 +187,67 @@ class UserList {
     }
 
     // 로그인
-    public void login() {
+    public User login() {
         System.out.println("[로그인]");
 
         while (true) {
+            boolean loginSuccess = false;
+            boolean idChecker = false;
+            boolean pwChecker = false;
+
             System.out.print("id를 입력해주세요 : ");
             String id = sc.nextLine();
 
             System.out.print("password를 입력해주세요 : ");
             String password = sc.nextLine();
 
-            for (int i = 0; i < userlist.size(); i++) {
-                if (!id.equals(userlist.get(i).getId())) {
-                    System.out.println("존재하지 않는 id입니다. 다시 입력해주세요.");
-                } else if (!password.equals(userlist.get(i).getPassword())) {
-                    System.out.println("존재하지 않는 password입니다. 다시 입력해주세요.");
+            if (userlist.isEmpty()) {
+                System.out.println("유효하지 않은 id/pw입니다.");
+                System.out.println("회원가입을 먼저 진행해주세요.");
+            }
+
+            User 찾은사용자 = findUser(id);
+
+
+            if (찾은사용자 != null) {
+                // 입력한 pw가 없다면?
+                if (!password.equals(찾은사용자.getPassword())) {
+                    pwChecker = true;
                 } else {
-                    System.out.println("로그인이 완료되었습니다!");
-                    break;
+                    pwChecker = false;
                 }
+            } else {
+                System.out.println("유효하지 않은 id입니다. 다시 입력해주세요.");
+                idChecker = true;
+            }
+
+
+            if (pwChecker) {
+                System.out.println("유효하지 않은 password입니다. 다시 입력해주세요.");
+            }
+
+
+            if (!idChecker && !pwChecker) {
+                loginSuccess = true;
+            }
+
+
+            if (loginSuccess) {
+                System.out.println("로그인이 완료되었습니다!");
+                return 찾은사용자;
+            }
+
+        }
+    }
+
+    // id로 객체 찾기
+    public User findUser(String id) {
+        for (int i = 0; i < userlist.size(); i++) {
+            if (userlist.get(i).getId().equals(id)) {
+                return userlist.get(i);
             }
         }
+        return null;
     }
 
 }
@@ -756,11 +804,18 @@ public class Main {
             int loginChoice = sc.nextInt();
             sc.nextLine();
 
+            int role = 0;
+
             if (loginChoice == 1) {
                 userList.registerUser();
                 continue;
             } else if (loginChoice == 2) {
-                userList.login();
+                User 로그인한사용자 = userList.login();
+                if ("사장님".equals(로그인한사용자.getRole())) {
+                    role = 1;
+                } else if ("손님".equals(로그인한사용자.getRole())) {
+                    role = 2;
+                }
 
             } else if (loginChoice == 3) {
 
@@ -769,18 +824,7 @@ public class Main {
             }
 
 
-            System.out.println("안녕하세요, 카페 주문 서비스입니다. 역할을 선택해주세요.");
-            System.out.println("1. 사장");
-            System.out.println("2. 손님");
-            System.out.println("3. 프로그램 종료");
-            System.out.print("역할을 선택해주세요 : ");
-
-            // 역할 선택
-            int role = sc.nextInt();
-            sc.nextLine();
-
             System.out.println();
-
             // 1. 주인일 때
             if (role == 1) {
                 while (true) {
@@ -790,7 +834,7 @@ public class Main {
                     System.out.println("3. 추천 메뉴 등록 및 관리");
                     System.out.println("4. 이벤트 등록 및 관리");
                     System.out.println("5. 쿠폰 등록 및 관리");
-                    System.out.println("6. 역할 선택으로 돌아가기");
+                    System.out.println("6. 로그인으로 돌아가기");
                     System.out.print("할 일을 선택해주세요 : ");
 
                     int menuSelect = sc.nextInt();
