@@ -40,38 +40,168 @@ class User {
 
 class UserList {
     ArrayList<User> userlist = new ArrayList<>();
-
     Scanner sc = new Scanner(System.in);
 
-    public void login() {
+    // 회원가입
+    public void registerUser() {
+        System.out.println();
         System.out.println("[회원가입]");
-        System.out.print("ID를 입력해주세요 (4~12자 사이 / 영문,숫자만 허용) : ");
-        String id = sc.nextLine();
 
-        System.out.println("입력한 ID : " + idCheck(id));
+        String thisId;
+        String thisPassword;
+        String thisRole;
 
-
-    }
-
-    public String idCheck(String id) {
-
-        // 중복 확인
-        for (int i = 0; i < userlist.size(); i++) {
-            if (id.equals(userlist.get(i).getId())) {
-                System.out.println("중복된 아이디입니다. 다시 입력해주세요.");
-                System.out.println();
+        // id
+        while (true) {
+            System.out.print("ID를 입력해주세요 (4~12자 사이 / 영문,숫자만 허용) : ");
+            String id = sc.nextLine();
+            if (!idDuplicateCheck(id)) {
+                System.out.println("중복된 ID입니다. 다시 입력해주세요");
+            } else if (!idInvalidCheck(id)) {
+                System.out.println("유효하지 않은 ID입니다. 4~12자 사이로 입력해주세요.");
+            } else {
+                System.out.println("사용가능한 ID입니다.");
+                thisId = id;
                 break;
             }
         }
 
-        // 유효성 검사
-//    if (id.length()  )
-//
-//    return id;
-        return null;
+        // password
+        while (true) {
+            System.out.print("Password를 입력해주세요 (길이 8자 이상 / 영문 + 숫자 조합만 허용) : ");
+            String password = sc.nextLine();
+
+            if (!passwordInvalidCheck(password)) {
+                System.out.println("유효하지 않은 Password입니다. 8자 이상, 영문+숫자 조합으로 입력해주세요.");
+            } else {
+                System.out.println("사용가능한 Password입니다.");
+                thisPassword = password;
+                break;
+            }
+        }
+
+        // role
+        while (true) {
+            System.out.println("사장님인가요 손님인가요?");
+            System.out.println("1. 사장");
+            System.out.println("2. 손님");
+            System.out.print(" : ");
+
+            int whatRole = sc.nextInt();
+            sc.nextLine();
+
+            if (whatRole == 1) {
+                thisRole = "사장님";
+                break;
+            } else if (whatRole == 2) {
+                thisRole = "손님";
+                break;
+            } else {
+                System.out.println("정확한 숫자를 입력해주세요.");
+            }
+        }
+
+        User user = new User(thisId, thisPassword, thisRole);
+        userlist.add(user);
+        System.out.println("회원가입이 완료되었습니다.");
     }
 
-//  public void
+    // id 중복 확인
+    public Boolean idDuplicateCheck(String id) {
+        boolean idchecker = true;
+
+        // 중복 확인
+        for (int i = 0; i < userlist.size(); i++) {
+            if (id.equals(userlist.get(i).getId())) {
+                System.out.println();
+                idchecker = false;
+            }
+        }
+
+        return idchecker;
+    }
+
+    // id 유효성 검사
+    public Boolean idInvalidCheck(String id) {
+        boolean idchecker = true;
+        if (id.length() < 4 || id.length() > 12) {
+            idchecker = false;
+        }
+
+        boolean 영문있음 = false;
+        boolean 숫자있음 = false;
+        for (int i = 0; i < id.length(); i++) {
+            char c = id.charAt(i);
+
+            if ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z')) {
+                영문있음 = true;
+            }
+
+            if (c >= '0' && c <= '9') {
+                숫자있음 = true;
+            }
+        }
+
+        if (영문있음 && 숫자있음) {
+            return idchecker;
+        } else {
+            return false;
+        }
+    }
+
+    // password 유효성 검사
+    public Boolean passwordInvalidCheck(String password) {
+        boolean passwordCehcker = true;
+
+        if (password.length() < 8) {
+            passwordCehcker = false;
+        }
+
+        boolean 영문있음 = false;
+        boolean 숫자있음 = false;
+        for (int i = 0; i < password.length(); i++) {
+            char c = password.charAt(i);
+
+            if ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z')) {
+                영문있음 = true;
+            }
+
+            if (c >= '0' && c <= '9') {
+                숫자있음 = true;
+            }
+        }
+
+        if (영문있음 && 숫자있음) {
+            return passwordCehcker;
+        } else {
+            return false;
+        }
+    }
+
+    // 로그인
+    public void login() {
+        System.out.println("[로그인]");
+
+        while (true) {
+            System.out.print("id를 입력해주세요 : ");
+            String id = sc.nextLine();
+
+            System.out.print("password를 입력해주세요 : ");
+            String password = sc.nextLine();
+
+            for (int i = 0; i < userlist.size(); i++) {
+                if (!id.equals(userlist.get(i).getId())) {
+                    System.out.println("존재하지 않는 id입니다. 다시 입력해주세요.");
+                } else if (!password.equals(userlist.get(i).getPassword())) {
+                    System.out.println("존재하지 않는 password입니다. 다시 입력해주세요.");
+                } else {
+                    System.out.println("로그인이 완료되었습니다!");
+                    break;
+                }
+            }
+        }
+    }
+
 }
 
 class Menu {
@@ -614,29 +744,32 @@ public class Main {
 
         Scanner sc = new Scanner(System.in);
 
-//         서비스 시작
+        // 서비스 시작
         while (true) {
-//            System.out.println();
-//            System.out.println("안녕하세요, 카페 주문 서비스입니다.");
-//            System.out.println("1. 회원가입");
-//            System.out.println("2. 로그인");
-//            System.out.println("3. 로그아웃");
-//            System.out.println("4. 프로그램 종료");
-//            System.out.print("메뉴를 선택해주세요 : ");
-//            int loginChoice = sc.nextInt();
-//            sc.nextLine();
-//
-//            if (loginChoice == 1) {
-//                userList.login();
-//            } else if (loginChoice == 2) {
-//
-//            } else if (loginChoice == 3) {
-//
-//            } else if (loginChoice == 4) {
-//                break;
-//            }
+            System.out.println();
+            System.out.println("안녕하세요, 카페 주문 서비스입니다.");
+            System.out.println("1. 회원가입");
+            System.out.println("2. 로그인");
+            System.out.println("3. 로그아웃");
+            System.out.println("4. 프로그램 종료");
+            System.out.print("메뉴를 선택해주세요 : ");
+            int loginChoice = sc.nextInt();
+            sc.nextLine();
 
-//      System.out.println("안녕하세요, 카페 주문 서비스입니다. 역할을 선택해주세요.");
+            if (loginChoice == 1) {
+                userList.registerUser();
+                continue;
+            } else if (loginChoice == 2) {
+                userList.login();
+
+            } else if (loginChoice == 3) {
+
+            } else if (loginChoice == 4) {
+                break;
+            }
+
+
+            System.out.println("안녕하세요, 카페 주문 서비스입니다. 역할을 선택해주세요.");
             System.out.println("1. 사장");
             System.out.println("2. 손님");
             System.out.println("3. 프로그램 종료");
