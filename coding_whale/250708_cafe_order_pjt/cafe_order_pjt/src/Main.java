@@ -12,6 +12,10 @@ class User {
         this.role = role;
     }
 
+    public User() {
+
+    }
+
     public String getId() {
         return id;
     }
@@ -798,19 +802,21 @@ public class Main {
             System.out.println("안녕하세요, 카페 주문 서비스입니다.");
             System.out.println("1. 회원가입");
             System.out.println("2. 로그인");
-            System.out.println("3. 로그아웃");
-            System.out.println("4. 프로그램 종료");
+            System.out.println("3. 프로그램 종료");
             System.out.print("메뉴를 선택해주세요 : ");
             int loginChoice = sc.nextInt();
             sc.nextLine();
 
             int role = 0;
 
+            User 현재유저 = new User();
+
             if (loginChoice == 1) {
                 userList.registerUser();
                 continue;
             } else if (loginChoice == 2) {
                 User 로그인한사용자 = userList.login();
+                현재유저 = 로그인한사용자;
                 if ("사장님".equals(로그인한사용자.getRole())) {
                     role = 1;
                 } else if ("손님".equals(로그인한사용자.getRole())) {
@@ -818,8 +824,6 @@ public class Main {
                 }
 
             } else if (loginChoice == 3) {
-
-            } else if (loginChoice == 4) {
                 break;
             }
 
@@ -834,12 +838,13 @@ public class Main {
                     System.out.println("3. 추천 메뉴 등록 및 관리");
                     System.out.println("4. 이벤트 등록 및 관리");
                     System.out.println("5. 쿠폰 등록 및 관리");
-                    System.out.println("6. 로그인으로 돌아가기");
+                    System.out.println("6. 로그아웃");
                     System.out.print("할 일을 선택해주세요 : ");
 
                     int menuSelect = sc.nextInt();
                     sc.nextLine();
 
+                    // 1-1. 메뉴 등록 및 관리
                     if (menuSelect == 1) {
                         System.out.println();
                         System.out.println("[메뉴 등록 및 관리]");
@@ -911,19 +916,19 @@ public class Main {
 
                     }
 
-                    // 주문 내역 확인
+                    // 1-2. 주문 내역 확인
                     else if (menuSelect == 2) {
                         orderHistory.OrderCheck();
                     }
 
-                    // 추천 메뉴 등록 및 관리
+                    // 1-3. 추천 메뉴 등록 및 관리
                     else if (menuSelect == 3) {
                         menuList.menuRecommend();
                     }
 
-                    // 1-6. 역할 선택으로 돌아가기
+                    // 1-6. 로그아웃
                     if (menuSelect == 6) {
-                        System.out.println("역할 선택으로 돌아갑니다.");
+                        System.out.println("로그아웃이 완료되었습니다.");
                         break;
                     }
 
@@ -996,10 +1001,9 @@ public class Main {
                         }
                     }
 
-                    // 2-5. 역할 선택으로 돌아가기
+                    // 2-5. 로그아웃
                     if (cusChoice == 5) {
-                        System.out.println("역할 선택으로 돌아갑니다.");
-                        System.out.println();
+                        System.out.println("로그아웃이 완료되었습니다.");
                         break;
                     }
                 }
