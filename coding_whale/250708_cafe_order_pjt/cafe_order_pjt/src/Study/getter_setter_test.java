@@ -1,3 +1,5 @@
+package Study;
+
 public class getter_setter_test {
     public static void main(String[] args) throws Exception {
         // 초기화 - 각각 수동 초기화 (실수)
