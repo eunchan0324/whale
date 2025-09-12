@@ -67,15 +67,22 @@ class UserList {
         while (true) {
             System.out.print("ID를 입력해주세요 (4~12자 사이 / 영문,숫자만 허용) : ");
             String id = sc.nextLine();
+
+            // id check 실패
             if (!idDuplicateCheck(id)) {
                 System.out.println("중복된 ID입니다. 다시 입력해주세요");
-            } else if (!idInvalidCheck(id)) {
-                System.out.println("유효하지 않은 ID입니다. 4~12자 사이로 입력해주세요.");
-            } else {
-                System.out.println("사용가능한 ID입니다.");
-                thisId = id;
-                break;
+                continue;
             }
+
+            if (!idInvalidCheck(id)) {
+                System.out.println("유효하지 않은 ID입니다. 4~12자 사이로 입력해주세요.");
+                continue;
+            }
+
+            // id check 성공
+            System.out.println("사용가능한 ID입니다.");
+            thisId = id;
+            break;
         }
 
         // password
@@ -83,13 +90,17 @@ class UserList {
             System.out.print("Password를 입력해주세요 (길이 8자 이상 / 영문 + 숫자 조합만 허용) : ");
             String password = sc.nextLine();
 
+            // pw check 실패
             if (!passwordInvalidCheck(password)) {
                 System.out.println("유효하지 않은 Password입니다. 8자 이상, 영문+숫자 조합으로 입력해주세요.");
-            } else {
-                System.out.println("사용가능한 Password입니다.");
-                thisPassword = password;
-                break;
+                continue;
             }
+
+            // pw check 성공
+            System.out.println("사용가능한 Password입니다.");
+            thisPassword = password;
+            break;
+
         }
 
         // role
@@ -102,6 +113,7 @@ class UserList {
             int whatRole = sc.nextInt();
             sc.nextLine();
 
+            // todo : Enum으로 리팩토링
             if (whatRole == 1) {
                 thisRole = "사장님";
                 break;
@@ -134,6 +146,8 @@ class UserList {
     }
 
     // id 유효성 검사
+    // todo : 정규식 리팩토링
+    // todo :  return으로 리팩토링
     public Boolean idInvalidCheck(String id) {
         boolean idchecker = true;
         if (id.length() < 4 || id.length() > 12) {
@@ -823,7 +837,9 @@ public class Main {
                     role = 2;
                 }
 
+                // 로그아웃
             } else if (loginChoice == 3) {
+                System.out.println("로그아웃이 되었습니다.");
                 break;
             }
 
