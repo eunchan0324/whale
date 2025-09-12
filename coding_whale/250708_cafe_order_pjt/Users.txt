@@ -1,0 +1,3 @@
+dmscks1,qwer1234,사장님
+dmscks2,qwer1234,손님
+dmscks3,qwer1234,사장님
