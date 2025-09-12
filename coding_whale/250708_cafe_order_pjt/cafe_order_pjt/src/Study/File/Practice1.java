@@ -4,7 +4,7 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 
-// 1단계 : 문자열 하나 저장/읽기
+// 문자열 하나 저장/읽기
 public class Practice1 {
     public static void main(String[] args) throws IOException {
 
