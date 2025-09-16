@@ -1,6 +1,16 @@
+import java.awt.*;
 import java.io.*;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Scanner;
+
+// 상수 모음 클래스
+class Constants {
+    final static Path BASE_PATH = Paths.get("C:/Users/eunchan1/Desktop/whale/coding_whale/250708_cafe_order_pjt/");
+    // 다른 방법
+//    final static Path BASE_PATH = Paths.get("C:", "Users", "eunchan1", "Desktop", "whale", "coding_whale", "250708_cafe_order_pjt/");
+}
 
 class User {
     private String id;
@@ -50,6 +60,11 @@ class User {
 class UserList {
     ArrayList<User> userlist = new ArrayList<>();
     Scanner sc = new Scanner(System.in);
+
+    UserList() throws IOException {
+        loadUserFile();
+    }
+
 
     // 회원가입
     public void registerUser() throws IOException {
@@ -124,8 +139,9 @@ class UserList {
 
         User user = new User(thisId, thisPassword, thisRole);
         userlist.add(user);
-//    FileWriter writer = new FileWriter("C:\\Users\\dmsck\\OneDrive\\바탕 화면\\whale\\coding_whale\\250708_cafe_order_pjt\\Users.txt", true);
-        FileWriter writer = new FileWriter("C:\\Users\\eunchan1\\Desktop\\whale\\coding_whale\\250708_cafe_order_pjt\\Users.txt", true);
+//    FileWriter writer = new FileWriter("C:/Users/dmsck/OneDrive/바탕 화면/whale/coding_whale/250708_cafe_order_pjt/Users.txt", true);
+        Path userFilePath = Constants.BASE_PATH.resolve("Users.txt");
+        FileWriter writer = new FileWriter(userFilePath.toFile(), true);
         writer.write((user.getId()) + "," + user.getPassword() + "," + user.getRole() + "\n");
         writer.close();
         System.out.println("회원가입이 완료되었습니다.");
@@ -271,9 +287,8 @@ class UserList {
 
     // User 파일 load
     public void loadUserFile() throws IOException {
-        BufferedReader reader = new BufferedReader(
-//        (new FileReader("C:\\Users\\dmsck\\OneDrive\\바탕 화면\\whale\\coding_whale\\250708_cafe_order_pjt\\Users.txt"))
-                (new FileReader("C:\\Users\\eunchan1\\Desktop\\whale\\coding_whale\\250708_cafe_order_pjt\\Users.txt")));
+        Path userFilePath = Constants.BASE_PATH.resolve("Users.txt");
+        BufferedReader reader = new BufferedReader((new FileReader(userFilePath.toFile())));
 
 
         String line;
@@ -353,7 +368,11 @@ class Menu {
 // todo : 1. 각 기능별 role에 따라 인가 가능한 것 체크하기 + 일단 User에 있는 맴버 변수를 가져와서 비교해보기
 // todo : 2. 인가 기능을 따로 뺄 수 있는지 확인해보기
 class MenuList {
-    private ArrayList<Menu> menus = new ArrayList<>();
+    private final ArrayList<Menu> menus = new ArrayList<>();
+
+    public MenuList() throws IOException {
+        loadMenuFile();
+    }
 
     // menuRecommend create
     public void menuRecommend() throws IOException {
@@ -441,7 +460,8 @@ class MenuList {
         Menu menu = new Menu(name, price, option); // 메뉴 생성
         menus.add(menu);
 
-        FileWriter writer = new FileWriter("C:\\Users\\eunchan1\\Desktop\\whale\\coding_whale\\250708_cafe_order_pjt\\Menus.txt", true);
+        Path menuFilePath = Constants.BASE_PATH.resolve("Menus.txt");
+        FileWriter writer = new FileWriter(menuFilePath.toFile(), true);
         writer.write(menu.getMenuName() + "," + menu.getMenuPrice() + "," + menu.getMenuOption() + "\n");
         writer.close();
     }
@@ -559,7 +579,8 @@ class MenuList {
 
     // Menu 파일 load
     public void loadMenuFile() throws IOException {
-        BufferedReader reader = new BufferedReader(new FileReader("C:\\Users\\eunchan1\\Desktop\\whale\\coding_whale\\250708_cafe_order_pjt\\Menus.txt"));
+        Path menuFilePath = Constants.BASE_PATH.resolve("Menus.txt");
+        BufferedReader reader = new BufferedReader(new FileReader(menuFilePath.toFile()));
 
         String line;
         while ((line = reader.readLine()) != null) {
@@ -840,9 +861,9 @@ public class Main {
         OrderHistory orderHistory = new OrderHistory();
         MyMenu myMenu = new MyMenu();
         UserList userList = new UserList();
+//        String basePath = UserList.BASE_PATH; // UserList 클래스의 주소 값
+//        String basePath = userList.BASE_PATH; // UserList 객체/인스턴스의 주소 값
 
-        userList.loadUserFile();
-        menuList.loadMenuFile();
 
         Scanner sc = new Scanner(System.in);
 
