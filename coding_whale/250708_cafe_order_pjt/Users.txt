@@ -1,3 +1,2 @@
-dmscks1,qwer1234,사장님
-dmscks2,qwer1234,손님
-dmscks3,qwer1234,사장님
+dmscks1,qwer1234,STORE_MANAGER
+qwer1234,qwer1234,STORE_MANAGER
