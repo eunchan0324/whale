@@ -4,12 +4,82 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Scanner;
 
-// UserRole Enum
 enum UserRole {
     ADMIN,
-    STORE_MANAGER,
+    SELLER,
     CUSTOMER
 }
+
+enum OrderStatus {
+    ORDER_PLACED,
+    PREPARING,
+    READY,
+    COMPLETED
+}
+
+enum Role {
+    ADMIN(1, "관리자"),
+    SELLER(2, "판매자"),
+    CUSTOMER(3, "구매자");
+
+    private final int value;
+    private final String role;
+
+    Role(int value, String role) {
+        this.value = value;
+        this.role = role;
+    }
+
+    public int getValue() {
+        return value;
+    }
+
+    public String getRole() {
+        return role;
+    }
+
+    public static Role fromValue(int value) {
+        for (Role role : Role.values()) {
+            if (role.getValue() == value) {
+                return role;
+            }
+        }
+        return null;
+
+    }
+}
+
+enum Test {
+    SIGNUP(1, "회원가입"),
+    LOGIN(2, "로그인"),
+    EXIT(3, "프로그램종료");
+
+    private final int value;
+    private final String message;
+
+    Test(int value, String message) {
+        this.value = value;
+        this.message = message;
+    }
+
+    public int getValue() {
+        return value;
+    }
+
+    public String getMessage() {
+        return message;
+    }
+
+    public static Test fromValue(int value) {
+        for (Test test : Test.values()) {
+            if (test.getValue() == value) {
+                return test;
+            }
+        }
+        return null;
+    }
+}
+
 
 // 상수 모음 클래스
 class Constants {
@@ -22,17 +92,11 @@ class User {
     private String id;
     private String password;
     private UserRole role;
-//    private String storeId;
-
 
     User(String id, String password, UserRole role) {
         this.id = id;
         this.password = password;
         this.role = role;
-    }
-
-    public User() {
-
     }
 
     public String getId() {
@@ -67,10 +131,14 @@ class User {
 
 class UserList {
     ArrayList<User> userlist = new ArrayList<>();
+    ArrayList<User> adminList = new ArrayList<>();
+    ArrayList<User> sellerList = new ArrayList<>();
+    ArrayList<User> customerList = new ArrayList<>();
     Scanner sc = new Scanner(System.in);
 
     UserList() throws IOException {
         loadUserFile();
+        loadAdminFile();
     }
 
 
@@ -133,9 +201,9 @@ class UserList {
             int whatRole = sc.nextInt();
             sc.nextLine();
 
-            // todo : Enum으로 리팩토링 > 완료
+            // Enum으로 리팩토링
             if (whatRole == 1) {
-                thisRole = UserRole.STORE_MANAGER;
+                thisRole = UserRole.SELLER;
                 break;
             } else if (whatRole == 2) {
                 thisRole = UserRole.CUSTOMER;
@@ -229,65 +297,92 @@ class UserList {
         }
     }
 
-    // 로그인
-    public User login() {
-        System.out.println("[로그인]");
-
+    // 로그인 로직
+    public User performLogin(ArrayList<User> targetList, String systemName) {
+        System.out.println();
+        System.out.println("[" + systemName + " 로그인]");
         while (true) {
-            boolean loginSuccess = false;
-            boolean idChecker = false;
-            boolean pwChecker = false;
+            System.out.println("1. 로그인");
+            System.out.println("2. 뒤로가기");
+            System.out.print(" : ");
+            int choice = sc.nextInt();
+            sc.nextLine();
 
-            System.out.print("id를 입력해주세요 : ");
-            String id = sc.nextLine();
+            if (choice == 1) {
+                boolean loginSuccess = false;
+                boolean idChecker = false;
+                boolean pwChecker = false;
 
-            System.out.print("password를 입력해주세요 : ");
-            String password = sc.nextLine();
+                System.out.println();
+                System.out.print("id를 입력해주세요 : ");
+                String id = sc.nextLine();
 
-            if (userlist.isEmpty()) {
-                System.out.println("유효하지 않은 id/pw입니다.");
-                System.out.println("회원가입을 먼저 진행해주세요.");
-            }
+                System.out.println();
+                System.out.print("password를 입력해주세요 : ");
+                String password = sc.nextLine();
 
-            User 찾은사용자 = findUser(id);
-
-
-            if (찾은사용자 != null) {
-                // 입력한 pw가 없다면?
-                if (!password.equals(찾은사용자.getPassword())) {
-                    pwChecker = true;
-                } else {
-                    pwChecker = false;
+                if (targetList.isEmpty()) {
+                    System.out.println("유효하지 않은 id/pw입니다.");
+                    System.out.println("회원가입을 먼저 진행해주세요.");
                 }
+
+                User 찾은사용자 = findUser(id, targetList);
+
+                if (찾은사용자 != null) {
+                    // 입력한 pw가 없다면?
+                    if (!password.equals(찾은사용자.getPassword())) {
+                        pwChecker = true;
+                    } else {
+                        pwChecker = false;
+                    }
+                } else {
+                    System.out.println("유효하지 않은 id입니다. 다시 입력해주세요.");
+                    idChecker = true;
+                }
+
+                if (pwChecker) {
+                    System.out.println("유효하지 않은 password입니다. 다시 입력해주세요.");
+                }
+
+                if (!idChecker && !pwChecker) {
+                    loginSuccess = true;
+                }
+
+                if (loginSuccess) {
+                    System.out.println("로그인이 완료되었습니다!");
+                    return 찾은사용자;
+                }
+            } else if (choice == 2) {
+                return null;
             } else {
-                System.out.println("유효하지 않은 id입니다. 다시 입력해주세요.");
-                idChecker = true;
+                System.out.println("올바른 번호를 입력해주세요.");
             }
-
-
-            if (pwChecker) {
-                System.out.println("유효하지 않은 password입니다. 다시 입력해주세요.");
-            }
-
-
-            if (!idChecker && !pwChecker) {
-                loginSuccess = true;
-            }
-
-
-            if (loginSuccess) {
-                System.out.println("로그인이 완료되었습니다!");
-                return 찾은사용자;
-            }
-
         }
     }
 
-    // id로 객체 찾기
-    public User findUser(String id) {
-        for (int i = 0; i < userlist.size(); i++) {
-            if (userlist.get(i).getId().equals(id)) {
-                return userlist.get(i);
+    // 관리자 로그인
+    public User adminLogin() {
+        return performLogin(adminList, "관리자");
+    }
+
+    // 판매자 로그인
+    public User sellerLogin() {
+        return performLogin(sellerList, "판매자");
+    }
+
+    // 구매자 로그인
+    public User customerLogin() {
+        return performLogin(customerList, "구매자");
+    }
+
+    // 판매자 로그인
+
+
+    // id,tarList에 맞는 객체 찾기
+    public User findUser(String id, ArrayList<User> targetList) {
+        for (int i = 0; i < targetList.size(); i++) {
+            if (targetList.get(i).getId().equals(id)) {
+                return targetList.get(i);
             }
         }
         return null;
@@ -312,6 +407,24 @@ class UserList {
 
         reader.close();
     }
+
+    // Admin 파일 load + adminlist에 업로드
+    public void loadAdminFile() throws IOException {
+        Path adminFilePath = Constants.BASE_PATH.resolve("Admin.txt");
+        BufferedReader reader = new BufferedReader((new FileReader(adminFilePath.toFile())));
+
+        String line;
+        while ((line = reader.readLine()) != null) {
+            String[] parts = line.split(",");
+            String id = parts[0];
+            String pw = parts[1];
+            UserRole role = UserRole.valueOf(parts[2]);
+
+            User user = new User(id, pw, role);
+            adminList.add(user);
+        }
+    }
+
 
 }
 
@@ -865,58 +978,50 @@ public class Main {
         // 객체 생성 == Menu의 인스턴스 menu 생성
 //        Menu menu = new Menu();
         // 객체 생성 == MenuList의 인스턴스 menuList 생성
+
+        UserList userList = new UserList();
         MenuList menuList = new MenuList();
         OrderHistory orderHistory = new OrderHistory();
         MyMenu myMenu = new MyMenu();
-        UserList userList = new UserList();
-
-        enum Test {
-            SIGNUP(1, "회원가입"),
-            LOGIN(2, "로그인"),
-            EXIT(3, "프로그램종료");
-
-            private final int value;
-            private final String message;
-
-            Test(int value, String message) {
-                this.value = value;
-                this.message = message;
-            }
-
-            public int getValue() {
-                return value;
-            }
-
-            public String getMessage() {
-                return message;
-            }
-
-            public static Test fromValue(int value) {
-                for (Test test : Test.values()) {
-                    if (test.getValue() == value) {
-                        return test;
-                    }
-                }
-                return null;
-            }
-        }
-
-        System.out.println(Test.SIGNUP.getValue());
-        System.out.println(Test.LOGIN.getValue());
-        System.out.println(Test.EXIT.getValue());
 
 //        String basePath = UserList.BASE_PATH; // UserList 클래스의 주소 값
 //        String basePath = userList.BASE_PATH; // UserList 객체/인스턴스의 주소 값
-
 
         Scanner sc = new Scanner(System.in);
 
         // 서비스 시작
         while (true) {
             // todo : 처음 진입 시, URL 구분처럼, if문으로 일단 관리자/소비자 구분하기
-
             System.out.println();
             System.out.println("안녕하세요, 카페 주문 서비스입니다.");
+            System.out.println(Role.ADMIN.getValue() + ". " + Role.ADMIN.getRole());
+            System.out.println(Role.SELLER.getValue() + ". " + Role.SELLER.getRole());
+            System.out.println(Role.CUSTOMER.getValue() + ". " + Role.CUSTOMER.getRole());
+            System.out.print("역할을 선택해주세요 : ");
+            int roleChoice = sc.nextInt();
+            sc.nextLine();
+
+            Role roleNum = Role.fromValue(roleChoice);
+            int role;
+            role = switch (roleNum) {
+                case ADMIN -> 1;
+                case SELLER -> 2;
+                case CUSTOMER -> 3;
+            };
+
+            // 관리자 모드
+            if (role == 1) {
+                if (userList.adminLogin() != null) {
+                    System.out.println("안녕하세요 관리자님,");
+                    System.out.println("1. 전체 메뉴 CRUD");
+                    System.out.println("2. 판매자 계정 관리");
+
+                } else {
+                    continue;
+                }
+            }
+
+
             System.out.println(Test.SIGNUP.getValue() + ". " + Test.SIGNUP.getMessage());
             System.out.println("2. 로그인");
             System.out.println("3. 프로그램 종료");
@@ -924,25 +1029,21 @@ public class Main {
             int loginChoice = sc.nextInt();
             sc.nextLine();
 
-            int role = 0;
 
-            User 현재유저 = new User();
-
-            // todo : switch 문으로 리팩토링 하기 동등비교( ==1,2,3)
+            // switch 문으로 리팩토링 하기 동등비교( ==1,2,3)
             Test test = Test.fromValue(loginChoice);
             switch (test) {
                 case Test.SIGNUP:
                     userList.registerUser();
                     continue;
                 case Test.LOGIN:
-                    User 로그인한사용자 = userList.login();
-                    현재유저 = 로그인한사용자;
+//                    User 로그인한사용자 = userList.login();
 
-                    role = switch (로그인한사용자.getRole()) {
-                        case ADMIN -> 0;
-                        case STORE_MANAGER -> 1;
-                        case CUSTOMER -> 2;
-                    };
+//                    role = switch (로그인한사용자.getRole()) {
+//                        case ADMIN -> 0;
+//                        case SELLER -> 1;
+//                        case CUSTOMER -> 2;
+//                    };
 
 //                    switch (로그인한사용자.getRole()) {
 //                        case UserRole.STORE_MANAGER:
