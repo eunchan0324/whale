@@ -1,9 +1,15 @@
-import java.awt.*;
 import java.io.*;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Scanner;
+
+// UserRole Enum
+enum UserRole {
+    ADMIN,
+    STORE_MANAGER,
+    CUSTOMER
+}
 
 // 상수 모음 클래스
 class Constants {
@@ -15,9 +21,11 @@ class Constants {
 class User {
     private String id;
     private String password;
-    private String role;
+    private UserRole role;
+//    private String storeId;
 
-    User(String id, String password, String role) {
+
+    User(String id, String password, UserRole role) {
         this.id = id;
         this.password = password;
         this.role = role;
@@ -43,11 +51,11 @@ class User {
         this.password = password;
     }
 
-    public String getRole() {
+    public UserRole getRole() {
         return role;
     }
 
-    public void setRole(String role) {
+    public void setRole(UserRole role) {
         this.role = role;
     }
 
@@ -73,7 +81,7 @@ class UserList {
 
         String thisId;
         String thisPassword;
-        String thisRole;
+        UserRole thisRole;
 
         // id
         while (true) {
@@ -125,12 +133,12 @@ class UserList {
             int whatRole = sc.nextInt();
             sc.nextLine();
 
-            // todo : Enum으로 리팩토링
+            // todo : Enum으로 리팩토링 > 완료
             if (whatRole == 1) {
-                thisRole = "사장님";
+                thisRole = UserRole.STORE_MANAGER;
                 break;
             } else if (whatRole == 2) {
-                thisRole = "손님";
+                thisRole = UserRole.CUSTOMER;
                 break;
             } else {
                 System.out.println("정확한 숫자를 입력해주세요.");
@@ -296,7 +304,7 @@ class UserList {
             String[] parts = line.split(",");
             String id = parts[0];
             String password = parts[1];
-            String role = parts[2];
+            UserRole role = UserRole.valueOf(parts[2]);
 
             User user = new User(id, password, role);
             userlist.add(user);
@@ -861,6 +869,42 @@ public class Main {
         OrderHistory orderHistory = new OrderHistory();
         MyMenu myMenu = new MyMenu();
         UserList userList = new UserList();
+
+        enum Test {
+            SIGNUP(1, "회원가입"),
+            LOGIN(2, "로그인"),
+            EXIT(3, "프로그램종료");
+
+            private final int value;
+            private final String message;
+
+            Test(int value, String message) {
+                this.value = value;
+                this.message = message;
+            }
+
+            public int getValue() {
+                return value;
+            }
+
+            public String getMessage() {
+                return message;
+            }
+
+            public static Test fromValue(int value) {
+                for (Test test : Test.values()) {
+                    if (test.getValue() == value) {
+                        return test;
+                    }
+                }
+                return null;
+            }
+        }
+
+        System.out.println(Test.SIGNUP.getValue());
+        System.out.println(Test.LOGIN.getValue());
+        System.out.println(Test.EXIT.getValue());
+
 //        String basePath = UserList.BASE_PATH; // UserList 클래스의 주소 값
 //        String basePath = userList.BASE_PATH; // UserList 객체/인스턴스의 주소 값
 
@@ -869,9 +913,11 @@ public class Main {
 
         // 서비스 시작
         while (true) {
+            // todo : 처음 진입 시, URL 구분처럼, if문으로 일단 관리자/소비자 구분하기
+
             System.out.println();
             System.out.println("안녕하세요, 카페 주문 서비스입니다.");
-            System.out.println("1. 회원가입");
+            System.out.println(Test.SIGNUP.getValue() + ". " + Test.SIGNUP.getMessage());
             System.out.println("2. 로그인");
             System.out.println("3. 프로그램 종료");
             System.out.print("메뉴를 선택해주세요 : ");
@@ -882,23 +928,54 @@ public class Main {
 
             User 현재유저 = new User();
 
-            if (loginChoice == 1) {
-                userList.registerUser();
-                continue;
-            } else if (loginChoice == 2) {
-                User 로그인한사용자 = userList.login();
-                현재유저 = 로그인한사용자;
-                if ("사장님".equals(로그인한사용자.getRole())) {
-                    role = 1;
-                } else if ("손님".equals(로그인한사용자.getRole())) {
-                    role = 2;
-                }
+            // todo : switch 문으로 리팩토링 하기 동등비교( ==1,2,3)
+            Test test = Test.fromValue(loginChoice);
+            switch (test) {
+                case Test.SIGNUP:
+                    userList.registerUser();
+                    continue;
+                case Test.LOGIN:
+                    User 로그인한사용자 = userList.login();
+                    현재유저 = 로그인한사용자;
 
-                // 로그아웃
-            } else if (loginChoice == 3) {
-                System.out.println("로그아웃이 되었습니다.");
-                break;
+                    role = switch (로그인한사용자.getRole()) {
+                        case ADMIN -> 0;
+                        case STORE_MANAGER -> 1;
+                        case CUSTOMER -> 2;
+                    };
+
+//                    switch (로그인한사용자.getRole()) {
+//                        case UserRole.STORE_MANAGER:
+//                            role = 1;
+//                            break;
+//                        case UserRole.CUSTOMER:
+//                            role = 2;
+//                            break;
+//                    }
+
+//                    if (UserRole.STORE_MANAGER == 로그인한사용자.getRole()) { // 조건문이 서로 변경되어야 가독성이 증가함
+//                        role = 1;
+//                    } else if (UserRole.CUSTOMER == 로그인한사용자.getRole()) {
+//                        role = 2;
+//                    }
+                    break;
+                case Test.EXIT:
+                    System.out.println("프로그램이 종료되었습니다.");
+                    break;
+                default:
+                    assert true : "잘못된 입력";
             }
+
+//            if (loginChoice == Test.SIGNUP.getValue()) {
+//                continue;
+//            } else if (loginChoice == 2) {
+//
+//                // todo : enum 비교로 처리하기 switch?
+//
+//                // 로그아웃
+//            } else if (loginChoice == 3) {
+//                break;
+//            }
 
 
             System.out.println();
