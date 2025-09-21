@@ -5,7 +5,17 @@ import java.util.ArrayList;
 import java.util.Scanner;
 
 enum UserRole {
-    ADMIN, SELLER, CUSTOMER
+    ADMIN("관리자"), SELLER("판매자"), CUSTOMER("구매자");
+
+    private final String korean;
+
+    UserRole(String korean) {
+        this.korean = korean;
+    }
+
+    public String getKorean() {
+        return korean;
+    }
 }
 
 enum OrderStatus {
@@ -121,12 +131,12 @@ class User {
 }
 
 class UserList {
-    ArrayList<User> userlist = new ArrayList<>();
     ArrayList<User> adminList = new ArrayList<>();
     ArrayList<User> sellerList = new ArrayList<>();
     ArrayList<User> customerList = new ArrayList<>();
     Scanner sc = new Scanner(System.in);
 
+    // 프로그램 시작 시, 모든 계정 정보 LOAD
     UserList() throws IOException {
         loadSellerFile();
         loadAdminFile();
@@ -134,7 +144,7 @@ class UserList {
     }
 
 
-    // 회원가입
+    // 회원가입 - 역할 기반
     public void registerUser(UserRole role, ArrayList<User> targetList, String fileName) throws IOException {
         System.out.println();
         System.out.println("[" + role + " 회원가입]");
@@ -211,7 +221,7 @@ class UserList {
         FileWriter writer = new FileWriter(userFilePath.toFile(), true);
         writer.write((user.getId()) + "," + user.getPassword() + "," + user.getRole() + "\n");
         writer.close();
-        System.out.println("회원가입이 완료되었습니다.");
+        System.out.println(role.getKorean() + " 회원가입이 완료되었습니다.");
     }
 
     // id 중복 확인
@@ -308,7 +318,6 @@ class UserList {
                 System.out.print("id를 입력해주세요 : ");
                 String id = sc.nextLine();
 
-                System.out.println();
                 System.out.print("password를 입력해주세요 : ");
                 String password = sc.nextLine();
 
@@ -366,7 +375,17 @@ class UserList {
         return performLogin(customerList, "구매자");
     }
 
-    // 판매자 로그인
+    // 판매자 계정 조회
+    public void sellerAccountRead() {
+
+        if (!sellerList.isEmpty()) {
+            for (int i = 0; i < sellerList.size(); i++) {
+                System.out.println(sellerList.get(i));
+            }
+        } else {
+            System.out.println("판매자 계정이 존재하지 않습니다.");
+        }
+    }
 
 
     // id,tarList에 맞는 객체 찾기
@@ -993,12 +1012,9 @@ public class Main {
         OrderHistory orderHistory = new OrderHistory();
         MyMenu myMenu = new MyMenu();
 
-//        String basePath = UserList.BASE_PATH; // UserList 클래스의 주소 값
-//        String basePath = userList.BASE_PATH; // UserList 객체/인스턴스의 주소 값
-
         Scanner sc = new Scanner(System.in);
 
-        // 서비스 시작
+        // 프로그램 시작
         while (true) {
             System.out.println();
             System.out.println("안녕하세요, 카페 주문 서비스입니다.");
@@ -1107,17 +1123,27 @@ public class Main {
                         System.out.println("2. 판매자 계정 조회");
                         System.out.println("3. 판매자 계정 수정");
                         System.out.println("4. 판매자 계정 삭제");
+                        System.out.print(" : ");
                         int sellerMenuChoice = sc.nextInt();
                         sc.nextLine();
 
                         // 판매자 계정 create
                         if (sellerMenuChoice == 1) {
                             userList.registerUser(UserRole.SELLER, userList.sellerList, "Seller.txt");
-                        } else if (sellerMenuChoice == 2) {
+                        }
 
-                        } else if (sellerMenuChoice == 3) {
+                        // 판매자 계정 read
+                        else if (sellerMenuChoice == 2) {
+                            userList.sellerAccountRead();
+                        }
 
-                        } else if (sellerMenuChoice == 4) {
+                        // 판매자 계정 update
+                        else if (sellerMenuChoice == 3) {
+
+                        }
+
+                        // 판매자 계정 delete
+                        else if (sellerMenuChoice == 4) {
 
                         }
 
@@ -1132,7 +1158,34 @@ public class Main {
 
             // 판매자 모드
             else if (role == 2) {
+                while (true) {
+                    System.out.println("안녕하세요 사장님, 카페 주문 서비스입니다.");
+                    System.out.println("1. 주문 내역 확인");
+                    System.out.println("2. 추천 메뉴 등록 및 관리");
+                    System.out.println("3. 로그아웃");
+                    System.out.print("할 일을 선택해주세요 : ");
 
+                    int menuSelect = sc.nextInt();
+                    sc.nextLine();
+
+                    // 주문 내역 확인
+                    if (menuSelect == 1) {
+                        orderHistory.OrderCheck();
+                    }
+
+                    // 추천 메뉴 등록 및 관리
+                    else if (menuSelect == 2) {
+                        menuList.menuRecommend();
+                    }
+
+                    // 로그아웃
+                    if (menuSelect == 3) {
+                        System.out.println("로그아웃이 완료되었습니다.");
+                        break;
+                    }
+
+
+                }
             }
 
             // 구매자 모드
@@ -1243,7 +1296,6 @@ public class Main {
             int loginChoice = sc.nextInt();
             sc.nextLine();
 
-
             // switch 문으로 리팩토링 하기 동등비교( ==1,2,3)
             Test test = Test.fromValue(loginChoice);
             switch (test) {
@@ -1279,41 +1331,6 @@ public class Main {
                     break;
                 default:
                     assert true : "잘못된 입력";
-            }
-
-
-            // 1. 주인일 때
-            if (role == 1) {
-                while (true) {
-                    System.out.println("안녕하세요 사장님, 카페 주문 서비스입니다.");
-                    System.out.println("2. 주문 내역 확인");
-                    System.out.println("3. 추천 메뉴 등록 및 관리");
-                    System.out.println("4. 이벤트 등록 및 관리");
-                    System.out.println("5. 쿠폰 등록 및 관리");
-                    System.out.println("6. 로그아웃");
-                    System.out.print("할 일을 선택해주세요 : ");
-
-                    int menuSelect = sc.nextInt();
-                    sc.nextLine();
-
-                    // 1-2. 주문 내역 확인
-                    if (menuSelect == 2) {
-                        orderHistory.OrderCheck();
-                    }
-
-                    // 1-3. 추천 메뉴 등록 및 관리
-                    else if (menuSelect == 3) {
-                        menuList.menuRecommend();
-                    }
-
-                    // 1-6. 로그아웃
-                    if (menuSelect == 6) {
-                        System.out.println("로그아웃이 완료되었습니다.");
-                        break;
-                    }
-
-
-                }
             }
 
 
