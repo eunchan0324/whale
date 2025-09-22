@@ -375,7 +375,7 @@ class UserList {
         return performLogin(customerList, "구매자");
     }
 
-    // 판매자 계정 조회
+    // 판매자 계정 조회(read)
     public void sellerAccountRead() {
 
         if (!sellerList.isEmpty()) {
@@ -384,6 +384,54 @@ class UserList {
             }
         } else {
             System.out.println("판매자 계정이 존재하지 않습니다.");
+        }
+    }
+
+    // 판매자 계정 수정(update)
+    public void sellerAccountUpdate() throws IOException {
+        System.out.println("[판매자 계정 수정]");
+        sellerAccountRead();
+
+        while (true) {
+            System.out.print("수정을 원하는 id를 입력해주세요 : ");
+            String id = sc.nextLine();
+            boolean checker = false;
+
+            for (int i = 0; i < sellerList.size(); i++) {
+                if (id.equals(sellerList.get(i).getId())) {
+                    System.out.println("입력한 id 계정 정보 : " + sellerList.get(i));
+                    System.out.print("변경할 비밀번호를 입력해주세요 : ");
+                    String newPassword = sc.nextLine();
+
+                    sellerList.get(i).setPassword(newPassword);
+                    Path sellerFilePath = Constants.BASE_PATH.resolve("Seller.txt");
+                    FileWriter writer = new FileWriter(sellerFilePath.toFile());
+                    for (int j = 0; j < sellerList.size(); j++) {
+                        writer.write(sellerList.get(j).getId() + "," + sellerList.get(j).getPassword() + "," + sellerList.get(j).getRole() + "\n");
+                    }
+                    writer.close();
+                    System.out.println("수정이 완료되었습니다.");
+                    checker = true;
+                    break;
+                }
+            }
+
+            if (checker == true) {
+                break;
+            }
+
+            if (checker == false) {
+                System.out.println("입력한 id가 정확하지 않습니다.");
+                System.out.println("1. id 다시 입력하기");
+                System.out.println("2. 나가기");
+                System.out.print(" : ");
+                int choice = sc.nextInt();
+                sc.nextLine();
+
+                if (choice == 2) {
+                    break;
+                }
+            }
         }
     }
 
@@ -1021,6 +1069,7 @@ public class Main {
             System.out.println(Role.ADMIN.getValue() + ". " + Role.ADMIN.getRole());
             System.out.println(Role.SELLER.getValue() + ". " + Role.SELLER.getRole());
             System.out.println(Role.CUSTOMER.getValue() + ". " + Role.CUSTOMER.getRole());
+            System.out.println("4. 프로그램 종료");
             System.out.print("역할을 선택해주세요 : ");
             int roleChoice = sc.nextInt();
             sc.nextLine();
@@ -1139,7 +1188,7 @@ public class Main {
 
                         // 판매자 계정 update
                         else if (sellerMenuChoice == 3) {
-
+                            userList.sellerAccountUpdate();
                         }
 
                         // 판매자 계정 delete
@@ -1286,6 +1335,12 @@ public class Main {
                 }
 
 
+            }
+
+            // 프로그램 종료
+            else if (role == 4) {
+                System.out.println("프로그램을 종료합니다.");
+                break;
             }
 
 
