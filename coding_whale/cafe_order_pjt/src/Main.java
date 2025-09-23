@@ -34,9 +34,34 @@ enum UserRole {
             }
         }
         return UNROLE;
-
     }
 
+}
+
+enum MenuCategory {
+    COFFEE(1),
+    LATTE(2),
+    TEA(3);
+
+    private final int value;
+
+    MenuCategory(int value) {
+        this.value = value;
+    }
+
+    public int getValue() {
+        return value;
+    }
+
+
+    public static MenuCategory fromValue(int value) {
+        for (MenuCategory category : MenuCategory.values()) {
+            if (category.getValue() == value) {
+                return category;
+            }
+        }
+        return null;
+    }
 }
 
 enum OrderStatus {
@@ -538,6 +563,8 @@ class UserList {
 }
 
 class Menu {
+    private static int nextId = 1;
+    private int menuId;
     private String menuName;
     private int menuPrice;
     private String menuOption;
@@ -548,6 +575,14 @@ class Menu {
     }
 
     public Menu(String menuName, int menuPrice, String menuOption) {
+        this.menuId = nextId++;
+        this.menuName = menuName;
+        this.menuPrice = menuPrice;
+        this.menuOption = menuOption;
+    }
+
+    public Menu(int menuId, String menuName, int menuPrice, String menuOption) {
+        this.menuId = menuId;
         this.menuName = menuName;
         this.menuPrice = menuPrice;
         this.menuOption = menuOption;
@@ -555,6 +590,14 @@ class Menu {
 
     public Menu(String recomReason) {
         this.menuRecommend = recomReason;
+    }
+
+    public int getMenuId() {
+        return menuId;
+    }
+
+    public static void setNextId(int nextId) {
+        Menu.nextId = nextId;
     }
 
     public String getMenuName() {
@@ -602,6 +645,198 @@ class MenuList {
 
     public MenuList() throws IOException {
         loadMenuFile();
+    }
+
+    // Create
+    public void menuCreate() throws IOException {
+        Scanner sc = new Scanner(System.in);
+
+        System.out.print("메뉴 이름을 작성해주세요 : ");
+        String menuName = sc.nextLine();
+
+        System.out.print("메뉴의 가격을 입력해주세요 : ");
+        int menuPrice = sc.nextInt();
+        sc.nextLine();
+
+        System.out.println("메뉴의 종류를 선택해주세요");
+        System.out.println("  1. 커피류(coffee)");
+        System.out.println("  2. 라떼류(latte)");
+        System.out.println("  3. 차류(tea)");
+        System.out.print(" : ");
+        int menuOptionNum = sc.nextInt();
+        sc.nextLine();
+
+        MenuCategory menuOption = MenuCategory.fromValue(menuOptionNum);
+        if (menuOption == null) {
+            System.out.println("잘못된 번호입니다.");
+            return;
+        }
+        Menu menu = new Menu(menuName, menuPrice, menuOption.name());
+        menus.add(menu);
+
+        Path menuFilePath = Constants.BASE_PATH.resolve("Menus.txt");
+        FileWriter writer = new FileWriter(menuFilePath.toFile(), true);
+        writer.write(menu.getMenuId() + "," + menu.getMenuName() + "," + menu.getMenuPrice() + "," + menu.getMenuOption() + "\n");
+        writer.close();
+
+        System.out.println("등록이 완료되었습니다.");
+        System.out.println();
+    }
+
+    // Read
+    public void menuListCheck() {
+
+        // 메뉴가 아무것도 등록되지 않았다면
+        if (menus.isEmpty()) {
+            System.out.println("등록된 메뉴가 없습니다. 메인 메뉴로 돌아갑니다.");
+            System.out.println();
+        }
+
+        // 메뉴가 1개 이상 등록되어있다면
+        else {
+            System.out.println("[현재 등록된 메뉴 목록]");
+            for (int i = 0; i < menus.size(); i++) {
+                System.out.println(menus.get(i));
+            }
+            System.out.println();
+        }
+
+    }
+
+    // Update
+    public void menuEdit(String 수정할메뉴) throws IOException {
+        Scanner sc = new Scanner(System.in);
+        boolean checker = false;
+
+        for (int i = 0; i < menus.size(); i++) {
+            if (menus.get(i).getMenuName().equals(수정할메뉴)) {
+                System.out.println("수정할 메뉴는 \"" + menus.get(i) + "\" 입니다.");
+                System.out.println();
+
+                System.out.print("수정할 항목의 번호를 입력해주세요 (1.메뉴명 2.가격 3.옵션) : ");
+                int 수정할항목 = sc.nextInt();
+
+
+                if (수정할항목 == 1) {
+                    sc.nextLine();
+                    System.out.print("수정할 메뉴명을 입력해주세요 : ");
+                    String 수정할메뉴명 = sc.nextLine();
+
+                    menus.get(i).setMenuName(수정할메뉴명);
+                    System.out.println("메뉴명이 수정되었습니다.");
+                    System.out.println();
+                }
+
+                if (수정할항목 == 2) {
+                    sc.nextLine();
+                    System.out.print("수정할 가격을 입력해주세요 (숫자만) : ");
+                    int 수정할가격 = sc.nextInt();
+
+                    menus.get(i).setMenuPrice(수정할가격);
+                    System.out.println("메뉴 가격이 수정되었습니다.");
+                    System.out.println();
+                }
+
+                if (수정할항목 == 3) {
+                    sc.nextLine();
+                    System.out.println("옵션은 다음과 같습니다");
+                    System.out.println("  1. 커피류(coffee)\n" + "  2. 라떼류(latte)\n" + "  3. 차류(tea)");
+                    System.out.print("수정할 옵션을 입력해주세요 (숫자만) : ");
+                    String 수정할옵션 = sc.nextLine();
+
+                    menus.get(i).setMenuOption(수정할옵션);
+                    System.out.println("메뉴 옵션이 수정되었습니다.");
+                    System.out.println();
+                }
+
+
+                checker = true;
+                if (checker) {
+                    Path menuFilePath = Constants.BASE_PATH.resolve("Menus.txt");
+                    FileWriter writer = new FileWriter(menuFilePath.toFile());
+                    for (int j = 0; j < menus.size(); j++) {
+                        writer.write(menus.get(j).getMenuId() + "," + menus.get(j).getMenuName() + "," + menus.get(j).getMenuPrice() + "," + menus.get(j).getMenuOption() + "\n");
+                    }
+                    writer.close();
+                    System.out.println("---변경사항이 저장되었습니다---");
+                }
+                break;
+            }
+        }
+
+        if (checker == false) {
+            System.out.println("입력한 메뉴명이 정확하지 않습니다. 다시 입력해주세요.");
+        }
+    }
+
+    // Delete
+    public void menuDelete(String 삭제할메뉴) throws IOException {
+        boolean checker = false;
+
+        for (int i = 0; i < menus.size(); i++) {
+            if (menus.get(i).getMenuName().equals(삭제할메뉴)) {
+                menus.remove(i);
+                System.out.println("선택한 메뉴가 삭제되었습니다.");
+                checker = true;
+                break;
+            }
+        }
+
+        if (checker) {
+            Path menuFilePath = Constants.BASE_PATH.resolve("Menus.txt");
+            FileWriter writer = new FileWriter(menuFilePath.toFile());
+            for (int j = 0; j < menus.size(); j++) {
+                writer.write(menus.get(j).getMenuId() + "," + menus.get(j).getMenuName() + "," + menus.get(j).getMenuPrice() + "," + menus.get(j).getMenuOption() + "\n");
+            }
+            writer.close();
+            System.out.println("---변경사항이 저장되었습니다---");
+        }
+
+        if (!checker) {
+            System.out.println("입력한 메뉴명이 정확하지 않습니다. 다시 입력해주세요.");
+        }
+
+    }
+
+    // Menu Empty Check
+    public boolean menuIsEmpty() {
+        if (menus.isEmpty()) {
+            return true;
+        }
+        return false;
+    }
+
+    // find Menu - 매개변수와 같은 이름의 _객체 반환
+    public Menu findMenu(String 주문할메뉴) {
+        for (int i = 0; i < menus.size(); i++) {
+            if (menus.get(i).getMenuName().equals(주문할메뉴)) {
+                return menus.get(i);
+            }
+        }
+        return null;
+    }
+
+    // Menu 파일 load
+    public void loadMenuFile() throws IOException {
+        Path menuFilePath = Constants.BASE_PATH.resolve("Menus.txt");
+        BufferedReader reader = new BufferedReader(new FileReader(menuFilePath.toFile()));
+
+        int maxId = 0;
+        String line;
+        while ((line = reader.readLine()) != null) {
+            String[] parts = line.split(",");
+            int id = Integer.parseInt(parts[0]);
+            String name = parts[1];
+            int price = Integer.parseInt(parts[2]);
+            String option = parts[3];
+
+            Menu menu = new Menu(id, name, price, option);
+            menus.add(menu);
+
+            maxId = Math.max(maxId, id);
+        }
+        reader.close();
+        Menu.setNextId(maxId + 1);
     }
 
     // menuRecommend create
@@ -683,168 +918,6 @@ class MenuList {
             System.out.println("- 오늘의 추천 메뉴가 없습니다.");
             System.out.println();
         }
-    }
-
-    // Create
-    public void menuCreate(String name, int price, String option) throws IOException {
-        Menu menu = new Menu(name, price, option); // 메뉴 생성
-        menus.add(menu);
-
-        Path menuFilePath = Constants.BASE_PATH.resolve("Menus.txt");
-        FileWriter writer = new FileWriter(menuFilePath.toFile(), true);
-        writer.write(menu.getMenuName() + "," + menu.getMenuPrice() + "," + menu.getMenuOption() + "\n");
-        writer.close();
-    }
-
-    // Read
-    public void menuListCheck() {
-
-        // 메뉴가 아무것도 등록되지 않았다면
-        if (menus.isEmpty()) {
-            System.out.println("등록된 메뉴가 없습니다. 메인 메뉴로 돌아갑니다.");
-            System.out.println();
-        }
-
-        // 메뉴가 1개 이상 등록되어있다면
-        else {
-            System.out.println("[현재 등록된 메뉴 목록]");
-            for (int i = 0; i < menus.size(); i++) {
-                System.out.println(menus.get(i));
-            }
-            System.out.println();
-        }
-
-    }
-
-    // Update
-    public void menuEdit(String 수정할메뉴) throws IOException {
-        Scanner sc = new Scanner(System.in);
-        boolean checker = false;
-
-        for (int i = 0; i < menus.size(); i++) {
-            if (menus.get(i).getMenuName().equals(수정할메뉴)) {
-                System.out.println("수정할 메뉴는 \"" + menus.get(i) + "\" 입니다.");
-                System.out.println();
-
-                System.out.print("수정할 항목의 번호를 입력해주세요 (1.메뉴명 2.가격 3.옵션) : ");
-                int 수정할항목 = sc.nextInt();
-
-
-                if (수정할항목 == 1) {
-                    sc.nextLine();
-                    System.out.print("수정할 메뉴명을 입력해주세요 : ");
-                    String 수정할메뉴명 = sc.nextLine();
-
-                    menus.get(i).setMenuName(수정할메뉴명);
-                    System.out.println("메뉴명이 수정되었습니다.");
-                    System.out.println();
-                }
-
-                if (수정할항목 == 2) {
-                    sc.nextLine();
-                    System.out.print("수정할 가격을 입력해주세요 (숫자만) : ");
-                    int 수정할가격 = sc.nextInt();
-
-                    menus.get(i).setMenuPrice(수정할가격);
-                    System.out.println("메뉴 가격이 수정되었습니다.");
-                    System.out.println();
-                }
-
-                if (수정할항목 == 3) {
-                    sc.nextLine();
-                    System.out.println("옵션은 다음과 같습니다");
-                    System.out.println("  1. 커피류(coffee)\n" + "  2. 라떼류(latte)\n" + "  3. 차류(tea)");
-                    System.out.print("수정할 옵션을 입력해주세요 (숫자만) : ");
-                    String 수정할옵션 = sc.nextLine();
-
-                    menus.get(i).setMenuOption(수정할옵션);
-                    System.out.println("메뉴 옵션이 수정되었습니다.");
-                    System.out.println();
-                }
-
-
-                checker = true;
-                if (checker) {
-                    Path menuFilePath = Constants.BASE_PATH.resolve("Menus.txt");
-                    FileWriter writer = new FileWriter(menuFilePath.toFile());
-                    for (int j = 0; j < menus.size(); j++) {
-                        writer.write(menus.get(j).getMenuName() + "," + menus.get(j).getMenuPrice() + "," + menus.get(j).getMenuOption() + "\n");
-                    }
-                    writer.close();
-                    System.out.println("---변경사항이 저장되었습니다---");
-                }
-                break;
-            }
-        }
-
-        if (checker == false) {
-            System.out.println("입력한 메뉴명이 정확하지 않습니다. 다시 입력해주세요.");
-        }
-    }
-
-    // Delete
-    public void menuDelete(String 삭제할메뉴) throws IOException {
-        boolean checker = false;
-
-        for (int i = 0; i < menus.size(); i++) {
-            if (menus.get(i).getMenuName().equals(삭제할메뉴)) {
-                menus.remove(i);
-                System.out.println("선택한 메뉴가 삭제되었습니다.");
-                checker = true;
-                break;
-            }
-        }
-
-        if (checker) {
-            Path menuFilePath = Constants.BASE_PATH.resolve("Menus.txt");
-            FileWriter writer = new FileWriter(menuFilePath.toFile());
-            for (int j = 0; j < menus.size(); j++) {
-                writer.write(menus.get(j).getMenuName() + "," + menus.get(j).getMenuPrice() + "," + menus.get(j).getMenuOption() + "\n");
-            }
-            writer.close();
-            System.out.println("---변경사항이 저장되었습니다---");
-        }
-
-        if (!checker) {
-            System.out.println("입력한 메뉴명이 정확하지 않습니다. 다시 입력해주세요.");
-        }
-
-    }
-
-    // Menu Empty Check
-    public boolean menuIsEmpty() {
-        if (menus.isEmpty()) {
-            return true;
-        }
-        return false;
-    }
-
-    // find Menu - 매개변수와 같은 이름의 _객체 반환
-    public Menu findMenu(String 주문할메뉴) {
-        for (int i = 0; i < menus.size(); i++) {
-            if (menus.get(i).getMenuName().equals(주문할메뉴)) {
-                return menus.get(i);
-            }
-        }
-        return null;
-    }
-
-    // Menu 파일 load
-    public void loadMenuFile() throws IOException {
-        Path menuFilePath = Constants.BASE_PATH.resolve("Menus.txt");
-        BufferedReader reader = new BufferedReader(new FileReader(menuFilePath.toFile()));
-
-        String line;
-        while ((line = reader.readLine()) != null) {
-            String[] parts = line.split(",");
-            String name = parts[0];
-            int price = Integer.parseInt(parts[1]);
-            String option = parts[2];
-
-            Menu menu = new Menu(name, price, option);
-            menus.add(menu);
-        }
-        reader.close();
     }
 }
 
@@ -1163,24 +1236,7 @@ public class Main {
 
                             // 1-1 메뉴 등록 (Create)
                             if (choice == 1) {
-                                System.out.print("메뉴 이름을 작성해주세요 : ");
-                                String menuName = sc.nextLine();
-
-                                System.out.print("메뉴의 가격을 입력해주세요 : ");
-                                int menuPrice = sc.nextInt();
-                                sc.nextLine();
-
-                                System.out.println("메뉴의 종류를 선택해주세요");
-                                System.out.println("  1. 커피류(coffee)");
-                                System.out.println("  2. 라떼류(latte)");
-                                System.out.println("  3. 차류(tea)");
-                                System.out.print(" : ");
-                                String menuOption = sc.nextLine();
-
-                                // Menu 클래스 생성자
-                                menuList.menuCreate(menuName, menuPrice, menuOption);
-                                System.out.println("등록이 완료되었습니다.");
-                                System.out.println();
+                                menuList.menuCreate();
                             }
 
                             // 1-2. 등록 메뉴 확인 (Read)
