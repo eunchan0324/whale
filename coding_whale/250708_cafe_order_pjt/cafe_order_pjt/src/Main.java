@@ -5,35 +5,18 @@ import java.util.ArrayList;
 import java.util.Scanner;
 
 enum UserRole {
-    ADMIN("관리자"), SELLER("판매자"), CUSTOMER("구매자");
-
-    private final String korean;
-
-    UserRole(String korean) {
-        this.korean = korean;
-    }
-
-    public String getKorean() {
-        return korean;
-    }
-}
-
-enum OrderStatus {
-    ORDER_PLACED, PREPARING, READY, COMPLETED
-}
-
-enum Role {
     ADMIN(1, "관리자"),
     SELLER(2, "판매자"),
     CUSTOMER(3, "구매자"),
-    UNROLE(-1, "UNROLE");
+    UNROLE(4, "UNROLE"),
+    ;
 
     private final int value;
     private final String role;
 
-    Role(int value, String role) {
+    UserRole(int value, String korean) {
         this.value = value;
-        this.role = role;
+        this.role = korean;
     }
 
     public int getValue() {
@@ -44,8 +27,8 @@ enum Role {
         return role;
     }
 
-    public static Role fromValue(int value) {
-        for (Role role : Role.values()) {
+    public static UserRole fromValue(int value) {
+        for (UserRole role : UserRole.values()) {
             if (role.getValue() == value) {
                 return role;
             }
@@ -53,37 +36,12 @@ enum Role {
         return UNROLE;
 
     }
+
 }
 
-enum Test {
-    SIGNUP(1, "회원가입"), LOGIN(2, "로그인"), EXIT(3, "프로그램종료");
-
-    private final int value;
-    private final String message;
-
-    Test(int value, String message) {
-        this.value = value;
-        this.message = message;
-    }
-
-    public int getValue() {
-        return value;
-    }
-
-    public String getMessage() {
-        return message;
-    }
-
-    public static Test fromValue(int value) {
-        for (Test test : Test.values()) {
-            if (test.getValue() == value) {
-                return test;
-            }
-        }
-        return null;
-    }
+enum OrderStatus {
+    ORDER_PLACED, PREPARING, READY, COMPLETED
 }
-
 
 // 상수 모음 클래스
 class Constants {
@@ -224,7 +182,7 @@ class UserList {
         FileWriter writer = new FileWriter(userFilePath.toFile(), true);
         writer.write((user.getId()) + "," + user.getPassword() + "," + user.getRole() + "\n");
         writer.close();
-        System.out.println(role.getKorean() + " 회원가입이 완료되었습니다.");
+        System.out.println(role.getRole() + " 회원가입이 완료되었습니다.");
     }
 
     // id 중복 확인
@@ -1163,15 +1121,15 @@ public class Main {
         while (true) {
             System.out.println();
             System.out.println("안녕하세요, 카페 주문 서비스입니다.");
-            System.out.println(Role.ADMIN.getValue() + ". " + Role.ADMIN.getRole());
-            System.out.println(Role.SELLER.getValue() + ". " + Role.SELLER.getRole());
-            System.out.println(Role.CUSTOMER.getValue() + ". " + Role.CUSTOMER.getRole());
+            System.out.println(UserRole.ADMIN.getValue() + ". " + UserRole.ADMIN.getRole());
+            System.out.println(UserRole.SELLER.getValue() + ". " + UserRole.SELLER.getRole());
+            System.out.println(UserRole.CUSTOMER.getValue() + ". " + UserRole.CUSTOMER.getRole());
             System.out.println("4. 프로그램 종료");
             System.out.print("역할을 선택해주세요 : ");
             int roleChoice = sc.nextInt();
             sc.nextLine();
 
-            Role role = Role.fromValue(roleChoice);
+            UserRole role = UserRole.fromValue(roleChoice);
             switch (role) {
                 // 관리자 모드
                 case ADMIN -> {
@@ -1436,59 +1394,14 @@ public class Main {
 
                 // Case UNROLE
                 case UNROLE -> {
-                    System.out.println("정확한 번호를 입력해주세요.");
-                }
-
-                // 프로그램 종료
-                default -> {
-                    System.out.println("프로그램을 종료합니다.");
+                    if (roleChoice == 4) {
+                        System.out.println("프로그램을 종료합니다.");
+                        return;
+                    } else {
+                        System.out.println("정확한 번호를 입력해주세요.");
+                    }
                 }
             }
-
-
-//            System.out.println(Test.SIGNUP.getValue() + ". " + Test.SIGNUP.getMessage());
-//            System.out.println("2. 로그인");
-//            System.out.println("3. 프로그램 종료");
-//            System.out.print("메뉴를 선택해주세요 : ");
-//            int loginChoice = sc.nextInt();
-//            sc.nextLine();
-
-//            // switch 문으로 리팩토링 하기 동등비교( ==1,2,3)
-//            Test test = Test.fromValue(loginChoice);
-//            switch (test) {
-//                case Test.SIGNUP:
-////                    userList.registerUser();
-//                    continue;
-//                case Test.LOGIN:
-////                    User 로그인한사용자 = userList.login();
-//
-////                    role = switch (로그인한사용자.getRole()) {
-////                        case ADMIN -> 0;
-////                        case SELLER -> 1;
-////                        case CUSTOMER -> 2;
-////                    };
-//
-////                    switch (로그인한사용자.getRole()) {
-////                        case UserRole.STORE_MANAGER:
-////                            role = 1;
-////                            break;
-////                        case UserRole.CUSTOMER:
-////                            role = 2;
-////                            break;
-////                    }
-//
-////                    if (UserRole.STORE_MANAGER == 로그인한사용자.getRole()) { // 조건문이 서로 변경되어야 가독성이 증가함
-////                        role = 1;
-////                    } else if (UserRole.CUSTOMER == 로그인한사용자.getRole()) {
-////                        role = 2;
-////                    }
-//                    break;
-//                case Test.EXIT:
-//                    System.out.println("프로그램이 종료되었습니다.");
-//                    break;
-//                default:
-//                    assert true : "잘못된 입력";
-//            }
 
 
         }
