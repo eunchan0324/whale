@@ -129,7 +129,6 @@ class UserList {
         loadCustomerFile();
     }
 
-
     // 회원가입 - 역할 기반
     public void registerUser(UserRole role, ArrayList<User> targetList, String fileName) throws IOException {
         System.out.println();
@@ -205,7 +204,7 @@ class UserList {
 
         Path userFilePath = Constants.BASE_PATH.resolve(fileName);
         FileWriter writer = new FileWriter(userFilePath.toFile(), true);
-        writer.write((user.getId()) + "," + user.getPassword() + "," + user.getRole() + "\n");
+        writer.write(user.getId() + "," + user.getPassword() + "," + user.getRole() + "\n");
         writer.close();
         System.out.println(role.getRole() + " 회원가입이 완료되었습니다.");
     }
@@ -921,6 +920,100 @@ class MenuList {
     }
 }
 
+class MenuStatus {
+    private int menuId;
+    private String sellerId;
+    private String status;
+    private int stock;
+
+    public MenuStatus(int menuId, String sellerId, String status, int stock) {
+        this.menuId = menuId;
+        this.sellerId = sellerId;
+        this.status = status;
+        this.stock = stock;
+    }
+
+    public int getMenuId() {
+        return menuId;
+    }
+
+    public void setMenuId(int menuId) {
+        this.menuId = menuId;
+    }
+
+    public String getSellerId() {
+        return sellerId;
+    }
+
+    public void setSellerId(String sellerId) {
+        this.sellerId = sellerId;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
+    public int getStock() {
+        return stock;
+    }
+
+    public void setStock(int stock) {
+        this.stock = stock;
+    }
+
+    @Override
+    public String toString() {
+        return "MenuStatus{" +
+                "menuId=" + menuId +
+                ", sellerId='" + sellerId + '\'' +
+                ", status='" + status + '\'' +
+                ", stock=" + stock +
+                '}';
+    }
+
+
+}
+
+class MenuStatusList {
+    ArrayList<MenuStatus> menuStatuses = new ArrayList<>();
+
+    public void saveMenuStatusFile() throws IOException {
+        Path menuFilePath = Constants.BASE_PATH.resolve("Menu_status.txt");
+        FileWriter writer = new FileWriter(menuFilePath.toFile());
+
+        for (int i = 0; i < menuStatuses.size(); i++) {
+            MenuStatus status = menuStatuses.get(i);
+            writer.write(status.getMenuId() + "," +
+                    status.getSellerId() + "," +
+                    status.getStatus() + "," +
+                    status.getStock() + "\n");
+        }
+        writer.close();
+    }
+
+    public void loadMenuStatusFile() throws  IOException {
+        Path menuFilePath = Constants.BASE_PATH.resolve("Menu_status.txt");
+        BufferedReader reader = new BufferedReader(new FileReader(menuFilePath.toFile()));
+
+        String line;
+        while ((line = reader.readLine()) != null) {
+            String[] parts = line.split(",");
+            int menuId = Integer.parseInt(parts[0]);
+            String sellerId = parts[1];
+            String status = parts[2];
+            int stock = Integer.parseInt(parts[3]);
+
+            MenuStatus menuStatus = new MenuStatus(menuId, sellerId, status, stock);
+            menuStatuses.add(menuStatus);
+        }
+        reader.close();
+    }
+}
+
 class OrderMenu {
     private Menu menu;
     private int finalPrice;
@@ -1246,6 +1339,7 @@ public class Main {
 
                             // 1-3. 메뉴 수정
                             else if (choice == 3) {
+                                // todo : 메서드에 내용 합치기
                                 System.out.println("[메뉴 수정]");
                                 System.out.println("어떤 메뉴를 수정할까요?");
                                 menuList.menuListCheck();
@@ -1256,6 +1350,7 @@ public class Main {
                             }
 
                             // 1-4. 메뉴 삭제
+                            // todo : 메서드에 내용 합치기
                             else if (choice == 4) {
                                 System.out.println("[메뉴 목록]");
                                 menuList.menuListCheck();
@@ -1264,7 +1359,10 @@ public class Main {
                                 String 삭제할메뉴 = sc.nextLine();
                                 menuList.menuDelete(삭제할메뉴);
                                 System.out.println();
-                            } else if (choice == 5) {
+                            }
+
+                            // 1-5. 뒤로가기
+                            else if (choice == 5) {
                             }
 
 
