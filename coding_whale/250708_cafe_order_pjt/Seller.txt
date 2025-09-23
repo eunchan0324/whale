@@ -1,3 +1,2 @@
-dmscks1,qwer1234,SELLER
+dmscks1,qwer4321,SELLER
 dmscks2,qwer1234,SELLER
-dmscks3,qwer1234,SELLER
