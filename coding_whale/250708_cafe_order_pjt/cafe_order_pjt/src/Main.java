@@ -822,7 +822,7 @@ class MenuList {
     }
 
     // Delete
-    public void menuDelete(String 삭제할메뉴) {
+    public void menuDelete(String 삭제할메뉴) throws IOException {
         boolean checker = false;
 
         for (int i = 0; i < menus.size(); i++) {
@@ -834,8 +834,18 @@ class MenuList {
             }
         }
 
-        if (checker == false) {
-            System.out.println("입력한 메뉴명이 정확하지 않습니다. 다시 입력해주세요.");
+        if (checker) {
+            Path menuFilePath = Constants.BASE_PATH.resolve("Menus.txt");
+            FileWriter writer = new FileWriter(menuFilePath.toFile());
+            for (int j = 0; j < menus.size(); j++) {
+                writer.write(menus.get(j).getMenuName() + "," + menus.get(j).getMenuPrice() + "," + menus.get(j).getMenuOption() + "\n");
+            }
+            writer.close();
+            System.out.println("---변경사항이 저장되었습니다---");
+
+            if (checker == false) {
+                System.out.println("입력한 메뉴명이 정확하지 않습니다. 다시 입력해주세요.");
+            }
         }
     }
 
