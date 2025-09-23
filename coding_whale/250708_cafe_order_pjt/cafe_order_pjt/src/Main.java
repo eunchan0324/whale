@@ -435,6 +435,78 @@ class UserList {
         }
     }
 
+    // 판매자 계정 삭제(delete)
+    public void sellerAccountDelete() throws IOException {
+        System.out.println("[판매자 계정 삭제]");
+
+        while (true) {
+            sellerAccountRead();
+            System.out.print("삭제를 원하는 id를 입력해주세요 : ");
+            String id = sc.nextLine();
+            boolean checker = false;
+            boolean shouldExit = false;
+
+            for (int i = 0; i < sellerList.size(); i++) {
+                if (id.equals(sellerList.get(i).getId())) {
+                    System.out.println("입력한 id 계정 정보 : " + sellerList.get(i));
+                    System.out.println("정말 삭제하시겠습니까?");
+                    System.out.println("1. 네");
+                    System.out.println("2. 아니요");
+                    System.out.print(" : ");
+                    int choice = sc.nextInt();
+                    sc.nextLine();
+
+                    if (choice == 1) {
+                        sellerList.remove(i);
+
+                        Path sellerFilePath = Constants.BASE_PATH.resolve("Seller.txt");
+                        FileWriter writer = new FileWriter(sellerFilePath.toFile());
+                        for (int j = 0; j < sellerList.size(); j++) {
+                            writer.write(sellerList.get(j).getId() + "," + sellerList.get(j).getPassword() + "," + sellerList.get(j).getRole() + "\n");
+                        }
+                        writer.close();
+                        checker = true;
+                        break;
+                    } else if (choice == 2) {
+                        System.out.println("1. 다른 ID 입력");
+                        System.out.println("2. 나가기");
+                        System.out.print(" : ");
+                        int choice2 = sc.nextInt();
+                        sc.nextLine();
+
+                        if (choice2 == 1) {
+                            break;
+                        } else if (choice2 == 2) {
+                            return;
+                        }
+                    }
+
+                    if (shouldExit) {
+                        break;
+                    }
+                }
+            }
+
+            if (checker) {
+                System.out.println("삭제가 완료되었습니다.");
+                break;
+            }
+
+            if (checker == false) {
+                System.out.println("입력한 id가 유효하지 않습니다.");
+                System.out.println("1. id 재입력");
+                System.out.println("2. 나가기");
+                System.out.print(" : ");
+                int choice = sc.nextInt();
+                sc.nextLine();
+
+                if (choice == 2) {
+                    break;
+                }
+            }
+        }
+    }
+
 
     // id,tarList에 맞는 객체 찾기
     public User findUser(String id, ArrayList<User> targetList) {
@@ -684,7 +756,7 @@ class MenuList {
     }
 
     // Update
-    public void menuEdit(String 수정할메뉴) {
+    public void menuEdit(String 수정할메뉴) throws IOException {
         Scanner sc = new Scanner(System.in);
         boolean checker = false;
 
@@ -728,7 +800,18 @@ class MenuList {
                     System.out.println("메뉴 옵션이 수정되었습니다.");
                     System.out.println();
                 }
+
+
                 checker = true;
+                if (checker) {
+                    Path menuFilePath = Constants.BASE_PATH.resolve("Menus.txt");
+                    FileWriter writer = new FileWriter(menuFilePath.toFile());
+                    for (int j = 0; j < menus.size(); j++) {
+                        writer.write(menus.get(j).getMenuName() + "," + menus.get(j).getMenuPrice() + "," + menus.get(j).getMenuOption() + "\n");
+                    }
+                    writer.close();
+                    System.out.println("---변경사항이 저장되었습니다---");
+                }
                 break;
             }
         }
@@ -1085,123 +1168,132 @@ public class Main {
             // 관리자 모드
             if (role == 1) {
                 if (userList.adminLogin() != null) {
-                    System.out.println();
-                    System.out.println("안녕하세요 관리자님, 메뉴를 선택해주세요");
-                    System.out.println("1. 전체 메뉴 CRUD");
-                    System.out.println("2. 판매자 계정 관리");
-                    System.out.print(" : ");
-                    int menuChoice = sc.nextInt();
-                    sc.nextLine();
-
-                    // 전체 메뉴 CRUD
-                    if (menuChoice == 1) {
+                    while (true) {
                         System.out.println();
-                        System.out.println("[메뉴 등록 및 관리]");
-                        System.out.println("1. 메뉴 등록");
-                        System.out.println("2. 등록 메뉴 확인");
-                        System.out.println("3. 메뉴 수정");
-                        System.out.println("4. 메뉴 삭제");
-                        System.out.println("5. 처음으로 돌아가기");
-                        System.out.print("할 일을 선택해주세요 : ");
-
-                        int choice = sc.nextInt();
+                        System.out.println("안녕하세요 관리자님, 메뉴를 선택해주세요");
+                        System.out.println("1. 전체 메뉴 CRUD");
+                        System.out.println("2. 판매자 계정 관리");
+                        System.out.println("3. 뒤로가기");
+                        System.out.print(" : ");
+                        int menuChoice = sc.nextInt();
                         sc.nextLine();
-                        System.out.println();
+
+                        // 전체 메뉴 CRUD
+                        if (menuChoice == 1) {
+                            System.out.println();
+                            System.out.println("[메뉴 등록 및 관리]");
+                            System.out.println("1. 메뉴 등록");
+                            System.out.println("2. 등록 메뉴 확인");
+                            System.out.println("3. 메뉴 수정");
+                            System.out.println("4. 메뉴 삭제");
+                            System.out.println("5. 뒤로가기");
+                            System.out.print("할 일을 선택해주세요 : ");
+
+                            int choice = sc.nextInt();
+                            sc.nextLine();
+                            System.out.println();
 
 
-                        // 1-1 메뉴 등록 (Create)
-                        if (choice == 1) {
-                            System.out.print("메뉴 이름을 작성해주세요 : ");
-                            String menuName = sc.nextLine();
+                            // 1-1 메뉴 등록 (Create)
+                            if (choice == 1) {
+                                System.out.print("메뉴 이름을 작성해주세요 : ");
+                                String menuName = sc.nextLine();
 
-                            System.out.print("메뉴의 가격을 입력해주세요 : ");
-                            int menuPrice = sc.nextInt();
+                                System.out.print("메뉴의 가격을 입력해주세요 : ");
+                                int menuPrice = sc.nextInt();
+                                sc.nextLine();
+
+                                System.out.println("메뉴의 종류를 선택해주세요");
+                                System.out.println("  1. 커피류(coffee)");
+                                System.out.println("  2. 라떼류(latte)");
+                                System.out.println("  3. 차류(tea)");
+                                System.out.print(" : ");
+                                String menuOption = sc.nextLine();
+
+                                // Menu 클래스 생성자
+                                menuList.menuCreate(menuName, menuPrice, menuOption);
+                                System.out.println("등록이 완료되었습니다.");
+                                System.out.println();
+                            }
+
+                            // 1-2. 등록 메뉴 확인 (Read)
+                            if (choice == 2) {
+                                menuList.menuListCheck();
+                            }
+
+                            // 1-3. 메뉴 수정
+                            if (choice == 3) {
+                                System.out.println("[메뉴 수정]");
+                                System.out.println("어떤 메뉴를 수정할까요?");
+                                menuList.menuListCheck();
+
+                                System.out.print("수정하고 싶은 메뉴의 메뉴명을 정확하게 입력해주세요 : ");
+                                String 수정할메뉴 = sc.nextLine();
+                                menuList.menuEdit(수정할메뉴);
+                            }
+
+                            // 1-4. 메뉴 삭제
+                            if (choice == 4) {
+                                System.out.println("[메뉴 목록]");
+                                menuList.menuListCheck();
+
+                                System.out.print("삭제할 메뉴명을 정확히 입력해주세요 : ");
+                                String 삭제할메뉴 = sc.nextLine();
+                                menuList.menuDelete(삭제할메뉴);
+                                System.out.println();
+                            }
+
+                            if (choice == 5) {
+                            }
+
+
+                        }
+
+                        // 판매자 계정 관리
+                        else if (menuChoice == 2) {
+                            System.out.println("[판매자 계정 관리]");
+                            System.out.println("1. 판매자 계정 생성");
+                            System.out.println("2. 판매자 계정 조회");
+                            System.out.println("3. 판매자 계정 수정");
+                            System.out.println("4. 판매자 계정 삭제");
+                            System.out.println("5. 뒤로가기");
+                            System.out.print(" : ");
+                            int sellerMenuChoice = sc.nextInt();
                             sc.nextLine();
 
-                            System.out.println("메뉴의 종류를 선택해주세요");
-                            System.out.println("  1. 커피류(coffee)");
-                            System.out.println("  2. 라떼류(latte)");
-                            System.out.println("  3. 차류(tea)");
-                            System.out.print(" : ");
-                            String menuOption = sc.nextLine();
+                            // 판매자 계정 create
+                            if (sellerMenuChoice == 1) {
+                                userList.registerUser(UserRole.SELLER, userList.sellerList, "Seller.txt");
+                            }
 
-                            // Menu 클래스 생성자
-                            menuList.menuCreate(menuName, menuPrice, menuOption);
-                            System.out.println("등록이 완료되었습니다.");
-                            System.out.println();
+                            // 판매자 계정 read
+                            else if (sellerMenuChoice == 2) {
+                                userList.sellerAccountRead();
+                            }
+
+                            // 판매자 계정 update
+                            else if (sellerMenuChoice == 3) {
+                                userList.sellerAccountUpdate();
+                            }
+
+                            // 판매자 계정 delete
+                            else if (sellerMenuChoice == 4) {
+                                userList.sellerAccountDelete();
+
+                            }
+
+                            // 뒤로가기
+                            else if (sellerMenuChoice == 5) {
+                            }
                         }
 
-                        // 1-2. 등록 메뉴 확인 (Read)
-                        if (choice == 2) {
-                            menuList.menuListCheck();
-                        }
-
-                        // 1-3. 메뉴 수정
-                        if (choice == 3) {
-                            System.out.println("[메뉴 수정]");
-                            System.out.println("어떤 메뉴를 수정할까요?");
-                            menuList.menuListCheck();
-
-                            System.out.print("수정하고 싶은 메뉴의 메뉴명을 정확하게 입력해주세요 : ");
-                            String 수정할메뉴 = sc.nextLine();
-                            menuList.menuEdit(수정할메뉴);
-                        }
-
-                        // 1-4. 메뉴 삭제
-                        if (choice == 4) {
-                            System.out.println("[메뉴 목록]");
-                            menuList.menuListCheck();
-
-                            System.out.print("삭제할 메뉴명을 정확히 입력해주세요 : ");
-                            String 삭제할메뉴 = sc.nextLine();
-                            menuList.menuDelete(삭제할메뉴);
-                            System.out.println();
-                        }
-
-                        if (choice == 5) {
+                        // 관리자 모드 나가기 (뒤로 가기)
+                        else if (menuChoice == 3) {
                             break;
                         }
-
-
                     }
-
-                    // 판매자 계정 관리
-                    else if (menuChoice == 2) {
-                        System.out.println("[판매자 계정 관리]");
-                        System.out.println("1. 판매자 계정 생성");
-                        System.out.println("2. 판매자 계정 조회");
-                        System.out.println("3. 판매자 계정 수정");
-                        System.out.println("4. 판매자 계정 삭제");
-                        System.out.print(" : ");
-                        int sellerMenuChoice = sc.nextInt();
-                        sc.nextLine();
-
-                        // 판매자 계정 create
-                        if (sellerMenuChoice == 1) {
-                            userList.registerUser(UserRole.SELLER, userList.sellerList, "Seller.txt");
-                        }
-
-                        // 판매자 계정 read
-                        else if (sellerMenuChoice == 2) {
-                            userList.sellerAccountRead();
-                        }
-
-                        // 판매자 계정 update
-                        else if (sellerMenuChoice == 3) {
-                            userList.sellerAccountUpdate();
-                        }
-
-                        // 판매자 계정 delete
-                        else if (sellerMenuChoice == 4) {
-
-                        }
-
-
-                    }
-
-
                 } else {
-                    continue;
+                    break;
                 }
             }
 
