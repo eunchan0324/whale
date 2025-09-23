@@ -23,7 +23,10 @@ enum OrderStatus {
 }
 
 enum Role {
-    ADMIN(1, "관리자"), SELLER(2, "판매자"), CUSTOMER(3, "구매자");
+    ADMIN(1, "관리자"),
+    SELLER(2, "판매자"),
+    CUSTOMER(3, "구매자"),
+    UNROLE(-1, "UNROLE");
 
     private final int value;
     private final String role;
@@ -47,7 +50,7 @@ enum Role {
                 return role;
             }
         }
-        return null;
+        return UNROLE;
 
     }
 }
@@ -842,11 +845,12 @@ class MenuList {
             }
             writer.close();
             System.out.println("---변경사항이 저장되었습니다---");
-
-            if (checker == false) {
-                System.out.println("입력한 메뉴명이 정확하지 않습니다. 다시 입력해주세요.");
-            }
         }
+
+        if (!checker) {
+            System.out.println("입력한 메뉴명이 정확하지 않습니다. 다시 입력해주세요.");
+        }
+
     }
 
     // Menu Empty Check
@@ -1167,17 +1171,12 @@ public class Main {
             int roleChoice = sc.nextInt();
             sc.nextLine();
 
-            Role roleNum = Role.fromValue(roleChoice);
-            int role;
-            role = switch (roleNum) {
-                case ADMIN -> 1;
-                case SELLER -> 2;
-                case CUSTOMER -> 3;
-            };
-
-            // 관리자 모드
-            if (role == 1) {
-                if (userList.adminLogin() != null) {
+            Role role = Role.fromValue(roleChoice);
+            switch (role) {
+                // 관리자 모드
+                case ADMIN -> {
+                    if (userList.adminLogin() == null) {
+                    }
                     while (true) {
                         System.out.println();
                         System.out.println("안녕하세요 관리자님, 메뉴를 선택해주세요");
@@ -1227,12 +1226,12 @@ public class Main {
                             }
 
                             // 1-2. 등록 메뉴 확인 (Read)
-                            if (choice == 2) {
+                            else if (choice == 2) {
                                 menuList.menuListCheck();
                             }
 
                             // 1-3. 메뉴 수정
-                            if (choice == 3) {
+                            else if (choice == 3) {
                                 System.out.println("[메뉴 수정]");
                                 System.out.println("어떤 메뉴를 수정할까요?");
                                 menuList.menuListCheck();
@@ -1243,7 +1242,7 @@ public class Main {
                             }
 
                             // 1-4. 메뉴 삭제
-                            if (choice == 4) {
+                            else if (choice == 4) {
                                 System.out.println("[메뉴 목록]");
                                 menuList.menuListCheck();
 
@@ -1251,9 +1250,7 @@ public class Main {
                                 String 삭제할메뉴 = sc.nextLine();
                                 menuList.menuDelete(삭제할메뉴);
                                 System.out.println();
-                            }
-
-                            if (choice == 5) {
+                            } else if (choice == 5) {
                             }
 
 
@@ -1302,193 +1299,196 @@ public class Main {
                             break;
                         }
                     }
-                } else {
-                    break;
                 }
-            }
 
-            // 판매자 모드
-            else if (role == 2) {
-                while (true) {
-                    System.out.println("안녕하세요 사장님, 카페 주문 서비스입니다.");
-                    System.out.println("1. 주문 내역 확인");
-                    System.out.println("2. 추천 메뉴 등록 및 관리");
-                    System.out.println("3. 로그아웃");
-                    System.out.print("할 일을 선택해주세요 : ");
+                // 판매자 모드
+                case SELLER -> {
+                    if (userList.sellerLogin() == null) {
+                    }
+                    while (true) {
+                        System.out.println();
+                        System.out.println("안녕하세요 사장님, 카페 주문 서비스입니다.");
+                        System.out.println("1. 주문 내역 확인");
+                        System.out.println("2. 추천 메뉴 등록 및 관리");
+                        System.out.println("3. 로그아웃");
+                        System.out.print("할 일을 선택해주세요 : ");
 
-                    int menuSelect = sc.nextInt();
+                        int menuSelect = sc.nextInt();
+                        sc.nextLine();
+
+                        // 주문 내역 확인
+                        if (menuSelect == 1) {
+                            orderHistory.OrderCheck();
+                        }
+
+                        // 추천 메뉴 등록 및 관리
+                        else if (menuSelect == 2) {
+                            menuList.menuRecommend();
+                        }
+
+                        // 로그아웃
+                        else if (menuSelect == 3) {
+                            System.out.println("로그아웃이 완료되었습니다.");
+                            break;
+                        }
+                    }
+                }
+
+                // 구매자 모드
+                case CUSTOMER -> {
+                    System.out.println();
+                    System.out.println("메뉴를 선택해주세요.");
+                    System.out.println("1. 회원가입");
+                    System.out.println("2. 로그인");
+                    System.out.println("3. 뒤로가기");
+                    System.out.print(" : ");
+                    int customerFirstChoice = sc.nextInt();
                     sc.nextLine();
 
-                    // 주문 내역 확인
-                    if (menuSelect == 1) {
-                        orderHistory.OrderCheck();
+                    // 회원가입
+                    if (customerFirstChoice == 1) {
+                        userList.registerUser(UserRole.CUSTOMER, userList.customerList, "Customer.txt");
                     }
 
-                    // 추천 메뉴 등록 및 관리
-                    else if (menuSelect == 2) {
-                        menuList.menuRecommend();
-                    }
+                    // 로그인
+                    else if (customerFirstChoice == 2) {
+                        if (userList.customerLogin() != null) {
+                            while (true) {
+                                System.out.println();
+                                System.out.println("회원가입");
 
-                    // 로그아웃
-                    if (menuSelect == 3) {
-                        System.out.println("로그아웃이 완료되었습니다.");
-                        break;
-                    }
+                                System.out.println("안녕하세요 손님, 카페 주문 서비스입니다.");
+                                System.out.println("할 일을 선택해주세요.");
+                                System.out.println("1. 메뉴 선택");
+                                System.out.println("2. 주문 내역 확인 ");
+                                System.out.println("3. 오늘의 메뉴 확인");
+                                System.out.println("4. 나만의 메뉴 (찜)");
+                                System.out.println("5. 로그아웃");
+                                System.out.print(" : ");
 
+                                int cusChoice = sc.nextInt();
+                                sc.nextLine();
 
-                }
-            }
+                                // 2-1. 메뉴 선택
+                                if (cusChoice == 1) {
+                                    // 메뉴 안내
+                                    System.out.println("[전체 메뉴]");
+                                    if (menuList.menuIsEmpty()) {
+                                        System.out.println("등록된 메뉴가 없습니다. 메인 메뉴로 돌아갑니다.");
+                                        break;
+                                    } else {
+                                        menuList.menuListCheck();
+                                        System.out.printf("주문할 메뉴명을 정확히 입력해주세요 : ");
+                                        String 주문할메뉴 = sc.nextLine();
 
-            // 구매자 모드
-            else if (role == 3) {
-                System.out.println();
-                System.out.println("메뉴를 선택해주세요.");
-                System.out.println("1. 회원가입");
-                System.out.println("2. 로그인");
-                System.out.println("3. 뒤로가기");
-                System.out.print(" : ");
-                int customerFirstChoice = sc.nextInt();
-                sc.nextLine();
+                                        OrderMenu orderMenu = new OrderMenu();
+                                        orderMenu.tempSelect();
+                                        orderMenu.cupSelect();
+                                        orderMenu.optionSelect(주문할메뉴, menuList);
+                                        orderHistory.OrderHistoryAdd(orderMenu);
 
-                // 회원가입
-                if (customerFirstChoice == 1) {
-                    userList.registerUser(UserRole.CUSTOMER, userList.customerList, "Customer.txt");
-                }
+                                    }
+                                }
 
-                // 로그인
-                else if (customerFirstChoice == 2) {
-                    if (userList.customerLogin() != null) {
-                        while (true) {
-                            System.out.println();
-                            System.out.println("회원가입");
+                                // 2-2. 주문 메뉴 확인
+                                if (cusChoice == 2) {
+                                    orderHistory.OrderCheck();
+                                }
 
-                            System.out.println("안녕하세요 손님, 카페 주문 서비스입니다.");
-                            System.out.println("할 일을 선택해주세요.");
-                            System.out.println("1. 메뉴 선택");
-                            System.out.println("2. 주문 내역 확인 ");
-                            System.out.println("3. 오늘의 메뉴 확인");
-                            System.out.println("4. 나만의 메뉴 (찜)");
-                            System.out.println("5. 로그아웃");
-                            System.out.print(" : ");
+                                // 2-3. 오늘의 추천 메뉴 확인
+                                if (cusChoice == 3) {
+                                    menuList.menuRecommendRead();
+                                }
 
-                            int cusChoice = sc.nextInt();
-                            sc.nextLine();
+                                // 2-4. 나만의 메뉴
+                                if (cusChoice == 4) {
+                                    System.out.println("[나만의 메뉴]");
+                                    System.out.println("1. 나만의 메뉴 등록");
+                                    System.out.println("2. 나만의 메뉴 확인");
+                                    System.out.println("3. 나만의 메뉴 삭제");
+                                    System.out.print("원하는 기능을 선택해주세요 : ");
+                                    int choice = sc.nextInt();
 
-                            // 2-1. 메뉴 선택
-                            if (cusChoice == 1) {
-                                // 메뉴 안내
-                                System.out.println("[전체 메뉴]");
-                                if (menuList.menuIsEmpty()) {
-                                    System.out.println("등록된 메뉴가 없습니다. 메인 메뉴로 돌아갑니다.");
+                                    if (choice == 1) {
+                                        myMenu.CreateMyManu(menuList);
+                                    } else if (choice == 2) {
+                                        myMenu.ReadMyMenu();
+                                    } else if (choice == 3) {
+                                        myMenu.DeleteMyMenu();
+                                    }
+                                }
+
+                                // 2-5. 로그아웃
+                                if (cusChoice == 5) {
+                                    System.out.println("로그아웃이 완료되었습니다.");
                                     break;
-                                } else {
-                                    menuList.menuListCheck();
-                                    System.out.printf("주문할 메뉴명을 정확히 입력해주세요 : ");
-                                    String 주문할메뉴 = sc.nextLine();
-
-                                    OrderMenu orderMenu = new OrderMenu();
-                                    orderMenu.tempSelect();
-                                    orderMenu.cupSelect();
-                                    orderMenu.optionSelect(주문할메뉴, menuList);
-                                    orderHistory.OrderHistoryAdd(orderMenu);
-
                                 }
                             }
-
-                            // 2-2. 주문 메뉴 확인
-                            if (cusChoice == 2) {
-                                orderHistory.OrderCheck();
-                            }
-
-                            // 2-3. 오늘의 추천 메뉴 확인
-                            if (cusChoice == 3) {
-                                menuList.menuRecommendRead();
-                            }
-
-                            // 2-4. 나만의 메뉴
-                            if (cusChoice == 4) {
-                                System.out.println("[나만의 메뉴]");
-                                System.out.println("1. 나만의 메뉴 등록");
-                                System.out.println("2. 나만의 메뉴 확인");
-                                System.out.println("3. 나만의 메뉴 삭제");
-                                System.out.print("원하는 기능을 선택해주세요 : ");
-                                int choice = sc.nextInt();
-
-                                if (choice == 1) {
-                                    myMenu.CreateMyManu(menuList);
-                                } else if (choice == 2) {
-                                    myMenu.ReadMyMenu();
-                                } else if (choice == 3) {
-                                    myMenu.DeleteMyMenu();
-                                }
-                            }
-
-                            // 2-5. 로그아웃
-                            if (cusChoice == 5) {
-                                System.out.println("로그아웃이 완료되었습니다.");
-                                break;
-                            }
+                        } else {
+                            continue;
                         }
-                    } else {
+                    } else if (customerFirstChoice == 3) {
                         continue;
                     }
-                } else if (customerFirstChoice == 3) {
-                    continue;
+
+
                 }
 
+                // Case UNROLE
+                case UNROLE -> {
+                    System.out.println("정확한 번호를 입력해주세요.");
+                }
 
+                // 프로그램 종료
+                default -> {
+                    System.out.println("프로그램을 종료합니다.");
+                }
             }
 
-            // 프로그램 종료
-            else if (role == 4) {
-                System.out.println("프로그램을 종료합니다.");
-                break;
-            }
 
+//            System.out.println(Test.SIGNUP.getValue() + ". " + Test.SIGNUP.getMessage());
+//            System.out.println("2. 로그인");
+//            System.out.println("3. 프로그램 종료");
+//            System.out.print("메뉴를 선택해주세요 : ");
+//            int loginChoice = sc.nextInt();
+//            sc.nextLine();
 
-            System.out.println(Test.SIGNUP.getValue() + ". " + Test.SIGNUP.getMessage());
-            System.out.println("2. 로그인");
-            System.out.println("3. 프로그램 종료");
-            System.out.print("메뉴를 선택해주세요 : ");
-            int loginChoice = sc.nextInt();
-            sc.nextLine();
-
-            // switch 문으로 리팩토링 하기 동등비교( ==1,2,3)
-            Test test = Test.fromValue(loginChoice);
-            switch (test) {
-                case Test.SIGNUP:
-//                    userList.registerUser();
-                    continue;
-                case Test.LOGIN:
-//                    User 로그인한사용자 = userList.login();
-
-//                    role = switch (로그인한사용자.getRole()) {
-//                        case ADMIN -> 0;
-//                        case SELLER -> 1;
-//                        case CUSTOMER -> 2;
-//                    };
-
-//                    switch (로그인한사용자.getRole()) {
-//                        case UserRole.STORE_MANAGER:
-//                            role = 1;
-//                            break;
-//                        case UserRole.CUSTOMER:
-//                            role = 2;
-//                            break;
-//                    }
-
-//                    if (UserRole.STORE_MANAGER == 로그인한사용자.getRole()) { // 조건문이 서로 변경되어야 가독성이 증가함
-//                        role = 1;
-//                    } else if (UserRole.CUSTOMER == 로그인한사용자.getRole()) {
-//                        role = 2;
-//                    }
-                    break;
-                case Test.EXIT:
-                    System.out.println("프로그램이 종료되었습니다.");
-                    break;
-                default:
-                    assert true : "잘못된 입력";
-            }
+//            // switch 문으로 리팩토링 하기 동등비교( ==1,2,3)
+//            Test test = Test.fromValue(loginChoice);
+//            switch (test) {
+//                case Test.SIGNUP:
+////                    userList.registerUser();
+//                    continue;
+//                case Test.LOGIN:
+////                    User 로그인한사용자 = userList.login();
+//
+////                    role = switch (로그인한사용자.getRole()) {
+////                        case ADMIN -> 0;
+////                        case SELLER -> 1;
+////                        case CUSTOMER -> 2;
+////                    };
+//
+////                    switch (로그인한사용자.getRole()) {
+////                        case UserRole.STORE_MANAGER:
+////                            role = 1;
+////                            break;
+////                        case UserRole.CUSTOMER:
+////                            role = 2;
+////                            break;
+////                    }
+//
+////                    if (UserRole.STORE_MANAGER == 로그인한사용자.getRole()) { // 조건문이 서로 변경되어야 가독성이 증가함
+////                        role = 1;
+////                    } else if (UserRole.CUSTOMER == 로그인한사용자.getRole()) {
+////                        role = 2;
+////                    }
+//                    break;
+//                case Test.EXIT:
+//                    System.out.println("프로그램이 종료되었습니다.");
+//                    break;
+//                default:
+//                    assert true : "잘못된 입력";
+//            }
 
 
         }
