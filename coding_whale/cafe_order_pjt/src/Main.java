@@ -975,7 +975,6 @@ class MenuStatus {
                 '}';
     }
 
-
 }
 
 class MenuStatusList {
@@ -1012,6 +1011,20 @@ class MenuStatusList {
         }
         reader.close();
     }
+
+    public MenuStatus findMenuStatus(String sellerId, int menuId) {
+        for (int i = 0; i < menuStatuses.size(); i++) {
+            if (menuStatuses.get(i).getSellerId().equals(sellerId) && menuStatuses.get(i).getMenuId() == menuId) {
+                return menuStatuses.get(i);
+            }
+        }
+        return null;
+    }
+
+    public void updateStock(String sellerId, int menuId, int newStock) {
+
+    }
+
 }
 
 class OrderMenu {
