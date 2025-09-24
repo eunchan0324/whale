@@ -1059,7 +1059,15 @@ class MenuStatusList {
         return true;
     }
 
-    public void isAvailable(String sellerId, int menuId) {
+    public boolean isAvailable(String sellerId, int menuId) {
+        MenuStatus menuStatus = findMenuStatus(sellerId, menuId);
+
+        if (menuStatus == null) {
+            return false;
+        }
+
+        // 조건식이 true 또는 false를 반환
+        return menuStatus.getStock() > 0 && menuStatus.getStatus().equals("available");
 
     }
 
