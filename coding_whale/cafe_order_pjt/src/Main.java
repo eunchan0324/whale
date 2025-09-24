@@ -641,12 +641,14 @@ class Menu {
 // todo : 2. 인가 기능을 따로 뺄 수 있는지 확인해보기
 class MenuList {
     private final ArrayList<Menu> menus = new ArrayList<>();
+    private MenuStatusList menuStatusList;
 
-    public MenuList() throws IOException {
+    public MenuList(MenuStatusList menuStatusList) throws IOException {
+        this.menuStatusList = menuStatusList;
         loadMenuFile();
     }
 
-    // Create
+    // Menu Create
     public void menuCreate() throws IOException {
         Scanner sc = new Scanner(System.in);
 
@@ -682,9 +684,8 @@ class MenuList {
         System.out.println();
     }
 
-    // Read
+    // Menu Read - 관리자용
     public void menuListCheck() {
-
         // 메뉴가 아무것도 등록되지 않았다면
         if (menus.isEmpty()) {
             System.out.println("등록된 메뉴가 없습니다. 메인 메뉴로 돌아갑니다.");
@@ -699,10 +700,37 @@ class MenuList {
             }
             System.out.println();
         }
-
     }
 
-    // Update
+    // Read - 구매자+판매자용
+    public void menuListCheck(String sellerId) {
+
+        // 메뉴가 아무것도 등록되지 않았다면
+        if (menus.isEmpty()) {
+            System.out.println("등록된 메뉴가 없습니다. 메인 메뉴로 돌아갑니다.");
+            System.out.println();
+        }
+
+        // 메뉴가 1개 이상 등록되어있다면
+        else {
+            System.out.println("[현재 등록된 메뉴 목록]");
+            for (int i = 0; i < menus.size(); i++) {
+                Menu menu = menus.get(i);
+                int menuId = menu.getMenuId();
+
+                String menuInfo = menu.getMenuId() + ". " + menu.getMenuName() + " | " + menu.getMenuPrice() + "원";
+
+                if (!menuStatusList.isAvailable(sellerId, menuId)) {
+                  menuInfo += "(품절)";
+                }
+
+                System.out.println(menuInfo);
+            }
+            System.out.println();
+        }
+    }
+
+    // Menu Update
     public void menuEdit(String 수정할메뉴) throws IOException {
         Scanner sc = new Scanner(System.in);
         boolean checker = false;
@@ -768,7 +796,7 @@ class MenuList {
         }
     }
 
-    // Delete
+    // Menu Delete
     public void menuDelete(String 삭제할메뉴) throws IOException {
         boolean checker = false;
 
@@ -1038,8 +1066,9 @@ class MenuStatusList {
     /**
      * 지정된 메뉴의 재고를 1감소 시키는 메서드
      * 이 메서드를 호출하기 전에는 반드시 isAvailable()로 재고를 확인해야 함
+     *
      * @param sellerId 판매자 ID
-     * @param menuId 메뉴 ID
+     * @param menuId   메뉴 ID
      * @return 성공하면 ture, 메뉴를 찾지 못하면 false
      * @throws IOException
      */
@@ -1336,7 +1365,8 @@ public class Main {
         // 객체 생성 == MenuList의 인스턴스 menuList 생성
 
         UserList userList = new UserList();
-        MenuList menuList = new MenuList();
+        MenuStatusList menuStatusList = new MenuStatusList();
+        MenuList menuList = new MenuList(menuStatusList);
         OrderHistory orderHistory = new OrderHistory();
         MyMenu myMenu = new MyMenu();
 
@@ -1525,6 +1555,8 @@ public class Main {
                     else if (customerFirstChoice == 2) {
                         if (userList.customerLogin() != null) {
                             while (true) {
+                                String sellerId = "seller01";
+
                                 System.out.println();
                                 System.out.println("회원가입");
 
@@ -1548,16 +1580,29 @@ public class Main {
                                         System.out.println("등록된 메뉴가 없습니다. 메인 메뉴로 돌아갑니다.");
                                         break;
                                     } else {
-                                        menuList.menuListCheck();
-                                        System.out.printf("주문할 메뉴명을 정확히 입력해주세요 : ");
+                                        menuList.menuListCheck(sellerId);
+                                        System.out.print("주문할 메뉴명을 정확히 입력해주세요 : ");
                                         String 주문할메뉴 = sc.nextLine();
+                                        Menu targetMenu = menuList.findMenu(주문할메뉴);
 
-                                        OrderMenu orderMenu = new OrderMenu();
-                                        orderMenu.tempSelect();
-                                        orderMenu.cupSelect();
-                                        orderMenu.optionSelect(주문할메뉴, menuList);
-                                        orderHistory.OrderHistoryAdd(orderMenu);
+                                        if (targetMenu != null) {
+                                            // 재고 있을 때
+                                            if (menuStatusList.isAvailable(sellerId, targetMenu.getMenuId())) {
+                                                OrderMenu orderMenu = new OrderMenu();
+                                                orderMenu.tempSelect();
+                                                orderMenu.cupSelect();
+                                                orderMenu.optionSelect(주문할메뉴, menuList);
+                                                orderHistory.OrderHistoryAdd(orderMenu);
 
+                                                menuStatusList.decreaseStock(sellerId, targetMenu.getMenuId());
+                                            }
+                                            // 재고 없을 때
+                                            else {
+                                                System.out.println("죄송합니다. 선택하신 메뉴는 현재 주문할 수 없습니다.");
+                                            }
+                                        } else {
+                                            System.out.println("메뉴명을 잘못 입력하셨습니다. 다시 시도해주세요.");
+                                        }
                                     }
                                 }
 
