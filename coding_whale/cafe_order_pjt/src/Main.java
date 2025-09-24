@@ -994,7 +994,7 @@ class MenuStatusList {
         writer.close();
     }
 
-    public void loadMenuStatusFile() throws  IOException {
+    public void loadMenuStatusFile() throws IOException {
         Path menuFilePath = Constants.BASE_PATH.resolve("Menu_status.txt");
         BufferedReader reader = new BufferedReader(new FileReader(menuFilePath.toFile()));
 
@@ -1021,7 +1021,45 @@ class MenuStatusList {
         return null;
     }
 
-    public void updateStock(String sellerId, int menuId, int newStock) {
+    public void updateStock(String sellerId, int menuId, int newStock) throws IOException {
+
+        MenuStatus menuStatus = findMenuStatus(sellerId, menuId);
+
+        if (menuStatus == null) {
+            System.out.println("해당 메뉴의 재고 정보를 찾을 수 없습니다.");
+            return;
+        }
+
+        menuStatus.setStock(newStock);
+        saveMenuStatusFile();
+        System.out.println("재고가 성공적으로 업데이트되었습니다.");
+    }
+
+    /**
+     * 지정된 메뉴의 재고를 1감소 시키는 메서드
+     * 이 메서드를 호출하기 전에는 반드시 isAvailable()로 재고를 확인해야 함
+     * @param sellerId 판매자 ID
+     * @param menuId 메뉴 ID
+     * @return 성공하면 ture, 메뉴를 찾지 못하면 false
+     * @throws IOException
+     */
+    public boolean decreaseStock(String sellerId, int menuId) throws IOException {
+
+        MenuStatus menuStatus = findMenuStatus(sellerId, menuId);
+
+        if (menuStatus == null) {
+            System.out.println("시스템 오류 : 해당 메뉴의 재고 정보를 찾을 수 없습니다.");
+            return false;
+        }
+
+        int currentStock = menuStatus.getStock();
+        menuStatus.setStock(currentStock - 1);
+
+        saveMenuStatusFile();
+        return true;
+    }
+
+    public void isAvailable(String sellerId, int menuId) {
 
     }
 
