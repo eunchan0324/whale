@@ -64,6 +64,11 @@ enum MenuCategory {
     }
 }
 
+enum MenuSaleStatus {
+    AVAILABLE,
+    SOLD_OUT
+}
+
 enum OrderStatus {
     ORDER_PLACED, PREPARING, READY, COMPLETED
 }
@@ -977,10 +982,10 @@ class MenuList {
 class MenuStatus {
     private int menuId;
     private String sellerId;
-    private String status;
+    private MenuSaleStatus status;
     private int stock;
 
-    public MenuStatus(int menuId, String sellerId, String status, int stock) {
+    public MenuStatus(int menuId, String sellerId, MenuSaleStatus status, int stock) {
         this.menuId = menuId;
         this.sellerId = sellerId;
         this.status = status;
@@ -1003,11 +1008,11 @@ class MenuStatus {
         this.sellerId = sellerId;
     }
 
-    public String getStatus() {
+    public MenuSaleStatus getStatus() {
         return status;
     }
 
-    public void setStatus(String status) {
+    public void setStatus(MenuSaleStatus status) {
         this.status = status;
     }
 
@@ -1057,7 +1062,7 @@ class MenuStatusList {
             String[] parts = line.split(",");
             int menuId = Integer.parseInt(parts[0]);
             String sellerId = parts[1];
-            String status = parts[2];
+            MenuSaleStatus status = MenuSaleStatus.valueOf(parts[2]);
             int stock = Integer.parseInt(parts[3]);
 
             MenuStatus menuStatus = new MenuStatus(menuId, sellerId, status, stock);
@@ -1079,14 +1084,21 @@ class MenuStatusList {
 
         MenuStatus menuStatus = findMenuStatus(sellerId, menuId);
 
-        if (menuStatus == null) {
-            System.out.println("해당 메뉴의 재고 정보를 찾을 수 없습니다.");
-            return;
+        // 재고 정보가 있으면 : 기본 재고 정보 수정(update)
+        if (menuStatus != null) {
+            menuStatus.setStock(newStock);
+            System.out.println("재고가 성공적으로 업데이트되었습니다.");
         }
 
-        menuStatus.setStock(newStock);
-        saveMenuStatusFile();
-        System.out.println("재고가 성공적으로 업데이트되었습니다.");
+        // 재고 정보가 없으면 :
+        else {
+            MenuStatus newMenuStatus = new MenuStatus(menuId, sellerId, MenuSaleStatus.AVAILABLE, newStock);
+            menuStatuses.add(newMenuStatus);
+            System.out.println("새로운 메뉴의 재고가 등록되었습니다.");
+        }
+
+        saveMenuStatusFile(); // 파일 저장
+
     }
 
     /**
@@ -1122,7 +1134,7 @@ class MenuStatusList {
         }
 
         // 조건식이 true 또는 false를 반환
-        return menuStatus.getStock() > 0 && menuStatus.getStatus().equals("available");
+        return menuStatus.getStock() > 0 && menuStatus.getStatus() == MenuSaleStatus.AVAILABLE;
 
     }
 
@@ -1588,7 +1600,18 @@ public class Main {
 
                                         // 3-2. 재고 수량 변경
                                         else if (choice == 2) {
-                                            menuStatusList.updateStock();
+                                            System.out.println("[재고 수량 변경]");
+                                            menuList.showStockStatusForSeller(sellerId);
+
+                                            System.out.print("수정할 메뉴의 ID를 입력해주세요 : ");
+                                            int menuId = sc.nextInt();
+                                            sc.nextLine();
+
+                                            System.out.print("수정할 재고의 수량을 입력해주세요 : ");
+                                            int newStock = sc.nextInt();
+                                            sc.nextLine();
+
+                                            menuStatusList.updateStock(sellerId, menuId, newStock);
                                         }
 
                                         // 3-3. 판매 상태 변경
