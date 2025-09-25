@@ -1071,6 +1071,11 @@ class MenuStatusList {
         reader.close();
     }
 
+    public MenuStatusList() throws IOException {
+        loadMenuStatusFile();
+    }
+
+    // 판매자 id로 MenuStatus 객체 반환
     public MenuStatus findMenuStatus(String sellerId, int menuId) {
         for (int i = 0; i < menuStatuses.size(); i++) {
             if (menuStatuses.get(i).getSellerId().equals(sellerId) && menuStatuses.get(i).getMenuId() == menuId) {
@@ -1080,6 +1085,7 @@ class MenuStatusList {
         return null;
     }
 
+    // 재고 수량 변경
     public void updateStock(String sellerId, int menuId, int newStock) throws IOException {
 
         MenuStatus menuStatus = findMenuStatus(sellerId, menuId);
@@ -1100,6 +1106,27 @@ class MenuStatusList {
         saveMenuStatusFile(); // 파일 저장
 
     }
+
+    // 판매 상태 변경
+    public void updateStatus(String sellerId, int menuId, MenuSaleStatus newStatus) throws IOException {
+        MenuStatus menuStatus = findMenuStatus(sellerId, menuId);
+
+        // 판매 상태가 있다면 :
+        if (menuStatus != null) {
+            menuStatus.setStatus(newStatus);
+            System.out.println("메뉴 상태가 " + newStatus.name() + "(으)로 변경되었습니다.");
+        }
+
+        // 판매 상태가 없다면 (null) :
+        else {
+            MenuStatus newMenuStatus = new MenuStatus(menuId, sellerId, newStatus, 0); // 기본 재고 0으로 등록
+            menuStatuses.add((newMenuStatus));
+            System.out.println("새로운 메뉴의 상태가 " + newStatus.name() + "(으)로 등록되었습니다.");
+        }
+
+        saveMenuStatusFile(); // 파일 저장
+    }
+
 
     /**
      * 지정된 메뉴의 재고를 1감소 시키는 메서드
@@ -1616,6 +1643,34 @@ public class Main {
 
                                         // 3-3. 판매 상태 변경
                                         else if (choice == 3) {
+                                            System.out.println();
+                                            System.out.println("[판매 상태 변경]");
+                                            menuList.showStockStatusForSeller(sellerId);
+
+                                            System.out.print("수정할 메뉴의 ID를 입력해주세요 : ");
+                                            int menuId = sc.nextInt();
+                                            sc.nextLine();
+
+                                            System.out.print("수정할 메뉴의 상태를 입력해주세요");
+                                            System.out.println("1. 판매 가능 (AVAILABLE)");
+                                            System.out.println("2. 판매 중지 (SOLD_OUT)");
+                                            System.out.print(" : ");
+                                            int statusChoice = sc.nextInt();
+                                            sc.nextLine();
+
+                                            MenuSaleStatus newstatus = null;
+
+                                            if (statusChoice == 1) {
+                                                newstatus = MenuSaleStatus.AVAILABLE;
+                                            } else if (statusChoice == 2) {
+                                                newstatus = MenuSaleStatus.SOLD_OUT;
+                                            }
+
+                                            if (newstatus != null) {
+                                                menuStatusList.updateStatus(sellerId, menuId, newstatus);
+                                            } else {
+                                                System.out.println("번호를 잘못 입력하셨습니다. 이전 메뉴로 돌아갑니다.");
+                                            }
 
                                         }
 

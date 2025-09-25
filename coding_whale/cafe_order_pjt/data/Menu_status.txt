@@ -1,1 +1,2 @@
-1,dmscks1,null,50
+1,dmscks1,AVAILABLE,30
+2,dmscks1,AVAILABLE,0
