@@ -702,9 +702,8 @@ class MenuList {
         }
     }
 
-    // Read - 구매자+판매자용
+    // Menu Read - 구매자용
     public void menuListCheck(String sellerId) {
-
         // 메뉴가 아무것도 등록되지 않았다면
         if (menus.isEmpty()) {
             System.out.println("등록된 메뉴가 없습니다. 메인 메뉴로 돌아갑니다.");
@@ -721,7 +720,7 @@ class MenuList {
                 String menuInfo = menu.getMenuId() + ". " + menu.getMenuName() + " | " + menu.getMenuPrice() + "원";
 
                 if (!menuStatusList.isAvailable(sellerId, menuId)) {
-                  menuInfo += "(품절)";
+                    menuInfo += "(품절)";
                 }
 
                 System.out.println(menuInfo);
@@ -729,6 +728,33 @@ class MenuList {
             System.out.println();
         }
     }
+
+    // Menu Stock Read - 재고 확인 판매자용
+    public void showStockStatusForSeller(String sellerId) {
+        if (menus.isEmpty()) {
+            System.out.println("등록된 메뉴가 없습니다. 메인 메뉴로 돌아갑니다.");
+            System.out.println();
+        }
+
+        // 메뉴가 1개 이상 등록되어있다면
+        else {
+            System.out.println("\n[" + sellerId + "] 님 매장 재고 현황");
+            for (Menu menu : menus) {
+                MenuStatus status = menuStatusList.findMenuStatus(sellerId, menu.getMenuId());
+
+                if (status != null) {
+                    System.out.println(menu.getMenuId() + ". " + menu.getMenuName() +
+                            " | 재고 : " + status.getStock() +
+                            " | 상태 : " + status.getStatus());
+                } else {
+                    System.out.println(menu.getMenuId() + ". " + menu.getMenuName() +
+                            " | 재고 : (미등록) " +
+                            " | 상태 : (미등록)");
+                }
+            }
+        }
+    }
+
 
     // Menu Update
     public void menuEdit(String 수정할메뉴) throws IOException {
@@ -1504,35 +1530,96 @@ public class Main {
 
                 // 판매자 모드
                 case SELLER -> {
-                    if (userList.sellerLogin() == null) {
+                    System.out.println();
+                    System.out.println("메뉴를 선택해주세요.");
+                    System.out.println("1. 로그인");
+                    System.out.println("2. 뒤로가기");
+                    System.out.print(" : ");
+                    int sellerFirstChoice = sc.nextInt();
+                    sc.nextLine();
+
+                    // 로그인
+                    if (sellerFirstChoice == 1) {
+                        User loggendinSeller = userList.sellerLogin();
+                        if (loggendinSeller != null) {
+
+                            String sellerId = loggendinSeller.getId();
+
+                            while (true) {
+                                System.out.println();
+                                System.out.println("안녕하세요 " + sellerId + "님, 카페 주문 서비스입니다.");
+                                System.out.println("1. 주문 내역 확인");
+                                System.out.println("2. 추천 메뉴 등록 및 관리");
+                                System.out.println("3. 재고 관리");
+                                System.out.println("4. 로그아웃");
+                                System.out.print("할 일을 선택해주세요 : ");
+
+                                int menuSelect = sc.nextInt();
+                                sc.nextLine();
+
+                                // 1. 주문 내역 확인
+                                if (menuSelect == 1) {
+                                    orderHistory.OrderCheck();
+                                }
+
+                                // 2. 추천 메뉴 등록 및 관리
+                                else if (menuSelect == 2) {
+                                    menuList.menuRecommend();
+                                }
+
+                                // 3. 재고 관리
+                                else if (menuSelect == 3) {
+                                    while (true) {
+                                        System.out.println();
+                                        System.out.println("[재고 관리]");
+                                        System.out.println("1. 재고 현황 보기");
+                                        System.out.println("2. 재고 수량 변경");
+                                        System.out.println("3. 판매 상태 변경");
+                                        System.out.println("4. 뒤로 가기");
+                                        System.out.print(" : ");
+
+                                        int choice = sc.nextInt();
+                                        sc.nextLine();
+
+                                        // 3-1. 재고 현황 보기
+                                        if (choice == 1) {
+                                            menuList.showStockStatusForSeller(sellerId);
+                                        }
+
+                                        // 3-2. 재고 수량 변경
+                                        else if (choice == 2) {
+                                            menuStatusList.updateStock();
+                                        }
+
+                                        // 3-3. 판매 상태 변경
+                                        else if (choice == 3) {
+
+                                        }
+
+                                        // 3-4. 재고 관리 종료
+                                        else if (choice == 4) {
+                                            break;
+                                        } else {
+                                            System.out.println("잘못된 번호 입력");
+                                        }
+
+                                    }
+                                }
+
+                                // 4. 로그아웃
+                                else if (menuSelect == 4) {
+                                    System.out.println("로그아웃이 완료되었습니다.");
+                                    break;
+                                }
+                            }
+                        }
                     }
-                    while (true) {
-                        System.out.println();
-                        System.out.println("안녕하세요 사장님, 카페 주문 서비스입니다.");
-                        System.out.println("1. 주문 내역 확인");
-                        System.out.println("2. 추천 메뉴 등록 및 관리");
-                        System.out.println("3. 로그아웃");
-                        System.out.print("할 일을 선택해주세요 : ");
 
-                        int menuSelect = sc.nextInt();
-                        sc.nextLine();
-
-                        // 주문 내역 확인
-                        if (menuSelect == 1) {
-                            orderHistory.OrderCheck();
-                        }
-
-                        // 추천 메뉴 등록 및 관리
-                        else if (menuSelect == 2) {
-                            menuList.menuRecommend();
-                        }
-
-                        // 로그아웃
-                        else if (menuSelect == 3) {
-                            System.out.println("로그아웃이 완료되었습니다.");
-                            break;
-                        }
+                    // 뒤로가기
+                    else if (sellerFirstChoice == 2) {
                     }
+
+
                 }
 
                 // 구매자 모드
@@ -1555,6 +1642,7 @@ public class Main {
                     else if (customerFirstChoice == 2) {
                         if (userList.customerLogin() != null) {
                             while (true) {
+                                // todo : 하드코딩 리팩토링
                                 String sellerId = "seller01";
 
                                 System.out.println();
