@@ -1,8 +1,12 @@
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Scanner;
+import constant.Constants;
+// todo : User Menu Order 클래스 패키지로 빼기
 
 enum UserRole {
     ADMIN(1, "관리자"),
@@ -71,13 +75,6 @@ enum MenuSaleStatus {
 
 enum OrderStatus {
     ORDER_PLACED, PREPARING, READY, COMPLETED
-}
-
-// 상수 모음 클래스
-class Constants {
-    final static Path BASE_PATH = Paths.get("C:/Users/eunchan1/Desktop/whale/coding_whale/cafe_order_pjt/data");
-    // 다른 방법 (, 구분)
-//    final static Path BASE_PATH = Paths.get("C:", "Users", "eunchan1", "Desktop", "whale", "coding_whale", "250708_cafe_order_pjt/");
 }
 
 class User {
@@ -879,6 +876,7 @@ class MenuList {
         Path menuFilePath = Constants.BASE_PATH.resolve("Menus.txt");
         BufferedReader reader = new BufferedReader(new FileReader(menuFilePath.toFile()));
 
+        // todo : UU id로 변경
         int maxId = 0;
         String line;
         while ((line = reader.readLine()) != null) {
@@ -1071,6 +1069,7 @@ class MenuStatusList {
         reader.close();
     }
 
+    // 생성자 - loadMenuStatusFile()
     public MenuStatusList() throws IOException {
         loadMenuStatusFile();
     }
@@ -1153,6 +1152,7 @@ class MenuStatusList {
         return true;
     }
 
+    // 판매가 가능한 상황인지 확인 (재고0이상 / 상태 AVAILABLE)
     public boolean isAvailable(String sellerId, int menuId) {
         MenuStatus menuStatus = findMenuStatus(sellerId, menuId);
 
