@@ -1,12 +1,14 @@
+import constant.Constants;
+
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Path;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Scanner;
-import constant.Constants;
-// todo : User Menu Order 클래스 패키지로 빼기
+// todo : User Menu Order 클래스 패키지로 빼기 / 하나의 파일 안에 하나의 클래스를 넣는 것을 먼저.
 
 enum UserRole {
     ADMIN(1, "관리자"),
@@ -74,7 +76,10 @@ enum MenuSaleStatus {
 }
 
 enum OrderStatus {
-    ORDER_PLACED, PREPARING, READY, COMPLETED
+    ORDER_PLACED,
+    PREPARING,
+    READY,
+    COMPLETED
 }
 
 class User {
@@ -1167,7 +1172,65 @@ class MenuStatusList {
 
 }
 
-class OrderMenu {
+class Order {
+    private int orderId;
+    private String customerId;
+    private String sellerId;
+    private LocalDateTime orderTime;
+    private int totalPrice;
+    private OrderStatus status;
+    private final ArrayList<OrderItem> items = new ArrayList<>();
+
+    public Order(String customerId, String sellerId, int totalPrice, OrderStatus status, ArrayList<OrderItem> items) {
+        this.customerId = customerId;
+        this.sellerId = sellerId;
+        this.orderTime = LocalDateTime.now();
+        this.totalPrice = totalPrice;
+        this.status = status;
+        this.items.addAll(items);
+    }
+
+
+    public int getOrderId() {
+        return orderId;
+    }
+
+    public void setOrderId(int orderId) {
+        this.orderId = orderId;
+    }
+
+    public LocalDateTime getOrderTime() {
+        return orderTime;
+    }
+
+    public void setOrderTime(LocalDateTime orderTime) {
+        this.orderTime = orderTime;
+    }
+
+    public OrderStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(OrderStatus status) {
+        this.status = status;
+    }
+
+    public ArrayList<OrderItem> getItems() {
+        return items;
+    }
+
+    public int getTotalPrice() {
+        return totalPrice;
+    }
+
+    public void setTotalPrice(int totalPrice) {
+        this.totalPrice = totalPrice;
+    }
+
+
+}
+
+class OrderItem {
     private Menu menu;
     private int finalPrice;
     private String finalOptions;
@@ -1220,7 +1283,6 @@ class OrderMenu {
 
         this.finalCup = cup;
     }
-
 
     public void optionSelect(String 주문할메뉴, MenuList menuList) {
         this.menu = menuList.findMenu(주문할메뉴);
@@ -1285,40 +1347,58 @@ class OrderMenu {
 
         }
         System.out.println();
-        System.out.println("[최종 주문 내역 확인]");
+        System.out.println("[주문 내역 확인]");
         System.out.println("메뉴명 : " + menu.getMenuName());
         System.out.println("온도 : " + finalTemp);
         System.out.println("사이즈 : " + finalCup);
         System.out.println("옵션 : " + finalOptions);
-        System.out.println("최종 가격 : " + finalPrice + "원");
-        System.out.println("-------주문이 완료되었습니다. 잠시만 기다려주세요.------");
+        System.out.println("총 가격 : " + finalPrice + "원");
         System.out.println();
     }
 }
 
-class OrderHistory {
-    ArrayList<OrderMenu> orderHistory = new ArrayList<>();
+class OrderList {
+    private ArrayList<Order> orderList = new ArrayList<>();
+    private int nextOrderId = 1;
 
-    public void OrderHistoryAdd(OrderMenu orderMenu) {
-        this.orderHistory.add(orderMenu);
+
+    public void addOrder(Order order) {
+        order.setOrderId(nextOrderId);
+        this.orderList.add(order);
+        nextOrderId++;
     }
 
-    public void OrderCheck() {
-        if (orderHistory.isEmpty()) {
+    public void checkOrders() {
+        if (orderList.isEmpty()) {
             System.out.println("현재 주문 내역이 존재하지 않습니다.");
-            System.out.println();
-        } else {
-            System.out.println("[현재 주문 내역]");
-            for (int i = 0; i < orderHistory.size(); i++) {
-                System.out.println("-----주문 No." + (i + 1) + "-----");
-                System.out.println("메뉴 : " + orderHistory.get(i).getMenu().getMenuName());
-                System.out.println("온도 : " + orderHistory.get(i).getFinalTemp());
-                System.out.println("컵 : " + orderHistory.get(i).getFinalCup());
-                System.out.println("옵션 : " + orderHistory.get(i).getFinalOptions());
-                System.out.println("가격 : " + orderHistory.get(i).getFinalPrice() + "원");
-                System.out.println();
-            }
+            return;
         }
+
+
+        System.out.println("--- 전체 주문 내역 --- ");
+        // 1. 바깥쪽 루프 : 전체 주문(Order) 목록 순회
+        for (Order order : orderList) {
+            System.out.println("===================================");
+            System.out.println("주문 번호 : " + order.getOrderId());
+            System.out.println("주문 시간 : " + order.getOrderTime());
+            System.out.println("주문 상태 : " + order.getStatus());
+            System.out.println("--- 주문 메뉴 목록 ---");
+
+            // 2. 안쪽 루프 : 해당 주문(Order)에 포함된 메뉴(OrderItem) 목록 순회
+            for (OrderItem item : order.getItems()) {
+                System.out.println("- 메뉴 : " + item.getMenu().getMenuName() +
+                        " | 온도 : " + item.getFinalTemp() +
+                        " | 컵 : " + item.getFinalCup() +
+                        " | 옵션 : " + item.getFinalOptions());
+            }
+
+            System.out.println("-----------------------------------");
+            System.out.println("총 결제 금액 : " + order.getTotalPrice() + "원");
+            System.out.println("===================================");
+
+
+        }
+
     }
 }
 
@@ -1432,7 +1512,7 @@ public class Main {
         UserList userList = new UserList();
         MenuStatusList menuStatusList = new MenuStatusList();
         MenuList menuList = new MenuList(menuStatusList);
-        OrderHistory orderHistory = new OrderHistory();
+        OrderList orderList = new OrderList();
         MyMenu myMenu = new MyMenu();
 
         Scanner sc = new Scanner(System.in);
@@ -1598,7 +1678,7 @@ public class Main {
 
                                 // 1. 주문 내역 확인
                                 if (menuSelect == 1) {
-                                    orderHistory.OrderCheck();
+                                    orderList.checkOrders();
                                 }
 
                                 // 2. 추천 메뉴 등록 및 관리
@@ -1718,7 +1798,9 @@ public class Main {
 
                     // 로그인
                     else if (customerFirstChoice == 2) {
-                        if (userList.customerLogin() != null) {
+                        User loggedInCustomer = userList.customerLogin();
+                        // 로그인 성공
+                        if (loggedInCustomer != null) {
                             while (true) {
                                 // todo : 하드코딩 리팩토링
                                 String sellerId = "seller01";
@@ -1740,41 +1822,83 @@ public class Main {
 
                                 // 2-1. 메뉴 선택
                                 if (cusChoice == 1) {
-                                    // 메뉴 안내
-                                    System.out.println("[전체 메뉴]");
-                                    if (menuList.menuIsEmpty()) {
-                                        System.out.println("등록된 메뉴가 없습니다. 메인 메뉴로 돌아갑니다.");
-                                        break;
-                                    } else {
+                                    // 1. 장바구니 준비
+                                    ArrayList<OrderItem> cart = new ArrayList<>();
+
+                                    // 2. 메뉴 담기 루프
+                                    while (true) {
+                                        // 메뉴 없을 때
+                                        if (menuList.menuIsEmpty()) {
+                                            System.out.println("등록된 메뉴가 없습니다. 메인 메뉴로 돌아갑니다.");
+                                            break;
+                                        }
+
+                                        // 메뉴 있을 때
+                                        System.out.println("[전체 메뉴]");
                                         menuList.menuListCheck(sellerId);
-                                        System.out.print("주문할 메뉴명을 정확히 입력해주세요 : ");
-                                        String 주문할메뉴 = sc.nextLine();
-                                        Menu targetMenu = menuList.findMenu(주문할메뉴);
+                                        System.out.print("주문할 메뉴명을 정확히 입력해주세요 (주문 완료는 '완료' 입력) : ");
+                                        String userInput = sc.nextLine();
+
+                                        if (userInput.equals("완료")) {
+                                            if (cart.isEmpty()) {
+                                                System.out.println("장바구니가 비어있습니다. 주문을 종료합니다.");
+                                            } else {
+                                                System.out.println("주문을 시작합니다.");
+                                            }
+                                            break;
+                                        }
+
+                                        Menu targetMenu = menuList.findMenu(userInput);
 
                                         if (targetMenu != null) {
                                             // 재고 있을 때
                                             if (menuStatusList.isAvailable(sellerId, targetMenu.getMenuId())) {
-                                                OrderMenu orderMenu = new OrderMenu();
-                                                orderMenu.tempSelect();
-                                                orderMenu.cupSelect();
-                                                orderMenu.optionSelect(주문할메뉴, menuList);
-                                                orderHistory.OrderHistoryAdd(orderMenu);
+                                                OrderItem orderItem = new OrderItem();
+                                                orderItem.tempSelect();
+                                                orderItem.cupSelect();
+                                                orderItem.optionSelect(userInput, menuList);
 
-                                                menuStatusList.decreaseStock(sellerId, targetMenu.getMenuId());
+                                                cart.add(orderItem); // 장바구니에 추가
+                                                System.out.println(targetMenu.getMenuName() + "(이)가 장바구니에 담겼습니다.");
                                             }
                                             // 재고 없을 때
                                             else {
-                                                System.out.println("죄송합니다. 선택하신 메뉴는 현재 주문할 수 없습니다.");
+                                                System.out.println("죄송합니다. 선택하신 메뉴는 현재 품절입니다..");
                                             }
                                         } else {
                                             System.out.println("메뉴명을 잘못 입력하셨습니다. 다시 시도해주세요.");
                                         }
+                                        System.out.println("--- 현재 장바구니 : " + cart.size() + "개 ---");
                                     }
+
+                                    // 3. 주문 처리 (루프가 끝난 후)
+                                    if (!cart.isEmpty()) {
+                                        // 3-1. 총액 계산 및 Order 객체 생성
+                                        int totalPirce = 0;
+                                        for (OrderItem item : cart) {
+                                            totalPirce += item.getFinalPrice(); //
+                                        }
+
+                                        Order finalOrder = new Order(loggedInCustomer.getId(), sellerId, totalPirce, OrderStatus.ORDER_PLACED, cart);
+
+                                        // 3-2. 주문 내역에 '최종 주문서 추가'
+                                        orderList.addOrder(finalOrder);
+
+                                        // 3-3. 재고 감소
+                                        for (OrderItem item : cart) {
+                                            menuStatusList.decreaseStock(sellerId, item.getMenu().getMenuId());
+                                        }
+
+                                        System.out.println("주문이 완료되었습니다. 주문 번호 : " + finalOrder.getOrderId());
+
+                                    }
+
+
                                 }
 
                                 // 2-2. 주문 메뉴 확인
                                 if (cusChoice == 2) {
-                                    orderHistory.OrderCheck();
+                                    orderList.checkOrders();
                                 }
 
                                 // 2-3. 오늘의 추천 메뉴 확인
@@ -1806,11 +1930,13 @@ public class Main {
                                     break;
                                 }
                             }
-                        } else {
-                            continue;
+                        }
+
+                        // 로그인 실패
+                        else {
+                            System.out.println("로그인에 실패했습니다.");
                         }
                     } else if (customerFirstChoice == 3) {
-                        continue;
                     }
 
 
