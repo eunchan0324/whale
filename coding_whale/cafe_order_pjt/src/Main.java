@@ -1199,6 +1199,22 @@ class Order {
         this.orderId = orderId;
     }
 
+    public String getCustomerId() {
+        return customerId;
+    }
+
+    public void setCustomerId(String customerId) {
+        this.customerId = customerId;
+    }
+
+    public String getSellerId() {
+        return sellerId;
+    }
+
+    public void setSellerId(String sellerId) {
+        this.sellerId = sellerId;
+    }
+
     public LocalDateTime getOrderTime() {
         return orderTime;
     }
@@ -1226,7 +1242,6 @@ class Order {
     public void setTotalPrice(int totalPrice) {
         this.totalPrice = totalPrice;
     }
-
 
 }
 
@@ -1361,11 +1376,44 @@ class OrderList {
     private ArrayList<Order> orderList = new ArrayList<>();
     private int nextOrderId = 1;
 
-
-    public void addOrder(Order order) {
+    public void addOrder(Order order) throws IOException {
         order.setOrderId(nextOrderId);
         this.orderList.add(order);
         nextOrderId++;
+        saveOrderFile();
+
+    }
+
+    public void saveOrderFile() throws IOException {
+        Path orderFilePath = Constants.BASE_PATH.resolve("Order.txt");
+        FileWriter orderWriter = new FileWriter(orderFilePath.toFile());
+
+        for (int i = 0; i < orderList.size(); i++) {
+            Order order = orderList.get(i);
+            orderWriter.write(order.getOrderId() + "," +
+                    order.getCustomerId() + "," +
+                    order.getSellerId() + "," +
+                    order.getOrderTime() + "," +
+                    order.getTotalPrice() + "," +
+                    order.getStatus());
+        }
+        orderWriter.close();
+
+
+        Path orderItemsFilePath = Constants.BASE_PATH.resolve("Order_items.txt");
+        FileWriter orderItemsWriter = new FileWriter(orderItemsFilePath.toFile());
+
+        for (Order order : orderList) {
+            for (OrderItem item : order.getItems()) {
+                orderItemsWriter.write(order.getOrderId() + "," +
+                        item.getMenu().getMenuId() + "," +
+                        item.getFinalPrice() + "," +
+                        item.getFinalTemp() + "," +
+                        item.getFinalCup() + "," +
+                        item.getFinalOptions() + "\n");
+            }
+        }
+        orderItemsWriter.close();
     }
 
     public void checkOrders() {
