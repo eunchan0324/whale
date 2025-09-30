@@ -5,8 +5,11 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Path;
+import java.sql.SQLOutput;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Scanner;
 // todo : User Menu Order 클래스 패키지로 빼기 / 하나의 파일 안에 하나의 클래스를 넣는 것을 먼저.
 
@@ -573,21 +576,21 @@ class Menu {
     private int menuId;
     private String menuName;
     private int menuPrice;
-    private String menuOption;
+    private MenuCategory menuOption;
     private String menuRecommend;
 
 
     public Menu() {
     }
 
-    public Menu(String menuName, int menuPrice, String menuOption) {
+    public Menu(String menuName, int menuPrice, MenuCategory menuOption) {
         this.menuId = nextId++;
         this.menuName = menuName;
         this.menuPrice = menuPrice;
         this.menuOption = menuOption;
     }
 
-    public Menu(int menuId, String menuName, int menuPrice, String menuOption) {
+    public Menu(int menuId, String menuName, int menuPrice, MenuCategory menuOption) {
         this.menuId = menuId;
         this.menuName = menuName;
         this.menuPrice = menuPrice;
@@ -622,11 +625,11 @@ class Menu {
         this.menuPrice = menuPrice;
     }
 
-    public String getMenuOption() {
+    public MenuCategory getMenuOption() {
         return menuOption;
     }
 
-    public void setMenuOption(String menuOption) {
+    public void setMenuOption(MenuCategory menuOption) {
         this.menuOption = menuOption;
     }
 
@@ -679,7 +682,7 @@ class MenuList {
             System.out.println("잘못된 번호입니다.");
             return;
         }
-        Menu menu = new Menu(menuName, menuPrice, menuOption.name());
+        Menu menu = new Menu(menuName, menuPrice, menuOption);
         menus.add(menu);
 
         Path menuFilePath = Constants.BASE_PATH.resolve("Menus.txt");
@@ -802,9 +805,11 @@ class MenuList {
                     System.out.println("옵션은 다음과 같습니다");
                     System.out.println("  1. 커피류(coffee)\n" + "  2. 라떼류(latte)\n" + "  3. 차류(tea)");
                     System.out.print("수정할 옵션을 입력해주세요 (숫자만) : ");
-                    String 수정할옵션 = sc.nextLine();
+                    int 수정할옵션 = sc.nextInt();
+                    sc.nextLine();
 
-                    menus.get(i).setMenuOption(수정할옵션);
+                    MenuCategory menuOption = MenuCategory.fromValue(수정할옵션);
+                    menus.get(i).setMenuOption(menuOption);
                     System.out.println("메뉴 옵션이 수정되었습니다.");
                     System.out.println();
                 }
@@ -889,7 +894,7 @@ class MenuList {
             int id = Integer.parseInt(parts[0]);
             String name = parts[1];
             int price = Integer.parseInt(parts[2]);
-            String option = parts[3];
+            MenuCategory option = MenuCategory.valueOf(parts[3]);
 
             Menu menu = new Menu(id, name, price, option);
             menus.add(menu);
@@ -979,6 +984,16 @@ class MenuList {
             System.out.println("- 오늘의 추천 메뉴가 없습니다.");
             System.out.println();
         }
+    }
+
+    // menuId로 해당 객체 반환하기
+    public Menu getMenuById(int menuId) {
+        for (Menu menu : menus) {
+            if (menu.getMenuId() == menuId) {
+                return menu;
+            }
+        }
+        return null;
     }
 }
 
@@ -1190,6 +1205,15 @@ class Order {
         this.items.addAll(items);
     }
 
+    public Order(int orderId, String customerId, String sellerId, LocalDateTime orderTime, int totalPrice, OrderStatus status) {
+        this.orderId = orderId;
+        this.customerId = customerId;
+        this.sellerId = sellerId;
+        this.orderTime = orderTime;
+        this.totalPrice = totalPrice;
+        this.status = status;
+    }
+
 
     public int getOrderId() {
         return orderId;
@@ -1252,6 +1276,19 @@ class OrderItem {
     private String finalCup;
     private String finalTemp;
 
+    public OrderItem(Menu menu) {
+        this.menu = menu;
+    }
+
+    public OrderItem(Menu menu, int finalPrice, String finalOptions, String finalCup, String finalTemp) {
+        this.menu = menu;
+        this.finalPrice = finalPrice;
+        this.finalOptions = finalOptions;
+        this.finalCup = finalCup;
+        this.finalTemp = finalTemp;
+    }
+
+
     public Menu getMenu() {
         return menu;
     }
@@ -1304,7 +1341,7 @@ class OrderItem {
 
         Scanner sc = new Scanner(System.in);
 
-        if (menuList.findMenu(주문할메뉴).getMenuOption().equals("1")) {
+        if (menu.getMenuOption() == MenuCategory.COFFEE) {
 
             System.out.println("샷 옵션을 선택해주세요");
             System.out.println("1.기본(2샷) " + System.lineSeparator() + "2.연하게(1샷)" + System.lineSeparator() + "3.샷추가(3샷) + 500원" + System.lineSeparator() + "4.디카페인 + 1000원");
@@ -1326,7 +1363,7 @@ class OrderItem {
                 this.finalPrice += menuList.findMenu(주문할메뉴).getMenuPrice() + 1000;
                 this.finalOptions = "디카페인";
             }
-        } else if (menuList.findMenu(주문할메뉴).getMenuOption().equals("2")) {
+        } else if (menu.getMenuOption() == MenuCategory.LATTE) {
             System.out.println("우유 옵션을 선택해주세요");
             System.out.println("1. 일반 우유");
             System.out.println("2. 오트(귀리) + 1000원");
@@ -1342,7 +1379,7 @@ class OrderItem {
                 this.finalPrice += menuList.findMenu(주문할메뉴).getMenuPrice() + 1000;
                 this.finalOptions = "오트(귀리)";
             }
-        } else if (menuList.findMenu((주문할메뉴)).getMenuOption().equals("3")) {
+        } else if (menu.getMenuOption() == MenuCategory.TEA) {
             System.out.println("물 양은 선택해주세요");
             System.out.println("1. 보통");
             System.out.println("2. 적게");
@@ -1375,6 +1412,16 @@ class OrderItem {
 class OrderList {
     private ArrayList<Order> orderList = new ArrayList<>();
     private int nextOrderId = 1;
+    private MenuList menuList;
+
+    public OrderList(MenuList menuList) throws IOException {
+        this.menuList = menuList;
+        loadOrderFile();
+    }
+
+    public void setNextOrderId(int nextOrderId) {
+        this.nextOrderId = nextOrderId;
+    }
 
     public void addOrder(Order order) throws IOException {
         order.setOrderId(nextOrderId);
@@ -1385,7 +1432,7 @@ class OrderList {
     }
 
     public void saveOrderFile() throws IOException {
-        Path orderFilePath = Constants.BASE_PATH.resolve("Order.txt");
+        Path orderFilePath = Constants.BASE_PATH.resolve("Orders.txt");
         FileWriter orderWriter = new FileWriter(orderFilePath.toFile());
 
         for (int i = 0; i < orderList.size(); i++) {
@@ -1395,7 +1442,7 @@ class OrderList {
                     order.getSellerId() + "," +
                     order.getOrderTime() + "," +
                     order.getTotalPrice() + "," +
-                    order.getStatus());
+                    order.getStatus() + "\n");
         }
         orderWriter.close();
 
@@ -1414,6 +1461,68 @@ class OrderList {
             }
         }
         orderItemsWriter.close();
+    }
+
+    public void loadOrderFile() throws IOException {
+        Path orderFilePath = Constants.BASE_PATH.resolve("Orders.txt");
+        BufferedReader orderReader = new BufferedReader((new FileReader(orderFilePath.toFile())));
+
+        Map<Integer, Order> ordersMap = new HashMap<>();
+        String line;
+        int maxId = 0;
+
+        while ((line = orderReader.readLine()) != null) {
+            String[] parts = line.split(",");
+            int orderId = Integer.parseInt(parts[0]);
+            String customerId = parts[1];
+            String sellerId = parts[2];
+            LocalDateTime orderTime = LocalDateTime.parse(parts[3]);
+            int totalPrice = Integer.parseInt(parts[4]);
+            OrderStatus status = OrderStatus.valueOf(parts[5]);
+
+            // 임시 객체 생성자
+            Order order = new Order(orderId, customerId, sellerId, orderTime, totalPrice, status);
+            ordersMap.put(orderId, order);
+
+            maxId = Math.max(maxId, orderId);
+        }
+        orderReader.close();
+        setNextOrderId(maxId + 1);
+
+        Path orderItemsFilePath = Constants.BASE_PATH.resolve("Order_items.txt");
+        BufferedReader orderItemsReader = new BufferedReader((new FileReader(orderItemsFilePath.toFile())));
+
+
+        while ((line = orderItemsReader.readLine()) != null) {
+            String[] parts = line.split((","));
+            int orderId = Integer.parseInt(parts[0]);
+            int menuId = Integer.parseInt(parts[1]);
+            int price = Integer.parseInt(parts[2]);
+            String temp = parts[3];
+            String cup = parts[4];
+            String options = parts[5];
+
+            // 1. 올바른 order 찾기
+            Order order = ordersMap.get(orderId);
+
+            // 안전장치
+            if (order == null) {
+                // 해당하는 주문이 없으면 건너뛰기
+                continue;
+            }
+
+            //2. OrderItem 생성
+            Menu menu = menuList.getMenuById(menuId); // menuId로 menu 객체 찾기
+            OrderItem orderItem = new OrderItem(menu, price, temp, cup, options);
+
+            // 3. Order에 OrderItem 추가
+            order.getItems().add(orderItem);
+
+        }
+        orderItemsReader.close();
+
+        // 모든 로딩이 끝난 후, Map의 모든 Order 객체를 실제 orderList에 추가
+        orderList.addAll(ordersMap.values());
     }
 
     public void checkOrders() {
@@ -1560,7 +1669,7 @@ public class Main {
         UserList userList = new UserList();
         MenuStatusList menuStatusList = new MenuStatusList();
         MenuList menuList = new MenuList(menuStatusList);
-        OrderList orderList = new OrderList();
+        OrderList orderList = new OrderList(menuList);
         MyMenu myMenu = new MyMenu();
 
         Scanner sc = new Scanner(System.in);
@@ -1851,7 +1960,7 @@ public class Main {
                         if (loggedInCustomer != null) {
                             while (true) {
                                 // todo : 하드코딩 리팩토링
-                                String sellerId = "seller01";
+                                String sellerId = "dmscks1";
 
                                 System.out.println();
                                 System.out.println("회원가입");
@@ -1901,7 +2010,7 @@ public class Main {
                                         if (targetMenu != null) {
                                             // 재고 있을 때
                                             if (menuStatusList.isAvailable(sellerId, targetMenu.getMenuId())) {
-                                                OrderItem orderItem = new OrderItem();
+                                                OrderItem orderItem = new OrderItem(targetMenu);
                                                 orderItem.tempSelect();
                                                 orderItem.cupSelect();
                                                 orderItem.optionSelect(userInput, menuList);
@@ -1917,6 +2026,7 @@ public class Main {
                                             System.out.println("메뉴명을 잘못 입력하셨습니다. 다시 시도해주세요.");
                                         }
                                         System.out.println("--- 현재 장바구니 : " + cart.size() + "개 ---");
+                                        System.out.println();
                                     }
 
                                     // 3. 주문 처리 (루프가 끝난 후)
