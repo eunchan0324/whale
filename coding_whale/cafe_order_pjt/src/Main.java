@@ -79,10 +79,29 @@ enum MenuSaleStatus {
 }
 
 enum OrderStatus {
-    ORDER_PLACED,
-    PREPARING,
-    READY,
-    COMPLETED
+    ORDER_PLACED(0),
+    PREPARING(1),
+    READY(2),
+    COMPLETED(3);
+
+    private final int value;
+
+    OrderStatus(int value) {
+        this.value = value;
+    }
+
+    public int getValue() {
+        return value;
+    }
+
+    public static OrderStatus fromValue(int value) {
+        for (OrderStatus status : OrderStatus.values()) {
+            if (status.getValue() == value) {
+                return status;
+            }
+        }
+        return null;
+    }
 }
 
 class User {
@@ -1467,6 +1486,7 @@ class OrderList {
         Path orderFilePath = Constants.BASE_PATH.resolve("Orders.txt");
         BufferedReader orderReader = new BufferedReader((new FileReader(orderFilePath.toFile())));
 
+        // 임시 보관소
         Map<Integer, Order> ordersMap = new HashMap<>();
         String line;
         int maxId = 0;
@@ -1502,21 +1522,21 @@ class OrderList {
             String cup = parts[4];
             String options = parts[5];
 
-            // 1. 올바른 order 찾기
-            Order order = ordersMap.get(orderId);
+            // 1. orderId로 Map 임시 보관소에서 targetOrder 찾기
+            Order targetOrder = ordersMap.get(orderId);
 
             // 안전장치
-            if (order == null) {
+            if (targetOrder == null) {
                 // 해당하는 주문이 없으면 건너뛰기
                 continue;
             }
 
             //2. OrderItem 생성
             Menu menu = menuList.getMenuById(menuId); // menuId로 menu 객체 찾기
-            OrderItem orderItem = new OrderItem(menu, price, temp, cup, options);
+            OrderItem item = new OrderItem(menu, price, temp, cup, options);
 
             // 3. Order에 OrderItem 추가
-            order.getItems().add(orderItem);
+            targetOrder.getItems().add(item);
 
         }
         orderItemsReader.close();
@@ -1552,11 +1572,139 @@ class OrderList {
             System.out.println("-----------------------------------");
             System.out.println("총 결제 금액 : " + order.getTotalPrice() + "원");
             System.out.println("===================================");
+            System.out.println();
 
 
         }
 
     }
+
+    public void showPendingOrders() {
+
+        if (orderList.isEmpty()) {
+            System.out.println("현재 주문 내역이 존재하지 않습니다.");
+            return;
+        }
+
+        System.out.println();
+        System.out.println("--- 주문 상태 변경 가능 내역 ---");
+        for (Order order : orderList) {
+            // 주문 완료가 아닌 것들만
+            if (order.getStatus() != OrderStatus.COMPLETED) {
+                System.out.println("===================================");
+                System.out.println("주문 번호 : " + order.getOrderId());
+                System.out.println("주문 시간 : " + order.getOrderTime());
+                System.out.println("주문 상태 : " + order.getStatus());
+                System.out.println();
+                System.out.println("--- 주문 메뉴 목록 ---");
+
+                // 2. 안쪽 루프 : 해당 주문(Order)에 포함된 메뉴(OrderItem) 목록 순회
+                for (OrderItem item : order.getItems()) {
+                    System.out.println("- 메뉴 : " + item.getMenu().getMenuName() +
+                            " | 온도 : " + item.getFinalTemp() +
+                            " | 컵 : " + item.getFinalCup() +
+                            " | 옵션 : " + item.getFinalOptions());
+                }
+
+                System.out.println("-----------------------------------");
+                System.out.println("총 결제 금액 : " + order.getTotalPrice() + "원");
+                System.out.println("===================================");
+                System.out.println();
+            }
+        }
+    }
+
+    public void updateOrderStatus() throws IOException {
+        Scanner sc = new Scanner(System.in);
+
+        ArrayList<Order> availableOrderList = new ArrayList<>();
+        for (Order order : orderList) {
+            if (order.getStatus() != OrderStatus.COMPLETED) {
+                availableOrderList.add(order);
+            }
+        }
+
+        // 상태 변경 가능한 주문이 없을 때
+        if (availableOrderList.isEmpty()) {
+            System.out.println("현재 상태 변경이 가능한 주문이 없습니다.");
+            return;
+        }
+
+        // targetOrder 초기화
+        Order targetOrder = null;
+
+        // 주문 ID 입력받기 및 유효 검사
+        while (true) {
+            System.out.print("상태를 변경할 주문 ID를 입력하세요 : ");
+            int orderIdInput = sc.nextInt();
+            sc.nextLine();
+
+            for (Order order : availableOrderList) {
+                if (orderIdInput == order.getOrderId()) {
+                    targetOrder = order;
+                    break;
+                }
+            }
+
+            if (targetOrder != null) {
+                break;
+            } else {
+                System.out.println("유효하지 않은 주문 ID입니다. 다시 입력해주세요.");
+            }
+        }
+
+        System.out.println(targetOrder.getOrderId() + "번 주문의 상태를 변경합니다.");
+
+        switch (targetOrder.getStatus()) {
+            case ORDER_PLACED -> {
+                System.out.println("1. 준비중 (PREPARING)");
+                System.out.println("2. 준비완료/픽업대기 (READY)");
+                System.out.println("3. 픽업완료 (COMPLETED)");
+            }
+            case PREPARING -> {
+                System.out.println("2. 준비완료/픽업대기 (READY)");
+                System.out.println("3. 픽업완료 (COMPLETED)");
+            }
+            case READY -> {
+                System.out.println("3. 픽업완료 (COMPLETED)");
+            }
+        }
+
+        System.out.print("변경하고 싶은 상태의 번호를 입력해주세요 : ");
+        int changeStatue = sc.nextInt();
+        sc.nextLine();
+
+
+        switch (targetOrder.getStatus()) {
+            case ORDER_PLACED -> {
+                if (changeStatue == 1) {
+                    targetOrder.setStatus(OrderStatus.PREPARING);
+                } else if (changeStatue == 2) {
+                    targetOrder.setStatus((OrderStatus.READY));
+                } else if (changeStatue == 3) {
+                    targetOrder.setStatus(OrderStatus.COMPLETED);
+                }
+            }
+            case PREPARING -> {
+                if (changeStatue == 2) {
+                    targetOrder.setStatus((OrderStatus.READY));
+                } else if (changeStatue == 3) {
+                    targetOrder.setStatus(OrderStatus.COMPLETED);
+                }
+            }
+            case READY -> {
+                if (changeStatue == 3) {
+                    targetOrder.setStatus(OrderStatus.COMPLETED);
+                }
+            }
+        }
+
+        System.out.println(targetOrder.getOrderId() + "번 주문의 상태 변경이 완료되었습니다.");
+        saveOrderFile();
+        System.out.println();
+
+    }
+
 }
 
 class MyMenu {
@@ -1564,7 +1712,7 @@ class MyMenu {
     Scanner sc = new Scanner(System.in);
 
     // 나만의 메뉴 등록하기
-    public void CreateMyManu(MenuList menuList) throws IOException {
+    public void CreateMyManu(MenuList menuList) {
         boolean hasMyMenu = false;
         System.out.println();
         System.out.println("[나만의 메뉴 등록하기]");
@@ -1824,7 +1972,7 @@ public class Main {
                             while (true) {
                                 System.out.println();
                                 System.out.println("안녕하세요 " + sellerId + "님, 카페 주문 서비스입니다.");
-                                System.out.println("1. 주문 내역 확인");
+                                System.out.println("1. 주문 관리");
                                 System.out.println("2. 추천 메뉴 등록 및 관리");
                                 System.out.println("3. 재고 관리");
                                 System.out.println("4. 로그아웃");
@@ -1832,10 +1980,34 @@ public class Main {
 
                                 int menuSelect = sc.nextInt();
                                 sc.nextLine();
+                                System.out.println();
 
-                                // 1. 주문 내역 확인
+                                // 1. 주문 관리
                                 if (menuSelect == 1) {
-                                    orderList.checkOrders();
+                                    System.out.println("[주문 관리]");
+                                    System.out.println("1. 주문 목록 변경");
+                                    System.out.println("2. 주문 상태 변경");
+                                    System.out.println("3. 뒤로가기");
+                                    System.out.print(" : ");
+                                    int orderMenuChoice = sc.nextInt();
+                                    sc.nextLine();
+
+                                    // 1-1. 주문 목록 변경
+                                    if (orderMenuChoice == 1) {
+                                        orderList.checkOrders();
+                                    }
+
+                                    // 1-2. 주문 상태 변경
+                                    else if (orderMenuChoice == 2) {
+                                        orderList.showPendingOrders();
+                                        orderList.updateOrderStatus();
+                                    }
+
+                                    // 1-3. 뒤로가기
+                                    else if (orderMenuChoice == 3) {
+
+                                    }
+
                                 }
 
                                 // 2. 추천 메뉴 등록 및 관리

@@ -1,4 +1,4 @@
-1,1,4000,샷추가(3샷),Grande,HOT
-1,3,4500,물 양 적게,Venti,ICED
-2,2,5500,오트(귀리),Grande,HOT
-3,1,3500,ICED,Tall,샷추가(3샷)
+1,1,4000,HOT,Grande,샷추가(3샷)
+1,3,4500,ICED,Venti,물 양 적게
+2,2,5500,HOT,Grande,오트(귀리)
+3,1,3500,샷추가(3샷),Tall,ICED
