@@ -783,7 +783,6 @@ class MenuList {
         }
     }
 
-
     // Menu Update
     public void menuEdit(String 수정할메뉴) throws IOException {
         Scanner sc = new Scanner(System.in);
@@ -1013,6 +1012,20 @@ class MenuList {
         }
         return null;
     }
+
+    // 판매자 : 판매 메뉴 전체 read
+    public void showManageableMenuList(String sellerId) {
+        System.out.println("[판매 메뉴 관리]");
+        System.out.println("------------------------------");
+
+        for (Menu menu : menus) {
+            MenuStatus status = menuStatusList.findMenuStatus(sellerId, menu.getMenuId());
+            String statusText = (status != null) ? "[판매중]" : "[미판매]";
+
+            System.out.println(menu.getMenuId() + ". " + menu.getMenuName() + " - " + statusText);
+        }
+        System.out.println("------------------------------");
+    }
 }
 
 class MenuStatus {
@@ -1201,6 +1214,41 @@ class MenuStatusList {
         // 조건식이 true 또는 false를 반환
         return menuStatus.getStock() > 0 && menuStatus.getStatus() == MenuSaleStatus.AVAILABLE;
 
+    }
+
+    // 판매 메뉴 등록
+    public void registerMenuForSale(String sellerId, int menuId) throws IOException {
+        // 1. 이미 등록된 메뉴인지 먼저 확인
+        if (findMenuStatus(sellerId, menuId) != null) {
+            System.out.println("이미 판매 목록에 등록된 메뉴입니다.");
+            return;
+        }
+
+        // 2. 등록되지 않은 메뉴라면, 새로운 MenuStatus 객체 생성
+        // 초기 재고는 0개, 판매 상태는 AVAILABLE
+        MenuStatus newMenuStatus = new MenuStatus(menuId, sellerId, MenuSaleStatus.AVAILABLE, 0);
+
+        // 3. 리스트에 추가
+        menuStatuses.add(newMenuStatus);
+
+        // 4. 파일에 저장
+        saveMenuStatusFile();
+        System.out.println("성공적으로 판매 메뉴에 등록되었습니다. 재고 관리를 통해 수량을 조절해주세요.");
+    }
+
+    // 판매 메뉴 삭제
+    public void removeMenuForSale(String sellerId, int menuId) throws IOException {
+        MenuStatus targetMenuState = findMenuStatus(sellerId, menuId);
+
+        if (targetMenuState == null) {
+            System.out.println("존재하지 않는 메뉴 ID입니다. 다시 입력해주세요");
+            return;
+        }
+
+        menuStatuses.remove(targetMenuState);
+
+        saveMenuStatusFile();
+        System.out.println("성공적으로 판매 메뉴가 삭제되었습니다.");
     }
 
 }
@@ -1744,7 +1792,7 @@ class OrderList {
     }
 
     public void showMySales(String sellerId) {
-        System.out.println("["sellerId + "님 지점 매출 조회]");
+        System.out.println("[" + sellerId + "님 지점 매출 조회]");
 
         int totalPrice = 0;
         for (Order order : orderList) {
@@ -2082,6 +2130,7 @@ public class Main {
                                 System.out.println("2. 추천 메뉴 관리");
                                 System.out.println("3. 재고 관리");
                                 System.out.println("4. 매출 조회");
+                                System.out.println("5. 판매 메뉴 관리");
                                 System.out.println("5. 로그아웃");
                                 System.out.print("할 일을 선택해주세요 : ");
 
@@ -2205,8 +2254,43 @@ public class Main {
                                     orderList.showMySales(sellerId);
                                 }
 
-                                // 5. 로그아웃
+                                // 5. 판매 메뉴 관리
                                 else if (menuSelect == 5) {
+                                    menuList.showManageableMenuList(sellerId);
+                                    System.out.println();
+                                    System.out.println("1. 판매 메뉴 등록하기");
+                                    System.out.println("2. 판매 메뉴 삭제하기");
+                                    System.out.println("3. 뒤로가기");
+                                    int salesChoice = sc.nextInt();
+                                    sc.nextLine();
+
+                                    // 5-1. 판매 메뉴 등록하기
+                                    if (salesChoice == 1) {
+                                        System.out.print("등록할 메뉴의 ID를 입력해주세요 : ");
+                                        int menuId = sc.nextInt();
+                                        sc.nextLine();
+
+                                        menuStatusList.registerMenuForSale(sellerId, menuId);
+                                    }
+
+                                    // 5-2. 판매 메뉴 삭제하기
+                                    else if (salesChoice == 2) {
+                                        System.out.print("삭제할 메뉴의 ID를 입력해주세요 : ");
+                                        int menuId = sc.nextInt();
+                                        sc.nextLine();
+
+                                        menuStatusList.removeMenuForSale(sellerId, menuId);
+                                    }
+
+                                    // 5-3. 뒤로가기
+                                    else if (salesChoice == 3) {
+                                        break;
+                                    }
+
+                                }
+
+                                // 6. 로그아웃
+                                else if (menuSelect == 6) {
                                     System.out.println("로그아웃이 완료되었습니다.");
                                     break;
                                 }
