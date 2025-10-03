@@ -103,6 +103,7 @@ enum OrderStatus {
     }
 }
 
+// User 기능
 class User {
     private String id;
     private String password;
@@ -589,6 +590,7 @@ class UserList {
 
 }
 
+// Menu 기능
 class Menu {
     private static int nextId = 1;
     private int menuId;
@@ -890,9 +892,9 @@ class MenuList {
 
     // find Menu - 매개변수와 같은 이름의 _객체 반환
     public Menu findMenu(String 주문할메뉴) {
-        for (int i = 0; i < menus.size(); i++) {
-            if (menus.get(i).getMenuName().equals(주문할메뉴)) {
-                return menus.get(i);
+        for (Menu menu : menus) {
+            if (menu.getMenuName().equals(주문할메뉴)) {
+                return menu;
             }
         }
         return null;
@@ -1253,6 +1255,8 @@ class MenuStatusList {
 
 }
 
+
+// Order 기능
 class Order {
     private int orderId;
     private String customerId;
@@ -1839,6 +1843,7 @@ class OrderList {
 
 }
 
+// 나만의 메뉴 (찜하기) 기능
 class MyMenu {
     ArrayList<Menu> myMenu = new ArrayList<>();
     Scanner sc = new Scanner(System.in);
@@ -2345,10 +2350,10 @@ public class Main {
 
                                 // 2-1. 메뉴 선택
                                 if (cusChoice == 1) {
-                                    // 1. 장바구니 준비
+                                    // 1. 장바구니
                                     ArrayList<OrderItem> cart = new ArrayList<>();
 
-                                    // 2. 메뉴 담기 루프
+                                    // 2. 메뉴 담기
                                     while (true) {
                                         // 메뉴 없을 때
                                         if (menuList.menuIsEmpty()) {
@@ -2395,7 +2400,7 @@ public class Main {
                                         System.out.println();
                                     }
 
-                                    // 3. 주문 처리 (루프가 끝난 후)
+                                    // 3. 주문 처리 (루프 끝난 후)
                                     if (!cart.isEmpty()) {
                                         // 3-1. 총액 계산 및 Order 객체 생성
                                         int totalPirce = 0;
