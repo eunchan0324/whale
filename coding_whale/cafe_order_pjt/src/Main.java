@@ -776,7 +776,7 @@ class MenuList {
     }
 
     // Menu Read - 구매자용
-    public void menuListCheck(String sellerId) {
+    public void menuListCheck(int storeId) {
         // 메뉴가 아무것도 등록되지 않았다면
         if (menus.isEmpty()) {
             System.out.println("등록된 메뉴가 없습니다. 메인 메뉴로 돌아갑니다.");
@@ -792,7 +792,7 @@ class MenuList {
 
                 String menuInfo = menu.getMenuId() + ". " + menu.getMenuName() + " | " + menu.getMenuPrice() + "원";
 
-                if (!menuStatusList.isAvailable(sellerId, menuId)) {
+                if (!menuStatusList.isAvailable(storeId, menuId)) {
                     menuInfo += "(품절)";
                 }
 
@@ -803,7 +803,7 @@ class MenuList {
     }
 
     // Menu Stock Read - 재고 확인 판매자용
-    public void showStockStatusForSeller(String sellerId) {
+    public void showStockStatusForSeller(int storeId) {
         if (menus.isEmpty()) {
             System.out.println("등록된 메뉴가 없습니다. 메인 메뉴로 돌아갑니다.");
             System.out.println();
@@ -811,9 +811,9 @@ class MenuList {
 
         // 메뉴가 1개 이상 등록되어있다면
         else {
-            System.out.println("\n[" + sellerId + "] 님 매장 재고 현황");
+            System.out.println("\n[" + storeId + "] 지점(ID 매장 재고 현황");
             for (Menu menu : menus) {
-                MenuStatus status = menuStatusList.findMenuStatus(sellerId, menu.getMenuId());
+                MenuStatus status = menuStatusList.findMenuStatus(storeId, menu.getMenuId());
 
                 if (status != null) {
                     System.out.println(menu.getMenuId() + ". " + menu.getMenuName() +
@@ -1059,12 +1059,12 @@ class MenuList {
     }
 
     // 판매자 : 판매 메뉴 전체 read
-    public void showManageableMenuList(String sellerId) {
+    public void showManageableMenuList(int storeId) {
         System.out.println("[판매 메뉴 관리]");
         System.out.println("------------------------------");
 
         for (Menu menu : menus) {
-            MenuStatus status = menuStatusList.findMenuStatus(sellerId, menu.getMenuId());
+            MenuStatus status = menuStatusList.findMenuStatus(storeId, menu.getMenuId());
             String statusText = (status != null) ? "[판매중]" : "[미판매]";
 
             System.out.println(menu.getMenuId() + ". " + menu.getMenuName() + " - " + statusText);
@@ -1074,14 +1074,14 @@ class MenuList {
 }
 
 class MenuStatus {
+    private int storeId;
     private int menuId;
-    private String sellerId;
     private MenuSaleStatus status;
     private int stock;
 
-    public MenuStatus(int menuId, String sellerId, MenuSaleStatus status, int stock) {
+    public MenuStatus(int storeId, int menuId, MenuSaleStatus status, int stock) {
+        this.storeId = storeId;
         this.menuId = menuId;
-        this.sellerId = sellerId;
         this.status = status;
         this.stock = stock;
     }
@@ -1094,12 +1094,12 @@ class MenuStatus {
         this.menuId = menuId;
     }
 
-    public String getSellerId() {
-        return sellerId;
+    public int getStoreId() {
+        return storeId;
     }
 
-    public void setSellerId(String sellerId) {
-        this.sellerId = sellerId;
+    public void setStoreId(int storeId) {
+        this.storeId = storeId;
     }
 
     public MenuSaleStatus getStatus() {
@@ -1121,8 +1121,8 @@ class MenuStatus {
     @Override
     public String toString() {
         return "MenuStatus{" +
-                "menuId=" + menuId +
-                ", sellerId='" + sellerId + '\'' +
+                " storeId=" + storeId +
+                ", menuId=" + menuId +
                 ", status='" + status + '\'' +
                 ", stock=" + stock +
                 '}';
@@ -1133,20 +1133,22 @@ class MenuStatus {
 class MenuStatusList {
     ArrayList<MenuStatus> menuStatuses = new ArrayList<>();
 
+    // Menu_status.txt save
     public void saveMenuStatusFile() throws IOException {
         Path menuFilePath = Constants.BASE_PATH.resolve("Menu_status.txt");
         FileWriter writer = new FileWriter(menuFilePath.toFile());
 
         for (int i = 0; i < menuStatuses.size(); i++) {
             MenuStatus status = menuStatuses.get(i);
-            writer.write(status.getMenuId() + "," +
-                    status.getSellerId() + "," +
+            writer.write(status.getStoreId() + "," +
+                    status.getMenuId() + "," +
                     status.getStatus() + "," +
                     status.getStock() + "\n");
         }
         writer.close();
     }
 
+    // Menu_status.txt load
     public void loadMenuStatusFile() throws IOException {
         Path menuFilePath = Constants.BASE_PATH.resolve("Menu_status.txt");
         BufferedReader reader = new BufferedReader(new FileReader(menuFilePath.toFile()));
@@ -1154,12 +1156,12 @@ class MenuStatusList {
         String line;
         while ((line = reader.readLine()) != null) {
             String[] parts = line.split(",");
-            int menuId = Integer.parseInt(parts[0]);
-            String sellerId = parts[1];
+            int storeId = Integer.parseInt(parts[0]);
+            int menuId = Integer.parseInt(parts[1]);
             MenuSaleStatus status = MenuSaleStatus.valueOf(parts[2]);
             int stock = Integer.parseInt(parts[3]);
 
-            MenuStatus menuStatus = new MenuStatus(menuId, sellerId, status, stock);
+            MenuStatus menuStatus = new MenuStatus(menuId, storeId, status, stock);
             menuStatuses.add(menuStatus);
         }
         reader.close();
@@ -1171,9 +1173,9 @@ class MenuStatusList {
     }
 
     // 판매자 id로 MenuStatus 객체 반환
-    public MenuStatus findMenuStatus(String sellerId, int menuId) {
+    public MenuStatus findMenuStatus(int storeId, int menuId) {
         for (int i = 0; i < menuStatuses.size(); i++) {
-            if (menuStatuses.get(i).getSellerId().equals(sellerId) && menuStatuses.get(i).getMenuId() == menuId) {
+            if (menuStatuses.get(i).getStoreId() == storeId && menuStatuses.get(i).getMenuId() == menuId) {
                 return menuStatuses.get(i);
             }
         }
@@ -1181,9 +1183,9 @@ class MenuStatusList {
     }
 
     // 재고 수량 변경
-    public void updateStock(String sellerId, int menuId, int newStock) throws IOException {
+    public void updateStock(int storeId, int menuId, int newStock) throws IOException {
 
-        MenuStatus menuStatus = findMenuStatus(sellerId, menuId);
+        MenuStatus menuStatus = findMenuStatus(storeId, menuId);
 
         // 재고 정보가 있으면 : 기본 재고 정보 수정(update)
         if (menuStatus != null) {
@@ -1193,7 +1195,7 @@ class MenuStatusList {
 
         // 재고 정보가 없으면 :
         else {
-            MenuStatus newMenuStatus = new MenuStatus(menuId, sellerId, MenuSaleStatus.AVAILABLE, newStock);
+            MenuStatus newMenuStatus = new MenuStatus(storeId, menuId, MenuSaleStatus.AVAILABLE, newStock);
             menuStatuses.add(newMenuStatus);
             System.out.println("새로운 메뉴의 재고가 등록되었습니다.");
         }
@@ -1203,8 +1205,8 @@ class MenuStatusList {
     }
 
     // 판매 상태 변경
-    public void updateStatus(String sellerId, int menuId, MenuSaleStatus newStatus) throws IOException {
-        MenuStatus menuStatus = findMenuStatus(sellerId, menuId);
+    public void updateStatus(int storeId, int menuId, MenuSaleStatus newStatus) throws IOException {
+        MenuStatus menuStatus = findMenuStatus(storeId, menuId);
 
         // 판매 상태가 있다면 :
         if (menuStatus != null) {
@@ -1214,7 +1216,7 @@ class MenuStatusList {
 
         // 판매 상태가 없다면 (null) :
         else {
-            MenuStatus newMenuStatus = new MenuStatus(menuId, sellerId, newStatus, 0); // 기본 재고 0으로 등록
+            MenuStatus newMenuStatus = new MenuStatus(storeId, menuId, newStatus, 0); // 기본 재고 0으로 등록
             menuStatuses.add((newMenuStatus));
             System.out.println("새로운 메뉴의 상태가 " + newStatus.name() + "(으)로 등록되었습니다.");
         }
@@ -1227,14 +1229,14 @@ class MenuStatusList {
      * 지정된 메뉴의 재고를 1감소 시키는 메서드
      * 이 메서드를 호출하기 전에는 반드시 isAvailable()로 재고를 확인해야 함
      *
-     * @param sellerId 판매자 ID
-     * @param menuId   메뉴 ID
+     * @param storeId 판매자 ID
+     * @param menuId  메뉴 ID
      * @return 성공하면 ture, 메뉴를 찾지 못하면 false
      * @throws IOException
      */
-    public boolean decreaseStock(String sellerId, int menuId) throws IOException {
+    public boolean decreaseStock(int storeId, int menuId) throws IOException {
 
-        MenuStatus menuStatus = findMenuStatus(sellerId, menuId);
+        MenuStatus menuStatus = findMenuStatus(storeId, menuId);
 
         if (menuStatus == null) {
             System.out.println("시스템 오류 : 해당 메뉴의 재고 정보를 찾을 수 없습니다.");
@@ -1249,8 +1251,8 @@ class MenuStatusList {
     }
 
     // 판매가 가능한 상황인지 확인 (재고0이상 / 상태 AVAILABLE)
-    public boolean isAvailable(String sellerId, int menuId) {
-        MenuStatus menuStatus = findMenuStatus(sellerId, menuId);
+    public boolean isAvailable(int storeId, int menuId) {
+        MenuStatus menuStatus = findMenuStatus(storeId, menuId);
 
         if (menuStatus == null) {
             return false;
@@ -1262,16 +1264,16 @@ class MenuStatusList {
     }
 
     // 판매 메뉴 등록
-    public void registerMenuForSale(String sellerId, int menuId) throws IOException {
+    public void registerMenuForSale(int storeId, int menuId) throws IOException {
         // 1. 이미 등록된 메뉴인지 먼저 확인
-        if (findMenuStatus(sellerId, menuId) != null) {
+        if (findMenuStatus(storeId, menuId) != null) {
             System.out.println("이미 판매 목록에 등록된 메뉴입니다.");
             return;
         }
 
         // 2. 등록되지 않은 메뉴라면, 새로운 MenuStatus 객체 생성
         // 초기 재고는 0개, 판매 상태는 AVAILABLE
-        MenuStatus newMenuStatus = new MenuStatus(menuId, sellerId, MenuSaleStatus.AVAILABLE, 0);
+        MenuStatus newMenuStatus = new MenuStatus(menuId, storeId, MenuSaleStatus.AVAILABLE, 0);
 
         // 3. 리스트에 추가
         menuStatuses.add(newMenuStatus);
@@ -1282,8 +1284,8 @@ class MenuStatusList {
     }
 
     // 판매 메뉴 삭제
-    public void removeMenuForSale(String sellerId, int menuId) throws IOException {
-        MenuStatus targetMenuState = findMenuStatus(sellerId, menuId);
+    public void removeMenuForSale(int storeId, int menuId) throws IOException {
+        MenuStatus targetMenuState = findMenuStatus(storeId, menuId);
 
         if (targetMenuState == null) {
             System.out.println("존재하지 않는 메뉴 ID입니다. 다시 입력해주세요");
@@ -1303,25 +1305,25 @@ class MenuStatusList {
 class Order {
     private int orderId;
     private String customerId;
-    private String sellerId;
+    private int storeId;
     private LocalDateTime orderTime;
     private int totalPrice;
     private OrderStatus status;
     private final ArrayList<OrderItem> items = new ArrayList<>();
 
-    public Order(String customerId, String sellerId, int totalPrice, OrderStatus status, ArrayList<OrderItem> items) {
+    public Order(String customerId, int storeId, int totalPrice, OrderStatus status, ArrayList<OrderItem> items) {
         this.customerId = customerId;
-        this.sellerId = sellerId;
+        this.storeId = storeId;
         this.orderTime = LocalDateTime.now();
         this.totalPrice = totalPrice;
         this.status = status;
         this.items.addAll(items);
     }
 
-    public Order(int orderId, String customerId, String sellerId, LocalDateTime orderTime, int totalPrice, OrderStatus status) {
+    public Order(int orderId, String customerId, int storeId, LocalDateTime orderTime, int totalPrice, OrderStatus status) {
         this.orderId = orderId;
         this.customerId = customerId;
-        this.sellerId = sellerId;
+        this.storeId = storeId;
         this.orderTime = orderTime;
         this.totalPrice = totalPrice;
         this.status = status;
@@ -1344,12 +1346,12 @@ class Order {
         this.customerId = customerId;
     }
 
-    public String getSellerId() {
-        return sellerId;
+    public int getStoreId() {
+        return storeId;
     }
 
-    public void setSellerId(String sellerId) {
-        this.sellerId = sellerId;
+    public void setStoreId(int storeId) {
+        this.storeId = storeId;
     }
 
     public LocalDateTime getOrderTime() {
@@ -1552,7 +1554,7 @@ class OrderList {
             Order order = orderList.get(i);
             orderWriter.write(order.getOrderId() + "," +
                     order.getCustomerId() + "," +
-                    order.getSellerId() + "," +
+                    order.getStoreId() + "," +
                     order.getOrderTime() + "," +
                     order.getTotalPrice() + "," +
                     order.getStatus() + "\n");
@@ -1589,13 +1591,13 @@ class OrderList {
             String[] parts = line.split(",");
             int orderId = Integer.parseInt(parts[0]);
             String customerId = parts[1];
-            String sellerId = parts[2];
+            int storeId = Integer.parseInt(parts[2]);
             LocalDateTime orderTime = LocalDateTime.parse(parts[3]);
             int totalPrice = Integer.parseInt(parts[4]);
             OrderStatus status = OrderStatus.valueOf(parts[5]);
 
             // 임시 객체 생성자
-            Order order = new Order(orderId, customerId, sellerId, orderTime, totalPrice, status);
+            Order order = new Order(orderId, customerId, storeId, orderTime, totalPrice, status);
             ordersMap.put(orderId, order);
 
             maxId = Math.max(maxId, orderId);
@@ -1838,38 +1840,38 @@ class OrderList {
         System.out.println("전체 매출 : " + totalPrice + "원");
     }
 
-    public void showMySales(String sellerId) {
-        System.out.println("[" + sellerId + "님 지점 매출 조회]");
+    public void showMySales(int storeId) {
+        System.out.println("[" + storeId + "(ID)지점 매출 조회]");
 
         int totalPrice = 0;
         for (Order order : orderList) {
-            if (order.getStatus() == OrderStatus.COMPLETED && order.getSellerId().equals(sellerId)) {
+            if (order.getStatus() == OrderStatus.COMPLETED && order.getStoreId() == storeId) {
                 totalPrice += order.getTotalPrice();
             }
         }
 
-        System.out.println(sellerId + "님 지점 전체 매출 : " + totalPrice + "원");
+        System.out.println(storeId + "ID 지점 전체 매출 : " + totalPrice + "원");
     }
 
     public void showSalesBySeller() {
         System.out.println("[지점별 매출 현황]");
 
-        // 1. sellerId(String)을 key로, 누적 매출액(interger)을 value로 갖는 Map 생성
-        Map<String, Integer> salesBySeller = new HashMap<>();
+        // 1. storeId(int)을 key로, 누적 매출액(interger)을 value로 갖는 Map 생성
+        Map<Integer, Integer> salesBySeller = new HashMap<>();
 
         // 2. 전체 주문 목록 순회하며 COMPLETED order 객체 찾기
         for (Order order : orderList) {
             if (order.getStatus() == OrderStatus.COMPLETED) {
                 // 3. salesBySeller Map에 추가
-                String sellerId = order.getSellerId();
+                int storeId = order.getStoreId();
                 int price = order.getTotalPrice();
 
-                Integer currentSales = salesBySeller.get(sellerId);
+                Integer currentSales = salesBySeller.get(storeId);
 
                 if (currentSales == null) {
-                    salesBySeller.put(sellerId, price);
+                    salesBySeller.put(storeId, price);
                 } else {
-                    salesBySeller.put(sellerId, price + currentSales);
+                    salesBySeller.put(storeId, price + currentSales);
                 }
 
 
@@ -1878,7 +1880,7 @@ class OrderList {
 
         // 4. 데이터가 모두 쌓인 Map을 출력
         System.out.println("--------------------");
-        for (Map.Entry<String, Integer> entry : salesBySeller.entrySet()) {
+        for (Map.Entry<Integer, Integer> entry : salesBySeller.entrySet()) {
             System.out.println("- " + entry.getKey() + " : " + entry.getValue() + "원");
         }
         System.out.println("--------------------");
@@ -2255,11 +2257,11 @@ public class Main {
                         User loggendinSeller = userList.sellerLogin();
                         if (loggendinSeller != null) {
 
-                            String sellerId = loggendinSeller.getId();
+                            int storeId = loggendinSeller.getStoreId();
 
                             while (true) {
                                 System.out.println();
-                                System.out.println("안녕하세요 " + sellerId + "님, 카페 주문 서비스입니다.");
+                                System.out.println("안녕하세요 " + storeId + "님, 카페 주문 서비스입니다.");
                                 System.out.println("1. 주문 관리");
                                 System.out.println("2. 추천 메뉴 관리");
                                 System.out.println("3. 재고 관리");
@@ -2321,13 +2323,13 @@ public class Main {
 
                                         // 3-1. 재고 현황 보기
                                         if (choice == 1) {
-                                            menuList.showStockStatusForSeller(sellerId);
+                                            menuList.showStockStatusForSeller(storeId);
                                         }
 
                                         // 3-2. 재고 수량 변경
                                         else if (choice == 2) {
                                             System.out.println("[재고 수량 변경]");
-                                            menuList.showStockStatusForSeller(sellerId);
+                                            menuList.showStockStatusForSeller(storeId);
 
                                             System.out.print("수정할 메뉴의 ID를 입력해주세요 : ");
                                             int menuId = sc.nextInt();
@@ -2337,14 +2339,14 @@ public class Main {
                                             int newStock = sc.nextInt();
                                             sc.nextLine();
 
-                                            menuStatusList.updateStock(sellerId, menuId, newStock);
+                                            menuStatusList.updateStock(storeId, menuId, newStock);
                                         }
 
                                         // 3-3. 판매 상태 변경
                                         else if (choice == 3) {
                                             System.out.println();
                                             System.out.println("[판매 상태 변경]");
-                                            menuList.showStockStatusForSeller(sellerId);
+                                            menuList.showStockStatusForSeller(storeId);
 
                                             System.out.print("수정할 메뉴의 ID를 입력해주세요 : ");
                                             int menuId = sc.nextInt();
@@ -2366,7 +2368,7 @@ public class Main {
                                             }
 
                                             if (newstatus != null) {
-                                                menuStatusList.updateStatus(sellerId, menuId, newstatus);
+                                                menuStatusList.updateStatus(storeId, menuId, newstatus);
                                             } else {
                                                 System.out.println("번호를 잘못 입력하셨습니다. 이전 메뉴로 돌아갑니다.");
                                             }
@@ -2385,12 +2387,12 @@ public class Main {
 
                                 // 4. 매출 관리
                                 else if (menuSelect == 4) {
-                                    orderList.showMySales(sellerId);
+                                    orderList.showMySales(storeId);
                                 }
 
                                 // 5. 판매 메뉴 관리
                                 else if (menuSelect == 5) {
-                                    menuList.showManageableMenuList(sellerId);
+                                    menuList.showManageableMenuList(storeId);
                                     System.out.println();
                                     System.out.println("1. 판매 메뉴 등록하기");
                                     System.out.println("2. 판매 메뉴 삭제하기");
@@ -2404,7 +2406,7 @@ public class Main {
                                         int menuId = sc.nextInt();
                                         sc.nextLine();
 
-                                        menuStatusList.registerMenuForSale(sellerId, menuId);
+                                        menuStatusList.registerMenuForSale(storeId, menuId);
                                     }
 
                                     // 5-2. 판매 메뉴 삭제하기
@@ -2413,7 +2415,7 @@ public class Main {
                                         int menuId = sc.nextInt();
                                         sc.nextLine();
 
-                                        menuStatusList.removeMenuForSale(sellerId, menuId);
+                                        menuStatusList.removeMenuForSale(storeId, menuId);
                                     }
 
                                     // 5-3. 뒤로가기
@@ -2462,7 +2464,7 @@ public class Main {
                         if (loggedInCustomer != null) {
                             while (true) {
                                 // todo : 하드코딩 리팩토링
-                                String sellerId = "dmscks1";
+                                int storeId = 1;
 
                                 System.out.println();
                                 System.out.println("안녕하세요 손님, 카페 주문 서비스입니다.");
@@ -2492,7 +2494,7 @@ public class Main {
 
                                         // 메뉴 있을 때
                                         System.out.println("[전체 메뉴]");
-                                        menuList.menuListCheck(sellerId);
+                                        menuList.menuListCheck(storeId);
                                         System.out.print("주문할 메뉴명을 정확히 입력해주세요 (주문 완료는 '완료' 입력) : ");
                                         String userInput = sc.nextLine();
 
@@ -2509,7 +2511,7 @@ public class Main {
 
                                         if (targetMenu != null) {
                                             // 재고 있을 때
-                                            if (menuStatusList.isAvailable(sellerId, targetMenu.getMenuId())) {
+                                            if (menuStatusList.isAvailable(storeId, targetMenu.getMenuId())) {
                                                 OrderItem orderItem = new OrderItem(targetMenu);
                                                 orderItem.tempSelect();
                                                 orderItem.cupSelect();
@@ -2537,14 +2539,14 @@ public class Main {
                                             totalPirce += item.getFinalPrice(); //
                                         }
 
-                                        Order finalOrder = new Order(loggedInCustomer.getId(), sellerId, totalPirce, OrderStatus.ORDER_PLACED, cart);
+                                        Order finalOrder = new Order(loggedInCustomer.getId(), storeId, totalPirce, OrderStatus.ORDER_PLACED, cart);
 
                                         // 3-2. 주문 내역에 '최종 주문서 추가'
                                         orderList.addOrder(finalOrder);
 
                                         // 3-3. 재고 감소
                                         for (OrderItem item : cart) {
-                                            menuStatusList.decreaseStock(sellerId, item.getMenu().getMenuId());
+                                            menuStatusList.decreaseStock(storeId, item.getMenu().getMenuId());
                                         }
 
                                         System.out.println("주문이 완료되었습니다. 주문 번호 : " + finalOrder.getOrderId());
