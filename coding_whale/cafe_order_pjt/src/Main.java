@@ -811,7 +811,7 @@ class MenuList {
 
         // 메뉴가 1개 이상 등록되어있다면
         else {
-            System.out.println("\n[" + storeId + "] 지점(ID 매장 재고 현황");
+            System.out.println("\n[" + storeId + "] 지점 매장 재고 현황");
             for (Menu menu : menus) {
                 MenuStatus status = menuStatusList.findMenuStatus(storeId, menu.getMenuId());
 
@@ -2261,13 +2261,14 @@ public class Main {
 
                             while (true) {
                                 System.out.println();
-                                System.out.println("안녕하세요 " + storeId + "님, 카페 주문 서비스입니다.");
+                                // todo : storeName으로 리팩토링
+                                System.out.println("안녕하세요 StoreId : " + storeId + "의 카페 주문 서비스입니다.");
                                 System.out.println("1. 주문 관리");
                                 System.out.println("2. 추천 메뉴 관리");
                                 System.out.println("3. 재고 관리");
                                 System.out.println("4. 매출 조회");
                                 System.out.println("5. 판매 메뉴 관리");
-                                System.out.println("5. 로그아웃");
+                                System.out.println("6. 로그아웃");
                                 System.out.print("할 일을 선택해주세요 : ");
 
                                 int menuSelect = sc.nextInt();
@@ -2397,6 +2398,7 @@ public class Main {
                                     System.out.println("1. 판매 메뉴 등록하기");
                                     System.out.println("2. 판매 메뉴 삭제하기");
                                     System.out.println("3. 뒤로가기");
+                                    System.out.print(" : ");
                                     int salesChoice = sc.nextInt();
                                     sc.nextLine();
 
@@ -2420,7 +2422,7 @@ public class Main {
 
                                     // 5-3. 뒤로가기
                                     else if (salesChoice == 3) {
-                                        break;
+                                        continue;
                                     }
 
                                 }
