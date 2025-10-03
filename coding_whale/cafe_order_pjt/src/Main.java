@@ -1,9 +1,6 @@
 import constant.Constants;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
 import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -102,6 +99,7 @@ enum OrderStatus {
         return null;
     }
 }
+
 
 // User 기능
 class User {
@@ -589,6 +587,7 @@ class UserList {
 
 
 }
+
 
 // Menu 기능
 class Menu {
@@ -1842,6 +1841,70 @@ class OrderList {
     }
 
 }
+
+
+// Store 기능
+class Store {
+    private int storeId;
+    private String storeName;
+
+    public Store(int storeId, String storeName) {
+        this.storeId = storeId;
+        this.storeName = storeName;
+    }
+
+    public int getStoreId() {
+        return storeId;
+    }
+
+    public void setStoreId(int storeId) {
+        this.storeId = storeId;
+    }
+
+    public String getStoreName() {
+        return storeName;
+    }
+
+    public void setStoreName(String storeName) {
+        this.storeName = storeName;
+    }
+}
+
+class StoreList {
+    ArrayList<Store> storeList = new ArrayList<>();
+
+    // store save (stores.txt)
+    public void saveStoreFile() throws IOException {
+        Path storeFilePath = Constants.BASE_PATH.resolve("Stores.txt");
+        FileWriter storeWriter = new FileWriter(storeFilePath.toFile());
+
+        for (Store store : storeList) {
+            storeWriter.write(
+                    store.getStoreId() + "," +
+                            store.getStoreName() + "\n"
+            );
+        }
+        storeWriter.close();
+    }
+
+    // store load (stores.txt)
+    public void loadStoreFIle() throws IOException{
+        Path storeFilePath = Constants.BASE_PATH.resolve("Stores.txt");
+        BufferedReader storeReader = new BufferedReader(new FileReader(storeFilePath.toFile()));
+
+        String line;
+        while ((line = storeReader.readLine()) != null) {
+            String[] parts = line.split(",");
+            int storeId = Integer.parseInt(parts[0]);
+            String storeName = parts[1];
+
+            Store store = new Store(storeId, storeName);
+            storeList.add(store);
+        }
+        storeReader.close();
+    }
+}
+
 
 // 나만의 메뉴 (찜하기) 기능
 class MyMenu {
