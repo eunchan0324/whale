@@ -106,11 +106,20 @@ class User {
     private String id;
     private String password;
     private UserRole role;
+    private int storeId; // for seller role
 
-    User(String id, String password, UserRole role) {
+
+    public User(String id, String password, UserRole role) {
         this.id = id;
         this.password = password;
         this.role = role;
+    }
+
+    public User(String id, String password, UserRole role, int storeId) {
+        this.id = id;
+        this.password = password;
+        this.role = role;
+        this.storeId = storeId;
     }
 
     public String getId() {
@@ -137,6 +146,14 @@ class User {
         this.role = role;
     }
 
+    public int getStoreId() {
+        return storeId;
+    }
+
+    public void setStoreId(int storeId) {
+        this.storeId = storeId;
+    }
+
     @Override
     public String toString() {
         return "User{" + "id='" + id + '\'' + ", password='" + password + '\'' + ", role='" + role + '\'' + '}';
@@ -147,16 +164,24 @@ class UserList {
     ArrayList<User> adminList = new ArrayList<>();
     ArrayList<User> sellerList = new ArrayList<>();
     ArrayList<User> customerList = new ArrayList<>();
+    private StoreList storeList;
+
     Scanner sc = new Scanner(System.in);
 
-    // 프로그램 시작 시, 모든 계정 정보 LOAD
-    UserList() throws IOException {
-        loadSellerFile();
-        loadAdminFile();
-        loadCustomerFile();
+    // 모든 User Load + load Store
+    public UserList(StoreList storeList) throws IOException {
+        this.storeList = storeList;
+
+        try {
+            loadSellerFile();
+            loadAdminFile();
+            loadCustomerFile();
+        } catch (IOException e) {
+            System.out.println("사용자 파일 로딩 중 오류가 발생했습니다.");
+        }
     }
 
-    // 회원가입 - 역할 기반
+    // 회원가입 - All role
     public void registerUser(UserRole role, ArrayList<User> targetList, String fileName) throws IOException {
         System.out.println();
         System.out.println("[" + role + " 회원가입]");
@@ -205,34 +230,48 @@ class UserList {
 
         }
 
-        // role
-//        while (true) {
-//            System.out.println("사장님인가요 손님인가요?");
-//            System.out.println("1. 사장");
-//            System.out.println("2. 손님");
-//            System.out.print(" : ");
-//
-//            int whatRole = sc.nextInt();
-//            sc.nextLine();
-//
-//            if (whatRole == 1) {
-//                thisRole = UserRole.SELLER;
-//                break;
-//            } else if (whatRole == 2) {
-//                thisRole = UserRole.CUSTOMER;
-//                break;
-//            } else {
-//                System.out.println("정확한 숫자를 입력해주세요.");
-//            }
-//        }
+        while (true) {
+            // role이 seller 일 때
+            if (role == UserRole.SELLER) {
+                System.out.println("지점 확인");
+                for (Store store : storeList.stores) {
+                    System.out.println("storeId : " + store.getStoreId() + ", storeName : " + store.getStoreName());
+                }
 
-        User user = new User(thisId, thisPassword, role);
-        targetList.add(user);
+                System.out.print("소속시킬 지점의 ID를 입력해주세요 : ");
+                int storeId = sc.nextInt();
+                sc.nextLine();
 
-        Path userFilePath = Constants.BASE_PATH.resolve(fileName);
-        FileWriter writer = new FileWriter(userFilePath.toFile(), true);
-        writer.write(user.getId() + "," + user.getPassword() + "," + user.getRole() + "\n");
-        writer.close();
+                // storeId가 stores에 없을 때
+                if (storeList.findStoreById(storeId) == null) {
+                    System.out.println("입력한 ID가 존재하지 않습니다.");
+                    continue;
+                }
+
+                // storeId가 stores에 있을 때
+                else {
+                    User user = new User(thisId, thisPassword, role, storeId);
+                    targetList.add(user);
+                    saveSellerFile();
+                    break;
+                }
+            }
+
+            // role이 customer일 때
+            else if (role == UserRole.CUSTOMER) {
+                User user = new User(thisId, thisPassword, role);
+                targetList.add(user);
+
+                // todo : saveCustomerFile() 로 리팩토링
+                Path userFilePath = Constants.BASE_PATH.resolve(fileName);
+                FileWriter writer = new FileWriter(userFilePath.toFile(), true);
+                writer.write(user.getId() + "," + user.getPassword() + "," + user.getRole() + "\n");
+                writer.close();
+                break;
+            }
+
+        }
+
         System.out.println(role.getRole() + " 회원가입이 완료되었습니다.");
     }
 
@@ -416,12 +455,8 @@ class UserList {
                     String newPassword = sc.nextLine();
 
                     sellerList.get(i).setPassword(newPassword);
-                    Path sellerFilePath = Constants.BASE_PATH.resolve("Seller.txt");
-                    FileWriter writer = new FileWriter(sellerFilePath.toFile());
-                    for (int j = 0; j < sellerList.size(); j++) {
-                        writer.write(sellerList.get(j).getId() + "," + sellerList.get(j).getPassword() + "," + sellerList.get(j).getRole() + "\n");
-                    }
-                    writer.close();
+                    saveSellerFile();
+
                     System.out.println("수정이 완료되었습니다.");
                     checker = true;
                     break;
@@ -471,12 +506,7 @@ class UserList {
                     if (choice == 1) {
                         sellerList.remove(i);
 
-                        Path sellerFilePath = Constants.BASE_PATH.resolve("Seller.txt");
-                        FileWriter writer = new FileWriter(sellerFilePath.toFile());
-                        for (int j = 0; j < sellerList.size(); j++) {
-                            writer.write(sellerList.get(j).getId() + "," + sellerList.get(j).getPassword() + "," + sellerList.get(j).getRole() + "\n");
-                        }
-                        writer.close();
+                        saveSellerFile();
                         checker = true;
                         break;
                     } else if (choice == 2) {
@@ -519,34 +549,38 @@ class UserList {
         }
     }
 
+    // Seller Save (seller.txt) + Add sellerList
+    public void saveSellerFile() throws IOException {
+        Path sellerFilePath = Constants.BASE_PATH.resolve("Seller.txt");
+        FileWriter writer = new FileWriter(sellerFilePath.toFile());
 
-    // id,tarList에 맞는 객체 찾기
-    public User findUser(String id, ArrayList<User> targetList) {
-        for (int i = 0; i < targetList.size(); i++) {
-            if (targetList.get(i).getId().equals(id)) {
-                return targetList.get(i);
-            }
+        for (User seller : sellerList) {
+            writer.write(seller.getId() + "," +
+                    seller.getPassword() + "," +
+                    seller.getRole() + "," +
+                    seller.getStoreId() + "\n"
+            );
         }
-        return null;
+        writer.close();
     }
 
-    // Seller 파일 load + SellerList add
+    // Seller load (seller.txt) + Add sellerList
     public void loadSellerFile() throws IOException {
         Path userFilePath = Constants.BASE_PATH.resolve("Seller.txt");
-        BufferedReader reader = new BufferedReader((new FileReader(userFilePath.toFile())));
-
+        BufferedReader sellerReader = new BufferedReader(new FileReader(userFilePath.toFile()));
 
         String line;
-        while ((line = reader.readLine()) != null) {
+        while ((line = sellerReader.readLine()) != null) {
             String[] parts = line.split(",");
-            String id = parts[0];
-            String password = parts[1];
+            String sellerId = parts[0];
+            String sellerPassword = parts[1];
             UserRole role = UserRole.valueOf(parts[2]);
+            int storeId = Integer.parseInt(parts[3]);
 
-            User user = new User(id, password, role);
-            sellerList.add(user);
+            User seller = new User(sellerId, sellerPassword, role, storeId);
+            sellerList.add(seller);
         }
-        reader.close();
+        sellerReader.close();
     }
 
     // Admin 파일 load + adminlist에 업로드
@@ -583,6 +617,16 @@ class UserList {
             customerList.add(user);
         }
         reader.close();
+    }
+
+    // id,tarList에 맞는 객체 찾기
+    public User findUser(String id, ArrayList<User> targetList) {
+        for (int i = 0; i < targetList.size(); i++) {
+            if (targetList.get(i).getId().equals(id)) {
+                return targetList.get(i);
+            }
+        }
+        return null;
     }
 
 
@@ -1871,14 +1915,23 @@ class Store {
 }
 
 class StoreList {
-    ArrayList<Store> storeList = new ArrayList<>();
+    ArrayList<Store> stores = new ArrayList<>();
+
+    // 생성자 - loadStoreFIle
+    public StoreList() throws IOException {
+        try {
+            loadStoreFIle();
+        } catch (IOException e) {
+            System.out.println("지점 파일 로드 중 오류 발생");
+        }
+    }
 
     // store save (stores.txt)
     public void saveStoreFile() throws IOException {
         Path storeFilePath = Constants.BASE_PATH.resolve("Stores.txt");
         FileWriter storeWriter = new FileWriter(storeFilePath.toFile());
 
-        for (Store store : storeList) {
+        for (Store store : stores) {
             storeWriter.write(
                     store.getStoreId() + "," +
                             store.getStoreName() + "\n"
@@ -1888,7 +1941,7 @@ class StoreList {
     }
 
     // store load (stores.txt)
-    public void loadStoreFIle() throws IOException{
+    public void loadStoreFIle() throws IOException {
         Path storeFilePath = Constants.BASE_PATH.resolve("Stores.txt");
         BufferedReader storeReader = new BufferedReader(new FileReader(storeFilePath.toFile()));
 
@@ -1899,9 +1952,21 @@ class StoreList {
             String storeName = parts[1];
 
             Store store = new Store(storeId, storeName);
-            storeList.add(store);
+            stores.add(store);
         }
         storeReader.close();
+    }
+
+    // 입력받은 ID 유효 검사
+    public Store findStoreById(int storeId) {
+        // 매개변수 storeId가 stores에 있다면, store 반환
+        for (Store store : stores) {
+            if (storeId == store.getStoreId()) {
+                return store;
+            }
+        }
+        // 매개변수 storeId가 stores에 있다면, null 반환
+        return null;
     }
 }
 
@@ -2014,7 +2079,8 @@ public class Main {
 //        Menu menu = new Menu();
         // 객체 생성 == MenuList의 인스턴스 menuList 생성
 
-        UserList userList = new UserList();
+        StoreList storeList = new StoreList();
+        UserList userList = new UserList(storeList);
         MenuStatusList menuStatusList = new MenuStatusList();
         MenuList menuList = new MenuList(menuStatusList);
         OrderList orderList = new OrderList(menuList);
