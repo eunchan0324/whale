@@ -70,8 +70,18 @@ enum MenuCategory {
 }
 
 enum MenuSaleStatus {
-    AVAILABLE,
-    SOLD_OUT
+    AVAILABLE("판매중"),
+    SOLD_OUT("품절");
+
+    private final String displayStatus;
+
+    MenuSaleStatus(String displayStatus) {
+        this.displayStatus = displayStatus;
+    }
+
+    public String getDisplayStatus() {
+        return displayStatus;
+    }
 }
 
 enum OrderStatus {
@@ -230,31 +240,50 @@ class UserList {
 
         }
 
+        // role
         while (true) {
             // role이 seller 일 때
             if (role == UserRole.SELLER) {
-                System.out.println("지점 확인");
+
+                // 1. 이미 배정된 지점 ID 목록을 미리 확보 - Set 사용
+                java.util.Set<Integer> assignedStoreIds = new java.util.HashSet<>();
+                for (User seller : sellerList) {
+                    assignedStoreIds.add(seller.getStoreId());
+                }
+
+                // 2. 사용자에게 전체 지점 목록과 현재 배정 상태를 보여준다.
+                System.out.println("\n--- 전체 지점 목록 ---");
                 for (Store store : storeList.stores) {
-                    System.out.println("storeId : " + store.getStoreId() + ", storeName : " + store.getStoreName());
+                    String status = (assignedStoreIds.contains(store.getStoreId())) ? "[배정됨]" : "[사용가능]";
+                    System.out.println("ID : " + store.getStoreId() + ", 지점명 : " + store.getStoreName() + " " + status);
                 }
+                System.out.println("--------------------");
 
-                System.out.print("소속시킬 지점의 ID를 입력해주세요 : ");
-                int storeId = sc.nextInt();
-                sc.nextLine();
+                while (true) {
+                    System.out.print("소속시킬 지점 ID를 선택해주세요 (중복 배정 불가) : ");
+                    int storeId = sc.nextInt();
+                    sc.nextLine();
 
-                // storeId가 stores에 없을 때
-                if (storeList.findStoreById(storeId) == null) {
-                    System.out.println("입력한 ID가 존재하지 않습니다.");
-                    continue;
-                }
+                    // 3-1. 입력한 storeId가 실제로 존재하는지 검사
+                    if (storeList.findStoreById(storeId) == null) {
+                        System.out.println("존재하지 않는 지점 ID입니다. 다시 입력해주세요.");
+                        continue;
+                    }
 
-                // storeId가 stores에 있을 때
-                else {
+                    // 3-2 입력한 ID가 이미 배정된 지점인지 검사
+                    if (assignedStoreIds.contains(storeId)) {
+                        System.out.println("이미 다른 판매자에게 배정된 지점입니다. 중복 배정은 불가하니 다시 입력해주세요.");
+                        continue;
+                    }
+
+                    // 모든 검증이 통과되었으므로 사용자 생성 후 루프 탈출
                     User user = new User(thisId, thisPassword, role, storeId);
                     targetList.add(user);
                     saveSellerFile();
+                    System.out.println("'" + storeList.findStoreById(storeId).getStoreName() + "' 지점에 판매자 계정 생성이 완료되었습니다.");
                     break;
                 }
+                break; // 바깥 while문 탈출
             }
 
             // role이 customer일 때
@@ -715,9 +744,11 @@ class Menu {
 class MenuList {
     private final ArrayList<Menu> menus = new ArrayList<>();
     private MenuStatusList menuStatusList;
+    private StoreList storeList;
 
-    public MenuList(MenuStatusList menuStatusList) throws IOException {
+    public MenuList(MenuStatusList menuStatusList, StoreList storeList) throws IOException {
         this.menuStatusList = menuStatusList;
+        this.storeList = storeList;
         loadMenuFile();
     }
 
@@ -780,51 +811,54 @@ class MenuList {
         // 메뉴가 아무것도 등록되지 않았다면
         if (menus.isEmpty()) {
             System.out.println("등록된 메뉴가 없습니다. 메인 메뉴로 돌아갑니다.");
-            System.out.println();
+            return;
         }
 
         // 메뉴가 1개 이상 등록되어있다면
-        else {
-            System.out.println("[현재 등록된 메뉴 목록]");
-            for (int i = 0; i < menus.size(); i++) {
-                Menu menu = menus.get(i);
-                int menuId = menu.getMenuId();
-
+        System.out.println("\n--- 주문 가능한 메뉴 목록 ---");
+        boolean hasOrderableMenu = false;
+        for (Menu menu : menus) {
+            if (menuStatusList.isAvailable(storeId, menu.getMenuId())) {
                 String menuInfo = menu.getMenuId() + ". " + menu.getMenuName() + " | " + menu.getMenuPrice() + "원";
-
-                if (!menuStatusList.isAvailable(storeId, menuId)) {
-                    menuInfo += "(품절)";
-                }
-
                 System.out.println(menuInfo);
+                hasOrderableMenu = true;
             }
-            System.out.println();
         }
+
+        // 주문 가능한 메뉴가 없다면 (AVAILABLE이 0)
+        if (!hasOrderableMenu) {
+            System.out.println("현재 주문 가능한 메뉴가 없습니다.");
+        }
+        System.out.println();
     }
 
     // Menu Stock Read - 재고 확인 판매자용
     public void showStockStatusForSeller(int storeId) {
+        // 메뉴가 아무것도 등록되지 않은 상태
         if (menus.isEmpty()) {
             System.out.println("등록된 메뉴가 없습니다. 메인 메뉴로 돌아갑니다.");
-            System.out.println();
+            return;
         }
 
-        // 메뉴가 1개 이상 등록되어있다면
-        else {
-            System.out.println("\n[" + storeId + "] 지점 매장 재고 현황");
-            for (Menu menu : menus) {
-                MenuStatus status = menuStatusList.findMenuStatus(storeId, menu.getMenuId());
+        // 메뉴가 1개 이상 등록
+        String storeName = storeList.findStoreById(storeId).getStoreName();
+        System.out.println("\n[" + storeName + "] 지점 매장 재고 현황");
+        boolean hasAvailableMenu = false; //판매중인 메뉴가 있는 확인하기 위한 flag
+        for (Menu menu : menus) {
+            MenuStatus status = menuStatusList.findMenuStatus(storeId, menu.getMenuId());
 
-                if (status != null) {
-                    System.out.println(menu.getMenuId() + ". " + menu.getMenuName() +
-                            " | 재고 : " + status.getStock() +
-                            " | 상태 : " + status.getStatus());
-                } else {
-                    System.out.println(menu.getMenuId() + ". " + menu.getMenuName() +
-                            " | 재고 : (미등록) " +
-                            " | 상태 : (미등록)");
-                }
+            // 메뉴의 상태가 존재하고 그 상태가 AVAILABLE 인 메뉴만 표시
+            if (status != null && status.getStatus() == MenuSaleStatus.AVAILABLE) {
+                System.out.println(menu.getMenuId() + ". " + menu.getMenuName() +
+                        " | 재고 : " + status.getStock() +
+                        " | 상태 : " + status.getStatus().getDisplayStatus());
+                hasAvailableMenu = true; // 메뉴가 하나로 출력됐으니, flag를 ture로 변경
             }
+        }
+
+        // for 문이 끝난 후, flag가 flase라면 판매중인 메뉴가 하나도 없다는 뜻.
+        if (!hasAvailableMenu) {
+            System.out.println("현재 판매중인 메뉴가 없습니다.");
         }
     }
 
@@ -1528,9 +1562,11 @@ class OrderList {
     private ArrayList<Order> orderList = new ArrayList<>();
     private int nextOrderId = 1;
     private MenuList menuList;
+    private StoreList storeList;
 
-    public OrderList(MenuList menuList) throws IOException {
+    public OrderList(MenuList menuList, StoreList storeList) throws IOException {
         this.menuList = menuList;
+        this.storeList = storeList;
         loadOrderFile();
     }
 
@@ -1841,7 +1877,8 @@ class OrderList {
     }
 
     public void showMySales(int storeId) {
-        System.out.println("[" + storeId + "(ID)지점 매출 조회]");
+        String storeName = storeList.findStoreById(storeId).getStoreName();
+        System.out.println("[" + storeName + " 지점 매출 조회]");
 
         int totalPrice = 0;
         for (Order order : orderList) {
@@ -1850,7 +1887,7 @@ class OrderList {
             }
         }
 
-        System.out.println(storeId + "ID 지점 전체 매출 : " + totalPrice + "원");
+        System.out.println(storeName + " 지점 전체 매출 : " + totalPrice + "원");
     }
 
     public void showSalesBySeller() {
@@ -1873,15 +1910,15 @@ class OrderList {
                 } else {
                     salesBySeller.put(storeId, price + currentSales);
                 }
-
-
             }
         }
 
         // 4. 데이터가 모두 쌓인 Map을 출력
         System.out.println("--------------------");
         for (Map.Entry<Integer, Integer> entry : salesBySeller.entrySet()) {
-            System.out.println("- " + entry.getKey() + " : " + entry.getValue() + "원");
+            int storeId = entry.getKey();
+            String storeName = storeList.findStoreById(storeId).getStoreName();
+            System.out.println("- " + storeName + " : " + entry.getValue() + "원");
         }
         System.out.println("--------------------");
     }
@@ -1918,6 +1955,10 @@ class Store {
 
 class StoreList {
     ArrayList<Store> stores = new ArrayList<>();
+
+    public ArrayList<Store> getStores() {
+        return stores;
+    }
 
     // 생성자 - loadStoreFIle
     public StoreList() throws IOException {
@@ -2084,8 +2125,8 @@ public class Main {
         StoreList storeList = new StoreList();
         UserList userList = new UserList(storeList);
         MenuStatusList menuStatusList = new MenuStatusList();
-        MenuList menuList = new MenuList(menuStatusList);
-        OrderList orderList = new OrderList(menuList);
+        MenuList menuList = new MenuList(menuStatusList, storeList);
+        OrderList orderList = new OrderList(menuList, storeList);
         MyMenu myMenu = new MyMenu();
 
         Scanner sc = new Scanner(System.in);
@@ -2258,11 +2299,11 @@ public class Main {
                         if (loggendinSeller != null) {
 
                             int storeId = loggendinSeller.getStoreId();
+                            String storeName = storeList.findStoreById(storeId).getStoreName();
 
                             while (true) {
                                 System.out.println();
-                                // todo : storeName으로 리팩토링
-                                System.out.println("안녕하세요 StoreId : " + storeId + "의 카페 주문 서비스입니다.");
+                                System.out.println("안녕하세요, " + storeName + " 지점 판매자님.");
                                 System.out.println("1. 주문 관리");
                                 System.out.println("2. 추천 메뉴 관리");
                                 System.out.println("3. 재고 관리");
@@ -2353,7 +2394,7 @@ public class Main {
                                             int menuId = sc.nextInt();
                                             sc.nextLine();
 
-                                            System.out.print("수정할 메뉴의 상태를 입력해주세요");
+                                            System.out.println("수정할 메뉴의 상태를 입력해주세요");
                                             System.out.println("1. 판매 가능 (AVAILABLE)");
                                             System.out.println("2. 판매 중지 (SOLD_OUT)");
                                             System.out.print(" : ");

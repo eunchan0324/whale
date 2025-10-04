@@ -1,7 +1,8 @@
-1,1,4000,샷추가(3샷),Grande,HOT
-1,3,4500,물 양 적게,Venti,ICED
-2,2,5500,오트(귀리),Grande,HOT
-3,1,3500,ICED,Tall,샷추가(3샷)
-4,1,5000,디카페인,Venti,HOT
-4,2,4000,일반 우유,Tall,HOT
-5,1,3000,HOT,Tall,기본(2샷)
+1,1,4000,HOT,Grande,샷추가(3샷)
+1,3,4500,ICED,Venti,물 양 적게
+2,2,5500,HOT,Grande,오트(귀리)
+3,1,3500,샷추가(3샷),Tall,ICED
+4,1,5000,HOT,Venti,디카페인
+4,2,4000,HOT,Tall,일반 우유
+5,1,3000,기본(2샷),Tall,HOT
+6,1,4500,HOT,Grande,디카페인
