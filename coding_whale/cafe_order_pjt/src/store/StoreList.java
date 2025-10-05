@@ -83,6 +83,16 @@ public class StoreList {
         }
     }
 
+    // 지점 중복 검사
+    public boolean isDuplicateName(String storeName) {
+        for (Store store : stores) {
+            if (store.getStoreName().equals(storeName)) {
+                return true; // 중복 이름 발견
+            }
+        }
+        return false; // 중복 없음
+    }
+
     // 신규 지점 등록
     public boolean registerNewStore(String newStoreName) {
         if (isDuplicateName(newStoreName)) {
@@ -117,13 +127,5 @@ public class StoreList {
 
     }
 
-    // 지점 중복 검사
-    public boolean isDuplicateName(String storeName) {
-        for (Store store : stores) {
-            if (store.getStoreName().equals(storeName)) {
-                return true; // 중복 이름 발견
-            }
-        }
-        return false; // 중복 없음
-    }
+
 }
