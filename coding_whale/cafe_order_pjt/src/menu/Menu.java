@@ -1,26 +1,25 @@
 package menu;
 
+import java.util.UUID;
+
 // Menu 기능
 public class Menu {
-    private static int nextId = 1;
-    private int menuId;
+    private UUID menuId;
     private String menuName;
     private int menuPrice;
     private MenuCategory menuOption;
     private String menuRecommend;
 
-
-    public Menu() {
-    }
-
+    // 신규 메뉴 생성 시 사용하는 생성자
     public Menu(String menuName, int menuPrice, MenuCategory menuOption) {
-        this.menuId = nextId++;
+        this.menuId = UUID.randomUUID();
         this.menuName = menuName;
         this.menuPrice = menuPrice;
         this.menuOption = menuOption;
     }
 
-    public Menu(int menuId, String menuName, int menuPrice, MenuCategory menuOption) {
+    // 파일에서 기존 메뉴를 로드할 때 사용할 생성자
+    public Menu(UUID menuId, String menuName, int menuPrice, MenuCategory menuOption) {
         this.menuId = menuId;
         this.menuName = menuName;
         this.menuPrice = menuPrice;
@@ -31,7 +30,7 @@ public class Menu {
         this.menuRecommend = recomReason;
     }
 
-    public int getMenuId() {
+    public UUID getMenuId() {
         return menuId;
     }
 

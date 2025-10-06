@@ -8,6 +8,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.UUID;
 
 public class MenuStatusList {
     ArrayList<MenuStatus> menuStatuses = new ArrayList<>();
@@ -52,7 +53,7 @@ public class MenuStatusList {
     }
 
     // 판매자 id로 menu.MenuStatus 객체 반환
-    public MenuStatus findMenuStatus(int storeId, int menuId) {
+    public MenuStatus findMenuStatus(int storeId, UUID menuId) {
         for (int i = 0; i < menuStatuses.size(); i++) {
             if (menuStatuses.get(i).getStoreId() == storeId && menuStatuses.get(i).getMenuId() == menuId) {
                 return menuStatuses.get(i);
@@ -130,7 +131,7 @@ public class MenuStatusList {
     }
 
     // 판매가 가능한 상황인지 확인 (재고0이상 / 상태 AVAILABLE)
-    public boolean isAvailable(int storeId, int menuId) {
+    public boolean isAvailable(int storeId, UUID menuId) {
         MenuStatus menuStatus = findMenuStatus(storeId, menuId);
 
         if (menuStatus == null) {
@@ -139,11 +140,10 @@ public class MenuStatusList {
 
         // 조건식이 true 또는 false를 반환
         return menuStatus.getStock() > 0 && menuStatus.getStatus() == MenuSaleStatus.AVAILABLE;
-
     }
 
     // 판매 메뉴 등록
-    public void registerMenuForSale(int storeId, int menuId) throws IOException {
+    public void registerMenuForSale(int storeId, UUID menuId) throws IOException {
         // 1. 이미 등록된 메뉴인지 먼저 확인
         if (findMenuStatus(storeId, menuId) != null) {
             System.out.println("이미 판매 목록에 등록된 메뉴입니다.");
