@@ -13,7 +13,7 @@ public class MyMenu {
         boolean hasMyMenu = false;
         System.out.println();
         System.out.println("[나만의 메뉴 등록하기]");
-        menuList.menuListCheck();
+        menuList.showAllMenus();
         System.out.print("메뉴 목록 중, 나만의 메뉴로 등록할 메뉴 명을 입력해주세요 : ");
         String 입력한메뉴명 = sc.nextLine();
         Menu 찾은메뉴 = menuList.findMenu(입력한메뉴명);

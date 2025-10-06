@@ -100,31 +100,60 @@ public class Main {
 
                             // 1-2. 등록 메뉴 확인 (Read)
                             else if (choice == 2) {
-                                menuList.menuListCheck();
+                                menuList.showAllMenus();
                             }
 
                             // 1-3. 메뉴 수정
                             else if (choice == 3) {
-                                // todo : 메서드에 내용 합치기
-                                System.out.println("[메뉴 수정]");
-                                System.out.println("어떤 메뉴를 수정할까요?");
-                                menuList.menuListCheck();
+                                System.out.println("\n[메뉴 수정]");
+                                ArrayList<Menu> allMenus = menuList.showAndGetAllMenus();
+                                if (allMenus.isEmpty()) {
+                                    continue;
+                                }
 
-                                System.out.print("수정하고 싶은 메뉴의 메뉴명을 정확하게 입력해주세요 : ");
-                                String 수정할메뉴 = sc.nextLine();
-                                menuList.menuEdit(수정할메뉴);
+                                Menu targetMenu = null;
+                                while (true) {
+                                    System.out.print("수정할 메뉴의 번호를 입력하세요 (취소: 0) : ");
+                                    int selection = sc.nextInt();
+                                    sc.nextLine();
+                                    if (selection == 0) break;
+                                    if (selection >= 1 && selection <= allMenus.size()) {
+                                        // 번호로 targetMenu 찾기
+                                        targetMenu = allMenus.get(selection - 1);
+                                        break;
+                                    }
+                                    System.out.println("잘못된 번호입니다.");
+                                }
+
+                                if (targetMenu != null) {
+                                    // 찾은 메뉴 객체를 menuEdit 메서드에 직접 넘겨줌
+                                    menuList.menuEdit(targetMenu);
+                                }
                             }
 
                             // 1-4. 메뉴 삭제
-                            // todo : 메서드에 내용 합치기
                             else if (choice == 4) {
-                                System.out.println("[메뉴 목록]");
-                                menuList.menuListCheck();
+                                System.out.println("\n[메뉴 삭제]");
+                                ArrayList<Menu> allMenus = menuList.showAndGetAllMenus();
+                                if (allMenus.isEmpty()) continue;
 
-                                System.out.print("삭제할 메뉴명을 정확히 입력해주세요 : ");
-                                String 삭제할메뉴 = sc.nextLine();
-                                menuList.menuDelete(삭제할메뉴);
-                                System.out.println();
+                                Menu targetMenu = null;
+                                while (true) {
+                                    System.out.print("수정할 메뉴의 번호를 입력하세요 (취소: 0) : ");
+                                    int selection = sc.nextInt();
+                                    sc.nextLine();
+                                    if (selection == 0) break;
+                                    if (selection >= 1 && selection <= allMenus.size()) {
+                                        // 번호로 targetMenu 찾기
+                                        targetMenu = allMenus.get(selection - 1);
+                                        break;
+                                    }
+                                    System.out.println("잘못된 번호입니다.");
+                                }
+
+                                if (targetMenu != null) {
+                                    menuList.menuDelete(targetMenu);
+                                }
                             }
 
                             // 1-5. 뒤로가기
@@ -284,7 +313,6 @@ public class Main {
 
                                     // 1-2. 주문 상태 변경
                                     else if (orderMenuChoice == 2) {
-                                        orderList.showPendingOrders();
                                         orderList.updateOrderStatus();
                                     }
 
@@ -321,31 +349,89 @@ public class Main {
 
                                         // 3-2. 재고 수량 변경
                                         else if (choice == 2) {
-                                            System.out.println("[재고 수량 변경]");
-                                            menuList.showStockStatusForSeller(storeId);
+                                            System.out.println("\n[재고 수량 변경]");
 
-                                            System.out.print("수정할 메뉴의 ID를 입력해주세요 : ");
-                                            int menuId = sc.nextInt();
-                                            sc.nextLine();
+                                            // 1. 새 메서드를 호출하여 메뉴 목록을 보여주고, 리스트를 받아옴
+                                            ArrayList<Menu> sellableMenus = menuList.showAndGetSellableMenus(storeId);
+
+                                            // 판매 가능한 메뉴가 없으면 로직 종료
+                                            if (sellableMenus.isEmpty()) {
+                                                continue;
+                                            }
+
+                                            Menu targetMenu = null;
+                                            while (true) {
+                                                System.out.print("수정할 메뉴의 ID를 입력해주세요 (취소 : 0) : ");
+                                                int selection = sc.nextInt();
+                                                sc.nextLine();
+
+                                                if (selection == 0) {
+                                                    targetMenu = null; // 취소를 명시적으로 표시
+                                                    break;
+                                                }
+
+                                                if (selection >= 1 && selection <= sellableMenus.size()) {
+                                                    // 2. 입력받은 '번호'로 리스트에서 실제 Menu 객체를 찾음
+                                                    targetMenu = sellableMenus.get(selection - 1);
+                                                    break;
+                                                } else {
+                                                    System.out.println("잘못된 번호입니다. 목록에 있는 번호를 다시 입력해주세요.");
+                                                }
+                                            }
+
+                                            // 사용자가 취소를 선택한 경우
+                                            if (targetMenu == null) {
+                                                System.out.println("재고 수량 변경을 취소했습니다.");
+                                                continue;
+                                            }
+
 
                                             System.out.print("수정할 재고의 수량을 입력해주세요 : ");
                                             int newStock = sc.nextInt();
                                             sc.nextLine();
 
-                                            menuStatusList.updateStock(storeId, menuId, newStock);
+                                            // 3. 찾은 Menu 객체에서 UUID를 꺼내서 사용
+                                            menuStatusList.updateStock(storeId, targetMenu.getMenuId(), newStock);
                                         }
 
                                         // 3-3. 판매 상태 변경
                                         else if (choice == 3) {
-                                            System.out.println();
-                                            System.out.println("[판매 상태 변경]");
-                                            menuList.showStockStatusForSeller(storeId);
+                                            System.out.println("\n[판매 상태 변경]");
 
-                                            System.out.print("수정할 메뉴의 ID를 입력해주세요 : ");
-                                            int menuId = sc.nextInt();
-                                            sc.nextLine();
+                                            // 1. 메뉴 목록을 보여주고, 리스트를 받아옴
+                                            ArrayList<Menu> sellableMenus = menuList.showAndGetSellableMenus(storeId);
 
-                                            System.out.println("수정할 메뉴의 상태를 입력해주세요");
+                                            // 비어있다면,
+                                            if (sellableMenus.isEmpty()) {
+                                                continue;
+                                            }
+
+                                            Menu targetMenu = null;
+                                            // 2. 임시 번호를 입력받아 targetMenu를 찾는 로직
+                                            while (true) {
+                                                System.out.print("수정할 메뉴의 번호를 입력해주세요 (취소: 0) : ");
+                                                int selection = sc.nextInt();
+                                                sc.nextLine();
+
+                                                if (selection == 0) {
+                                                    targetMenu = null;
+                                                    break;
+                                                }
+
+                                                if (selection >= 1 && selection <= sellableMenus.size()) {
+                                                    targetMenu = sellableMenus.get(selection - 1);
+                                                    break;
+                                                } else {
+                                                    System.out.println("잘못된 번호입니다. 목록에 있는 번호를 다시 입력해주세요.");
+                                                }
+                                            }
+
+                                            if (targetMenu == null) {
+                                                System.out.println("판매 상태 변경을 취소했습니다.");
+                                                continue;
+                                            }
+
+                                            System.out.println("\n['" + targetMenu.getMenuName() + "' 메뉴의 상태를 변경합니다.");
                                             System.out.println("1. 판매 가능 (AVAILABLE)");
                                             System.out.println("2. 판매 중지 (SOLD_OUT)");
                                             System.out.print(" : ");
@@ -353,7 +439,6 @@ public class Main {
                                             sc.nextLine();
 
                                             MenuSaleStatus newstatus = null;
-
                                             if (statusChoice == 1) {
                                                 newstatus = MenuSaleStatus.AVAILABLE;
                                             } else if (statusChoice == 2) {
@@ -361,7 +446,9 @@ public class Main {
                                             }
 
                                             if (newstatus != null) {
-                                                menuStatusList.updateStatus(storeId, menuId, newstatus);
+                                                // 찾은 Menu 객체에서 UUID를 꺼내 사용
+                                                menuStatusList.updateStatus(storeId, targetMenu.getMenuId(), newstatus);
+                                                System.out.println("판매 상태가 '" + newstatus.getDisplayStatus() + "' (으)로 변경되었습니다.");
                                             } else {
                                                 System.out.println("번호를 잘못 입력하셨습니다. 이전 메뉴로 돌아갑니다.");
                                             }
@@ -385,7 +472,13 @@ public class Main {
 
                                 // 5. 판매 메뉴 관리
                                 else if (menuSelect == 5) {
-                                    menuList.showManageableMenuList(storeId);
+                                    ArrayList<Menu> allMenus = menuList.showAndGetManageableMenus(storeId);
+
+                                    // 메뉴가 비어있다면
+                                    if (allMenus.isEmpty()) {
+                                        continue;
+                                    }
+
                                     System.out.println();
                                     System.out.println("1. 판매 메뉴 등록하기");
                                     System.out.println("2. 판매 메뉴 삭제하기");
@@ -394,29 +487,48 @@ public class Main {
                                     int salesChoice = sc.nextInt();
                                     sc.nextLine();
 
-                                    // 5-1. 판매 메뉴 등록하기
-                                    if (salesChoice == 1) {
-                                        System.out.print("등록할 메뉴의 ID를 입력해주세요 : ");
-                                        int menuId = sc.nextInt();
-                                        sc.nextLine();
-
-                                        menuStatusList.registerMenuForSale(storeId, menuId);
-                                    }
-
-                                    // 5-2. 판매 메뉴 삭제하기
-                                    else if (salesChoice == 2) {
-                                        System.out.print("삭제할 메뉴의 ID를 입력해주세요 : ");
-                                        int menuId = sc.nextInt();
-                                        sc.nextLine();
-
-                                        menuStatusList.removeMenuForSale(storeId, menuId);
-                                    }
-
                                     // 5-3. 뒤로가기
-                                    else if (salesChoice == 3) {
+                                    if (salesChoice == 3) {
                                         continue;
                                     }
 
+                                    // 5-1 or 5-2
+                                    else if (salesChoice == 1 || salesChoice == 2) {
+                                        // 등록,삭제 메뉴 선택에 필요한 입력 한 번에 받기
+                                        Menu targetMenu = null;
+                                        while (true) {
+                                            System.out.print("작업할 메뉴의 번호를 입력해주세요 (취소 : 0) : ");
+                                            int selection = sc.nextInt();
+                                            sc.nextLine();
+
+                                            if (selection == 0) {
+                                                targetMenu = null;
+                                                break;
+                                            }
+
+                                            if (selection >= 1 && selection <= allMenus.size()) {
+                                                targetMenu = allMenus.get(selection - 1);
+                                                break;
+                                            } else {
+                                                System.out.println("잘못된 번호입니다. 목록에 있는 번호를 다시 입력해주세요.");
+                                            }
+                                        }
+
+                                        if (targetMenu == null) {
+                                            System.out.println("작업을 취소했습니다.");
+                                            continue;
+                                        }
+
+                                        // 5-1. 판매 메뉴 등록하기
+                                        if (salesChoice == 1) {
+                                            menuStatusList.registerMenuForSale(storeId, targetMenu.getMenuId());
+                                        }
+
+                                        // 5-2. 판매 메뉴 삭제하기
+                                        else if (salesChoice == 2) {
+                                            menuStatusList.removeMenuForSale(storeId, targetMenu.getMenuId());
+                                        }
+                                    }
                                 }
 
                                 // 6. 로그아웃
@@ -463,7 +575,7 @@ public class Main {
                                 System.out.println();
                                 System.out.println("안녕하세요 손님, 카페 주문 서비스입니다.");
                                 System.out.println("할 일을 선택해주세요.");
-                                System.out.println("1. 메뉴 선택");
+                                System.out.println("1. 메뉴 보기 및 주문");
                                 System.out.println("2. 주문 내역 확인 ");
                                 System.out.println("3. 오늘의 메뉴 확인");
                                 System.out.println("4. 나만의 메뉴 (찜)");
@@ -473,56 +585,50 @@ public class Main {
                                 int cusChoice = sc.nextInt();
                                 sc.nextLine();
 
-                                // 2-1. 메뉴 선택
+                                // 2-1. 메뉴 보기 및 주문
                                 if (cusChoice == 1) {
+                                    ArrayList<Menu> orderableMenus = menuList.showAndGetOrderableMenus(storeId);
+
+                                    // 주문할 메뉴가 없다면
+                                    if (orderableMenus.isEmpty()) {
+                                        continue;
+                                    }
+
                                     // 1. 장바구니
                                     ArrayList<OrderItem> cart = new ArrayList<>();
-
                                     // 2. 메뉴 담기
                                     while (true) {
-                                        // 메뉴 없을 때
-                                        if (menuList.menuIsEmpty()) {
-                                            System.out.println("등록된 메뉴가 없습니다. 메인 메뉴로 돌아갑니다.");
-                                            break;
+                                        System.out.print("주문할 메뉴의 번호를 입력해주세요 (주문 완료는 : 0 입력) : ");
+                                        int menuSelection = sc.nextInt();
+                                        sc.nextLine();
+
+
+                                        if (menuSelection == 0) {
+                                            break; // 주문 완료
                                         }
 
-                                        // 메뉴 있을 때
-                                        System.out.println("[전체 메뉴]");
-                                        menuList.menuListCheck(storeId);
-                                        System.out.print("주문할 메뉴명을 정확히 입력해주세요 (주문 완료는 '완료' 입력) : ");
-                                        String userInput = sc.nextLine();
-
-                                        if (userInput.equals("완료")) {
-                                            if (cart.isEmpty()) {
-                                                System.out.println("장바구니가 비어있습니다. 주문을 종료합니다.");
-                                            } else {
-                                                System.out.println("주문을 시작합니다.");
-                                            }
-                                            break;
+                                        if (menuSelection < 1 || menuSelection > orderableMenus.size()) {
+                                            System.out.println("잘못된 번호입니다. 다시 입력해주세요.");
+                                            continue; // 잘못된 번호면 다시 입력받기
                                         }
 
-                                        Menu targetMenu = menuList.findMenu(userInput);
+                                        // 유효한 번호임이 보장
+                                        Menu targetMenu = orderableMenus.get(menuSelection - 1);
 
-                                        if (targetMenu != null) {
-                                            // 재고 있을 때
-                                            if (menuStatusList.isAvailable(storeId, targetMenu.getMenuId())) {
-                                                OrderItem orderItem = new OrderItem(targetMenu);
-                                                orderItem.tempSelect();
-                                                orderItem.cupSelect();
-                                                orderItem.optionSelect(userInput, menuList);
-
-                                                cart.add(orderItem); // 장바구니에 추가
-                                                System.out.println(targetMenu.getMenuName() + "(이)가 장바구니에 담겼습니다.");
-                                            }
-                                            // 재고 없을 때
-                                            else {
-                                                System.out.println("죄송합니다. 선택하신 메뉴는 현재 품절입니다..");
-                                            }
-                                        } else {
-                                            System.out.println("메뉴명을 잘못 입력하셨습니다. 다시 시도해주세요.");
+                                        // 재고 있을 때
+                                        if (menuStatusList.isAvailable(storeId, targetMenu.getMenuId())) {
+                                            OrderItem newItem = createOrderItemWithOptions(targetMenu, menuList);
+                                            cart.add(newItem);
+                                            System.out.println("-> '" + targetMenu.getMenuName() + "' 메뉴가 장바구니에 담겼습니다.");
                                         }
+
+                                        // 재고 없을 때
+                                        else {
+                                            System.out.println("죄송합니다. '" + targetMenu.getMenuName() + "' 메뉴는 현재 품절입니다.");
+                                        }
+
                                         System.out.println("--- 현재 장바구니 : " + cart.size() + "개 ---");
-                                        System.out.println();
+
                                     }
 
                                     // 3. 주문 처리 (루프 끝난 후)
@@ -544,10 +650,7 @@ public class Main {
                                         }
 
                                         System.out.println("주문이 완료되었습니다. 주문 번호 : " + finalOrder.getOrderId());
-
                                     }
-
-
                                 }
 
                                 // 2-2. 주문 메뉴 확인
@@ -609,6 +712,70 @@ public class Main {
 
 
         }
+    }
+
+    public static OrderItem createOrderItemWithOptions(Menu menu, MenuList menuList) {
+        Scanner sc = new Scanner(System.in);
+        String finalOptions = "선택안함";
+        int finalPrice = menu.getMenuPrice();
+        String finalTemp = "ICE";    // 기본값
+        String finalCup = "일회용컵"; // 기본값
+
+        // 1. 추가 옵션 선택 (COFFEE, LATTE, TEA 등)
+        if (menu.getMenuOption() == MenuCategory.COFFEE) {
+            System.out.println("샷 옵션을 선택해주세요");
+            System.out.println("1.기본(2샷) | 2.연하게(1샷) | 3.샷추가(+500원) | 4.디카페인(+1000원)");
+            System.out.print(" -> 선택: ");
+            int choice = sc.nextInt(); sc.nextLine();
+            if (choice == 3) { finalPrice += 500; finalOptions = "샷추가(3샷)"; }
+            else if (choice == 4) { finalPrice += 1000; finalOptions = "디카페인"; }
+            else if (choice == 2) { finalOptions = "연하게(1샷)"; }
+            else { finalOptions = "기본(2샷)"; }
+        } else if (menu.getMenuOption() == MenuCategory.LATTE) {
+            System.out.println("우유 옵션을 선택해주세요");
+            System.out.println("1. 일반 우유 | 2. 오트(귀리) (+1000원)");
+            System.out.print(" -> 선택: ");
+            int choice = sc.nextInt(); sc.nextLine();
+            if (choice == 2) { finalPrice += 1000; finalOptions = "오트(귀리)"; }
+            else { finalOptions = "일반 우유"; }
+        } else if (menu.getMenuOption() == MenuCategory.TEA) {
+            System.out.println("물 양을 선택해주세요");
+            System.out.println("1. 보통 | 2. 적게");
+            System.out.print(" -> 선택: ");
+            int choice = sc.nextInt(); sc.nextLine();
+            if (choice == 2) { finalOptions = "물 양 적게"; }
+            else { finalOptions = "물 양 보통"; }
+        }
+
+        // 2. 온도 선택 (COFFEE 또는 TEA 카테고리일 경우)
+        if (menu.getMenuOption() == MenuCategory.COFFEE || menu.getMenuOption() == MenuCategory.TEA) {
+            while (true) {
+                System.out.println("1. HOT | 2. ICE");
+                System.out.print(" -> 온도를 선택해주세요 : ");
+                int choice = sc.nextInt(); sc.nextLine();
+                if (choice == 1) { finalTemp = "HOT"; break; }
+                else if (choice == 2) { finalTemp = "ICE"; break; }
+                else { System.out.println("잘못된 번호입니다."); }
+            }
+        }
+
+        // 3. 컵 선택
+        while (true) {
+            System.out.println("1. 매장컵 | 2. 개인컵 (-300원) | 3. 일회용컵");
+            System.out.print(" -> 컵을 선택해주세요 : ");
+            int choice = sc.nextInt(); sc.nextLine();
+            if (choice == 1) { finalCup = "매장컵"; break;
+            } else if (choice == 2) {
+                finalCup = "개인컵";
+                finalPrice -= 300;
+                break;
+            } else if (choice == 3) { finalCup = "일회용컵"; break;
+            } else { System.out.println("잘못된 번호입니다."); }
+        }
+
+        System.out.println("\n-> [선택 완료] " + menu.getMenuName() + " (온도: " + finalTemp + ", 컵: " + finalCup + ", 옵션: " + finalOptions + ")");
+
+        return new OrderItem(menu, finalPrice, finalTemp, finalCup, finalOptions);
     }
 }
 

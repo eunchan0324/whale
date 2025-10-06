@@ -2,10 +2,7 @@ package menu;
 
 import constant.Constants;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.UUID;
@@ -13,16 +10,27 @@ import java.util.UUID;
 public class MenuStatusList {
     ArrayList<MenuStatus> menuStatuses = new ArrayList<>();
 
+    // 생성자 - loadMenuStatusFile()
+    public MenuStatusList() {
+        try {
+            Path menuFilePath = Constants.BASE_PATH.resolve("Menu_status.txt");
+            if (menuFilePath.toFile().exists()) {
+                loadMenuStatusFile();
+            }
+        } catch (IOException e) {
+            System.out.println("메뉴 상태 파일 로딩 중 오류가 발생했습니다.");
+        }
+    }
+
     // Menu_status.txt save
     public void saveMenuStatusFile() throws IOException {
         Path menuFilePath = Constants.BASE_PATH.resolve("Menu_status.txt");
         FileWriter writer = new FileWriter(menuFilePath.toFile());
 
-        for (int i = 0; i < menuStatuses.size(); i++) {
-            MenuStatus status = menuStatuses.get(i);
+        for (MenuStatus status : menuStatuses) {
             writer.write(status.getStoreId() + "," +
-                    status.getMenuId() + "," +
-                    status.getStatus() + "," +
+                    status.getMenuId().toString() + "," +
+                    status.getStatus().name() + "," +
                     status.getStock() + "\n");
         }
         writer.close();
@@ -37,33 +45,28 @@ public class MenuStatusList {
         while ((line = reader.readLine()) != null) {
             String[] parts = line.split(",");
             int storeId = Integer.parseInt(parts[0]);
-            int menuId = Integer.parseInt(parts[1]);
+            UUID menuId = UUID.fromString(parts[1]);
             MenuSaleStatus status = MenuSaleStatus.valueOf(parts[2]);
             int stock = Integer.parseInt(parts[3]);
 
-            MenuStatus menuStatus = new MenuStatus(menuId, storeId, status, stock);
+            MenuStatus menuStatus = new MenuStatus(storeId, menuId, status, stock);
             menuStatuses.add(menuStatus);
         }
         reader.close();
     }
 
-    // 생성자 - loadMenuStatusFile()
-    public MenuStatusList() throws IOException {
-        loadMenuStatusFile();
-    }
-
     // 판매자 id로 menu.MenuStatus 객체 반환
     public MenuStatus findMenuStatus(int storeId, UUID menuId) {
-        for (int i = 0; i < menuStatuses.size(); i++) {
-            if (menuStatuses.get(i).getStoreId() == storeId && menuStatuses.get(i).getMenuId() == menuId) {
-                return menuStatuses.get(i);
+        for (MenuStatus status : menuStatuses) {
+            if (status.getStoreId() == storeId && status.getMenuId().equals(menuId)) {
+                return status;
             }
         }
         return null;
     }
 
     // 재고 수량 변경
-    public void updateStock(int storeId, int menuId, int newStock) throws IOException {
+    public void updateStock(int storeId, UUID menuId, int newStock) throws IOException {
 
         MenuStatus menuStatus = findMenuStatus(storeId, menuId);
 
@@ -81,11 +84,10 @@ public class MenuStatusList {
         }
 
         saveMenuStatusFile(); // 파일 저장
-
     }
 
     // 판매 상태 변경
-    public void updateStatus(int storeId, int menuId, MenuSaleStatus newStatus) throws IOException {
+    public void updateStatus(int storeId, UUID menuId, MenuSaleStatus newStatus) throws IOException {
         MenuStatus menuStatus = findMenuStatus(storeId, menuId);
 
         // 판매 상태가 있다면 :
@@ -114,7 +116,7 @@ public class MenuStatusList {
      * @return 성공하면 ture, 메뉴를 찾지 못하면 false
      * @throws IOException
      */
-    public boolean decreaseStock(int storeId, int menuId) throws IOException {
+    public boolean decreaseStock(int storeId, UUID menuId) throws IOException {
 
         MenuStatus menuStatus = findMenuStatus(storeId, menuId);
 
@@ -152,7 +154,7 @@ public class MenuStatusList {
 
         // 2. 등록되지 않은 메뉴라면, 새로운 menu.MenuStatus 객체 생성
         // 초기 재고는 0개, 판매 상태는 AVAILABLE
-        MenuStatus newMenuStatus = new MenuStatus(menuId, storeId, MenuSaleStatus.AVAILABLE, 0);
+        MenuStatus newMenuStatus = new MenuStatus(storeId, menuId, MenuSaleStatus.AVAILABLE, 0);
 
         // 3. 리스트에 추가
         menuStatuses.add(newMenuStatus);
@@ -163,7 +165,7 @@ public class MenuStatusList {
     }
 
     // 판매 메뉴 삭제
-    public void removeMenuForSale(int storeId, int menuId) throws IOException {
+    public void removeMenuForSale(int storeId, UUID menuId) throws IOException {
         MenuStatus targetMenuState = findMenuStatus(storeId, menuId);
 
         if (targetMenuState == null) {

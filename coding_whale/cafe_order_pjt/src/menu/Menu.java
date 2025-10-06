@@ -34,10 +34,6 @@ public class Menu {
         return menuId;
     }
 
-    public static void setNextId(int nextId) {
-        Menu.nextId = nextId;
-    }
-
     public String getMenuName() {
         return menuName;
     }

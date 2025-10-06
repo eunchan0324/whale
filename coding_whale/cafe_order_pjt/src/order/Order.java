@@ -2,10 +2,11 @@ package order;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.UUID;
 
 // Order 기능
 public class Order {
-    private int orderId;
+    private UUID orderId;
     private String customerId;
     private int storeId;
     private LocalDateTime orderTime;
@@ -13,7 +14,9 @@ public class Order {
     private OrderStatus status;
     private final ArrayList<OrderItem> items = new ArrayList<>();
 
+    // 신규 주문용 생성자
     public Order(String customerId, int storeId, int totalPrice, OrderStatus status, ArrayList<OrderItem> items) {
+        this.orderId = UUID.randomUUID();
         this.customerId = customerId;
         this.storeId = storeId;
         this.orderTime = LocalDateTime.now();
@@ -22,7 +25,8 @@ public class Order {
         this.items.addAll(items);
     }
 
-    public Order(int orderId, String customerId, int storeId, LocalDateTime orderTime, int totalPrice, OrderStatus status) {
+    // 파일 로드용 생성자
+    public Order(UUID orderId, String customerId, int storeId, LocalDateTime orderTime, int totalPrice, OrderStatus status) {
         this.orderId = orderId;
         this.customerId = customerId;
         this.storeId = storeId;
@@ -32,12 +36,8 @@ public class Order {
     }
 
 
-    public int getOrderId() {
+    public UUID getOrderId() {
         return orderId;
-    }
-
-    public void setOrderId(int orderId) {
-        this.orderId = orderId;
     }
 
     public String getCustomerId() {

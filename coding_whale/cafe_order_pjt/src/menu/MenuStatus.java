@@ -1,23 +1,25 @@
 package menu;
 
+import java.util.UUID;
+
 public class MenuStatus {
     private int storeId;
-    private int menuId;
+    private UUID menuId;
     private MenuSaleStatus status;
     private int stock;
 
-    public MenuStatus(int storeId, int menuId, MenuSaleStatus status, int stock) {
+    public MenuStatus(int storeId, UUID menuId, MenuSaleStatus status, int stock) {
         this.storeId = storeId;
         this.menuId = menuId;
         this.status = status;
         this.stock = stock;
     }
 
-    public int getMenuId() {
+    public UUID getMenuId() {
         return menuId;
     }
 
-    public void setMenuId(int menuId) {
+    public void setMenuId(UUID menuId) {
         this.menuId = menuId;
     }
 
