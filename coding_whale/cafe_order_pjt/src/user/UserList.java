@@ -131,7 +131,7 @@ public class UserList {
                         continue;
                     }
 
-                    // 모든 검증이 통과되었으므로 사용자 생성 후 루프 탈출
+                    // 모든 검증이 통과되었으므로 사용자 생성 후 while문 탈출
                     User user = new User(thisId, thisPassword, role, storeId);
                     targetList.add(user);
                     saveSellerFile();

@@ -53,7 +53,7 @@ public class OrderList {
         for (Order order : orderList) {
             for (OrderItem item : order.getItems()) {
                 orderItemsWriter.write(order.getOrderId().toString() + "," +
-                        item.getMenu().getMenuId().toString() + "," +
+                        item.getMenu().getId().toString() + "," +
                         item.getFinalPrice() + "," +
                         item.getFinalTemp() + "," +
                         item.getFinalCup() + "," +
@@ -141,7 +141,7 @@ public class OrderList {
 
             // 2. 안쪽 루프 : 해당 주문(order.Order)에 포함된 메뉴(order.OrderItem) 목록 순회
             for (OrderItem item : order.getItems()) {
-                System.out.println("- 메뉴 : " + item.getMenu().getMenuName() +
+                System.out.println("- 메뉴 : " + item.getMenu().getName() +
                         " | 온도 : " + item.getFinalTemp() +
                         " | 컵 : " + item.getFinalCup() +
                         " | 옵션 : " + item.getFinalOptions());
@@ -168,7 +168,7 @@ public class OrderList {
                 System.out.println("--- 주문 메뉴 목록 ---");
 
                 for (OrderItem item : order.getItems()) {
-                    System.out.println("- 메뉴 : " + item.getMenu().getMenuName() +
+                    System.out.println("- 메뉴 : " + item.getMenu().getName() +
                             " | 온도 : " + item.getFinalTemp() +
                             " | 컵 : " + item.getFinalCup() +
                             " | 옵션 : " + item.getFinalOptions());
@@ -215,7 +215,7 @@ public class OrderList {
 
             // 2. 안쪽 루프 : 해당 주문(order.Order)에 포함된 메뉴(order.OrderItem) 목록 순회
             for (OrderItem item : order.getItems()) {
-                System.out.println("- 메뉴 : " + item.getMenu().getMenuName() +
+                System.out.println("- 메뉴 : " + item.getMenu().getName() +
                         " | 온도 : " + item.getFinalTemp() +
                         " | 컵 : " + item.getFinalCup() +
                         " | 옵션 : " + item.getFinalOptions());

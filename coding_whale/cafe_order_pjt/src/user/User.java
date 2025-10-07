@@ -7,12 +7,14 @@ public class User {
     private int storeId; // for seller role
 
 
+    // ADMIN, CUSTOMER 회원 생성시 사용하는 생성자
     public User(String id, String password, UserRole role) {
         this.id = id;
         this.password = password;
         this.role = role;
     }
 
+    // SELLER 회원생성 시 사용하는 생성자
     public User(String id, String password, UserRole role, int storeId) {
         this.id = id;
         this.password = password;

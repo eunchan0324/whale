@@ -15,7 +15,7 @@ public class MenuStatusList {
         try {
             Path menuFilePath = Constants.BASE_PATH.resolve("Menu_status.txt");
             if (menuFilePath.toFile().exists()) {
-                loadMenuStatusFile();
+                loadFile();
             }
         } catch (IOException e) {
             System.out.println("메뉴 상태 파일 로딩 중 오류가 발생했습니다.");
@@ -23,7 +23,7 @@ public class MenuStatusList {
     }
 
     // Menu_status.txt save
-    public void saveMenuStatusFile() throws IOException {
+    public void saveFile() throws IOException {
         Path menuFilePath = Constants.BASE_PATH.resolve("Menu_status.txt");
         FileWriter writer = new FileWriter(menuFilePath.toFile());
 
@@ -37,7 +37,7 @@ public class MenuStatusList {
     }
 
     // Menu_status.txt load
-    public void loadMenuStatusFile() throws IOException {
+    public void loadFile() throws IOException {
         Path menuFilePath = Constants.BASE_PATH.resolve("Menu_status.txt");
         BufferedReader reader = new BufferedReader(new FileReader(menuFilePath.toFile()));
 
@@ -46,7 +46,7 @@ public class MenuStatusList {
             String[] parts = line.split(",");
             int storeId = Integer.parseInt(parts[0]);
             UUID menuId = UUID.fromString(parts[1]);
-            MenuSaleStatus status = MenuSaleStatus.valueOf(parts[2]);
+            EMenuSaleStatus status = EMenuSaleStatus.valueOf(parts[2]);
             int stock = Integer.parseInt(parts[3]);
 
             MenuStatus menuStatus = new MenuStatus(storeId, menuId, status, stock);
@@ -78,16 +78,16 @@ public class MenuStatusList {
 
         // 재고 정보가 없으면 :
         else {
-            MenuStatus newMenuStatus = new MenuStatus(storeId, menuId, MenuSaleStatus.AVAILABLE, newStock);
+            MenuStatus newMenuStatus = new MenuStatus(storeId, menuId, EMenuSaleStatus.AVAILABLE, newStock);
             menuStatuses.add(newMenuStatus);
             System.out.println("새로운 메뉴의 재고가 등록되었습니다.");
         }
 
-        saveMenuStatusFile(); // 파일 저장
+        saveFile(); // 파일 저장
     }
 
     // 판매 상태 변경
-    public void updateStatus(int storeId, UUID menuId, MenuSaleStatus newStatus) throws IOException {
+    public void updateStatus(int storeId, UUID menuId, EMenuSaleStatus newStatus) throws IOException {
         MenuStatus menuStatus = findMenuStatus(storeId, menuId);
 
         // 판매 상태가 있다면 :
@@ -103,7 +103,7 @@ public class MenuStatusList {
             System.out.println("새로운 메뉴의 상태가 " + newStatus.name() + "(으)로 등록되었습니다.");
         }
 
-        saveMenuStatusFile(); // 파일 저장
+        saveFile(); // 파일 저장
     }
 
 
@@ -126,10 +126,12 @@ public class MenuStatusList {
         }
 
         int currentStock = menuStatus.getStock();
-        menuStatus.setStock(currentStock - 1);
 
-        saveMenuStatusFile();
-        return true;
+        if (menuStatus.setStock(currentStock - 1)) {
+            saveFile();
+            return true;
+        }
+        return false;
     }
 
     // 판매가 가능한 상황인지 확인 (재고0이상 / 상태 AVAILABLE)
@@ -141,7 +143,7 @@ public class MenuStatusList {
         }
 
         // 조건식이 true 또는 false를 반환
-        return menuStatus.getStock() > 0 && menuStatus.getStatus() == MenuSaleStatus.AVAILABLE;
+        return menuStatus.getStock() > 0 && menuStatus.getStatus() == EMenuSaleStatus.AVAILABLE;
     }
 
     // 판매 메뉴 등록
@@ -154,13 +156,13 @@ public class MenuStatusList {
 
         // 2. 등록되지 않은 메뉴라면, 새로운 menu.MenuStatus 객체 생성
         // 초기 재고는 0개, 판매 상태는 AVAILABLE
-        MenuStatus newMenuStatus = new MenuStatus(storeId, menuId, MenuSaleStatus.AVAILABLE, 0);
+        MenuStatus newMenuStatus = new MenuStatus(storeId, menuId, EMenuSaleStatus.AVAILABLE, 0);
 
         // 3. 리스트에 추가
         menuStatuses.add(newMenuStatus);
 
         // 4. 파일에 저장
-        saveMenuStatusFile();
+        saveFile();
         System.out.println("성공적으로 판매 메뉴에 등록되었습니다. 재고 관리를 통해 수량을 조절해주세요.");
     }
 
@@ -175,7 +177,7 @@ public class MenuStatusList {
 
         menuStatuses.remove(targetMenuState);
 
-        saveMenuStatusFile();
+        saveFile();
         System.out.println("성공적으로 판매 메뉴가 삭제되었습니다.");
     }
 

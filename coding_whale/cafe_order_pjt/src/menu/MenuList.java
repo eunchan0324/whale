@@ -22,7 +22,7 @@ public class MenuList {
     public MenuList(MenuStatusList menuStatusList, StoreList storeList) throws IOException {
         this.menuStatusList = menuStatusList;
         this.storeList = storeList;
-        loadMenuFile();
+        loadFile();
     }
 
     // menu.Menu Create
@@ -54,7 +54,7 @@ public class MenuList {
 
         Path menuFilePath = Constants.BASE_PATH.resolve("Menus.txt");
         FileWriter writer = new FileWriter(menuFilePath.toFile(), true);
-        writer.write(menu.getMenuId() + "," + menu.getMenuName() + "," + menu.getMenuPrice() + "," + menu.getMenuOption() + "\n");
+        writer.write(menu.getId() + "," + menu.getName() + "," + menu.getPrice() + "," + menu.getOption() + "\n");
         writer.close();
 
         System.out.println("등록이 완료되었습니다.");
@@ -72,10 +72,10 @@ public class MenuList {
         // 메뉴가 1개 이상 등록되어있다면
         System.out.println("[\n 현재 등록된 전체 메뉴 목록]");
         for (Menu menu : menus) {
-            String menuinfo = "- 이름 : " + menu.getMenuName() +
-                    " | 가격 : " + menu.getMenuPrice() + "원" +
-                    " | 카테고리 : " + menu.getMenuOption().name() +
-                    " | ID : " + menu.getMenuId().toString();
+            String menuinfo = "- 이름 : " + menu.getName() +
+                    " | 가격 : " + menu.getPrice() + "원" +
+                    " | 카테고리 : " + menu.getOption().name() +
+                    " | ID : " + menu.getId().toString();
             System.out.println(menuinfo);
         }
         System.out.println("---------------------------------");
@@ -85,7 +85,7 @@ public class MenuList {
     public ArrayList<Menu> showAndGetOrderableMenus(int storeId) {
         ArrayList<Menu> orderableMenus = new ArrayList<>();
         for (Menu menu : menus) {
-            if (menuStatusList.isAvailable(storeId, menu.getMenuId())) {
+            if (menuStatusList.isAvailable(storeId, menu.getId())) {
                 orderableMenus.add(menu);
             }
         }
@@ -100,7 +100,7 @@ public class MenuList {
         System.out.println("\n--- 주문 가능한 메뉴 목록 ---");
         for (int i = 0; i < orderableMenus.size(); i++) {
             Menu menu = orderableMenus.get(i);
-            System.out.println((i + 1) + ". " + menu.getMenuName() + " | " + menu.getMenuPrice() + "원");
+            System.out.println((i + 1) + ". " + menu.getName() + " | " + menu.getPrice() + "원");
         }
         System.out.println("----------------------------");
 
@@ -117,9 +117,9 @@ public class MenuList {
 
         // 1. 판매 가능한 메뉴만 필터링해서 sellableMenus리스트에 추가
         for (Menu menu : menus) {
-            MenuStatus status = menuStatusList.findMenuStatus(storeId, menu.getMenuId());
+            MenuStatus status = menuStatusList.findMenuStatus(storeId, menu.getId());
             // 판매중(AVAILABLE) 상태인 메뉴만 대상으로 함
-            if (status != null && status.getStatus() == MenuSaleStatus.AVAILABLE) {
+            if (status != null && status.getStatus() == EMenuSaleStatus.AVAILABLE) {
                 sellableMenus.add((menu));
             }
         }
@@ -133,8 +133,8 @@ public class MenuList {
         // 2. 필터링된 메뉴 목록을 '임시 번호'와 함께 출력
         for (int i = 0; i < sellableMenus.size(); i++) {
             Menu menu = sellableMenus.get(i);
-            MenuStatus status = menuStatusList.findMenuStatus(storeId, menu.getMenuId()); // 재고를 가져오기 위해 다시 찾음
-            System.out.println((i + 1) + ". " + menu.getMenuName() +
+            MenuStatus status = menuStatusList.findMenuStatus(storeId, menu.getId()); // 재고를 가져오기 위해 다시 찾음
+            System.out.println((i + 1) + ". " + menu.getName() +
                     " | 재고 : " + status.getStock() +
                     " | 상태 : " + status.getStatus().getDisplayStatus());
         }
@@ -157,7 +157,7 @@ public class MenuList {
         boolean checker = false;
 
         for (int i = 0; i < menus.size(); i++) {
-            if (menus.get(i).getMenuName().equals(수정할메뉴)) {
+            if (menus.get(i).getName().equals(수정할메뉴)) {
                 System.out.println("수정할 메뉴는 \"" + menus.get(i) + "\" 입니다.");
                 System.out.println();
 
@@ -170,7 +170,7 @@ public class MenuList {
                     System.out.print("수정할 메뉴명을 입력해주세요 : ");
                     String 수정할메뉴명 = sc.nextLine();
 
-                    menus.get(i).setMenuName(수정할메뉴명);
+                    menus.get(i).setName(수정할메뉴명);
                     System.out.println("메뉴명이 수정되었습니다.");
                     System.out.println();
                 }
@@ -180,7 +180,7 @@ public class MenuList {
                     System.out.print("수정할 가격을 입력해주세요 (숫자만) : ");
                     int 수정할가격 = sc.nextInt();
 
-                    menus.get(i).setMenuPrice(수정할가격);
+                    menus.get(i).setPrice(수정할가격);
                     System.out.println("메뉴 가격이 수정되었습니다.");
                     System.out.println();
                 }
@@ -194,7 +194,7 @@ public class MenuList {
                     sc.nextLine();
 
                     MenuCategory menuOption = MenuCategory.fromValue(수정할옵션);
-                    menus.get(i).setMenuOption(menuOption);
+                    menus.get(i).setOption(menuOption);
                     System.out.println("메뉴 옵션이 수정되었습니다.");
                     System.out.println();
                 }
@@ -202,7 +202,7 @@ public class MenuList {
 
                 checker = true;
                 if (checker) {
-                    saveMenuFile();
+                    saveFile();
                 }
                 break;
             }
@@ -218,7 +218,7 @@ public class MenuList {
         boolean checker = false;
 
         for (int i = 0; i < menus.size(); i++) {
-            if (menus.get(i).getMenuName().equals(삭제할메뉴)) {
+            if (menus.get(i).getName().equals(삭제할메뉴)) {
                 menus.remove(i);
                 System.out.println("선택한 메뉴가 삭제되었습니다.");
                 checker = true;
@@ -227,7 +227,7 @@ public class MenuList {
         }
 
         if (checker) {
-            saveMenuFile();
+            saveFile();
         }
 
         if (!checker) {
@@ -247,7 +247,7 @@ public class MenuList {
     // find menu.Menu - 매개변수와 같은 이름의 _객체 반환
     public Menu findMenu(String 주문할메뉴) {
         for (Menu menu : menus) {
-            if (menu.getMenuName().equals(주문할메뉴)) {
+            if (menu.getName().equals(주문할메뉴)) {
                 return menu;
             }
         }
@@ -255,23 +255,22 @@ public class MenuList {
     }
 
     // Menu 파일 save (Menus.txt)
-    public void saveMenuFile() throws IOException {
+    public void saveFile() throws IOException {
         Path menuFilePath = Constants.BASE_PATH.resolve("Menus.txt");
         FileWriter writer = new FileWriter(menuFilePath.toFile());
 
         for (Menu menu : menus) {
-            writer.write(menu.getMenuId().toString() + "," + menu.getMenuName() + "," + menu.getMenuPrice() + "," + menu.getMenuOption().name() + "\n");
+            writer.write(menu.getId().toString() + "," + menu.getName() + "," + menu.getPrice() + "," + menu.getOption().name() + "\n");
         }
         writer.close();
         System.out.println("--- 변경사항이 저장되었습니다---\n");
     }
 
     // Menu 파일 load (Menus.txt)
-    public void loadMenuFile() throws IOException {
+    public void loadFile() throws IOException {
         Path menuFilePath = Constants.BASE_PATH.resolve("Menus.txt");
         BufferedReader reader = new BufferedReader(new FileReader(menuFilePath.toFile()));
 
-        // todo : UU id로 변경
         String line;
         while ((line = reader.readLine()) != null) {
             String[] parts = line.split(",");
@@ -297,7 +296,7 @@ public class MenuList {
 
         String 추천메뉴명 = sc.nextLine();
         if (findMenu(추천메뉴명) != null) {
-            System.out.println(findMenu(추천메뉴명).getMenuName() + "를 선택하였습니다. 추천 이유를 번호로 선택해주세요");
+            System.out.println(findMenu(추천메뉴명).getName() + "를 선택하였습니다. 추천 이유를 번호로 선택해주세요");
             System.out.println("1. Best 메뉴 선정");
             System.out.println("2. New 메뉴 선정");
             System.out.print(" : ");
@@ -310,9 +309,9 @@ public class MenuList {
             // Best 를 선택했다면,
             // todo : Enum으로 리팩토링
             if (추천이유 == 1) {
-                찾은메뉴.setMenuRecommend("Best");
+                찾은메뉴.setRecommend("Best");
             } else if (추천이유 == 2) {
-                찾은메뉴.setMenuRecommend("New");
+                찾은메뉴.setRecommend("New");
             }
 
 
@@ -329,7 +328,7 @@ public class MenuList {
         boolean checker = false;
 
         for (int i = 0; i < menus.size(); i++) {
-            if ("Best".equals(menus.get(i).getMenuRecommend())) {
+            if ("Best".equals(menus.get(i).getRecommend())) {
                 hasBestMenu = true;
                 checker = true;
             }
@@ -338,15 +337,15 @@ public class MenuList {
         if (hasBestMenu == true) {
             System.out.println("[Best menu.Menu]");
             for (int i = 0; i < menus.size(); i++) {
-                if ("Best".equals(menus.get(i).getMenuRecommend())) {
-                    System.out.println("- " + menus.get(i).getMenuName());
+                if ("Best".equals(menus.get(i).getRecommend())) {
+                    System.out.println("- " + menus.get(i).getName());
                 }
             }
             System.out.println();
         }
 
         for (int i = 0; i < menus.size(); i++) {
-            if ("New".equals(menus.get(i).getMenuRecommend())) {
+            if ("New".equals(menus.get(i).getRecommend())) {
                 hasNewMenu = true;
                 checker = true;
             }
@@ -355,8 +354,8 @@ public class MenuList {
         if (hasNewMenu == true) {
             System.out.println("[New menu.Menu]");
             for (int i = 0; i < menus.size(); i++) {
-                if ("New".equals(menus.get(i).getMenuRecommend())) {
-                    System.out.println("- " + menus.get(i).getMenuName());
+                if ("New".equals(menus.get(i).getRecommend())) {
+                    System.out.println("- " + menus.get(i).getName());
                 }
             }
             System.out.println();
@@ -371,7 +370,7 @@ public class MenuList {
     // menuId로 해당 객체 반환하기
     public Menu getMenuById(UUID menuId) {
         for (Menu menu : menus) {
-            if (menu.getMenuId() == menuId) {
+            if (menu.getId() == menuId) {
                 return menu;
             }
         }
@@ -391,10 +390,10 @@ public class MenuList {
 
         for (int i = 0; i < menus.size(); i++) {
             Menu menu = menus.get(i);
-            MenuStatus status = menuStatusList.findMenuStatus(storeId, menu.getMenuId());
-            String saleStatus = (status != null && status.getStatus() == MenuSaleStatus.AVAILABLE) ? "[판매중]" : "[미판매중]";
+            MenuStatus status = menuStatusList.findMenuStatus(storeId, menu.getId());
+            String saleStatus = (status != null && status.getStatus() == EMenuSaleStatus.AVAILABLE) ? "[판매중]" : "[미판매중]";
 
-            System.out.println((i + 1) + ". " + menu.getMenuName() + " " + saleStatus);
+            System.out.println((i + 1) + ". " + menu.getName() + " " + saleStatus);
         }
         System.out.println("---------------------------------");
         return menus;
@@ -415,7 +414,7 @@ public class MenuList {
 
         for (int i = 0; i < menus.size(); i++) {
             Menu menu = menus.get(i);
-            System.out.println((i + 1) + ". " + menu.getMenuName() + " | " + menu.getMenuPrice() + "원");
+            System.out.println((i + 1) + ". " + menu.getName() + " | " + menu.getPrice() + "원");
         }
         System.out.println("---------------------------------");
         return menus;

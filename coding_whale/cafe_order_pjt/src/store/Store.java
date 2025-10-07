@@ -5,6 +5,7 @@ public class Store {
     private int storeId;
     private String storeName;
 
+    // 생성자 (신규 지점 생성, 기존 파일 로드 시)
     public Store(int storeId, String storeName) {
         this.storeId = storeId;
         this.storeName = storeName;

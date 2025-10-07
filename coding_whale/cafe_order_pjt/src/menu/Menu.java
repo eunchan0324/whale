@@ -4,70 +4,71 @@ import java.util.UUID;
 
 // Menu 기능
 public class Menu {
-    private UUID menuId;
-    private String menuName;
-    private int menuPrice;
-    private MenuCategory menuOption;
-    private String menuRecommend;
+    private UUID id;
+    private String name;
+    private int price;
+    private MenuCategory option;
+    private String recommend;
 
     // 신규 메뉴 생성 시 사용하는 생성자
-    public Menu(String menuName, int menuPrice, MenuCategory menuOption) {
-        this.menuId = UUID.randomUUID();
-        this.menuName = menuName;
-        this.menuPrice = menuPrice;
-        this.menuOption = menuOption;
+    public Menu(String name, int price, MenuCategory option) {
+        this(UUID.randomUUID(), name, price, option);
     }
 
     // 파일에서 기존 메뉴를 로드할 때 사용할 생성자
-    public Menu(UUID menuId, String menuName, int menuPrice, MenuCategory menuOption) {
-        this.menuId = menuId;
-        this.menuName = menuName;
-        this.menuPrice = menuPrice;
-        this.menuOption = menuOption;
+    public Menu(UUID id, String name, int price, MenuCategory option) {
+        // 가격 음수 검증
+        if (price < 0) {
+            return;
+        }
+        this.id = id;
+        this.name = name;
+        this.price = price;
+        this.option = option;
     }
 
     public Menu(String recomReason) {
-        this.menuRecommend = recomReason;
+        this.recommend = recomReason;
     }
 
-    public UUID getMenuId() {
-        return menuId;
+    public UUID getId() {
+        return id;
     }
 
-    public String getMenuName() {
-        return menuName;
+    public String getName() {
+        return name;
     }
 
-    public void setMenuName(String menuName) {
-        this.menuName = menuName;
+    public void setName(String name) {
+        this.name = name;
     }
 
-    public int getMenuPrice() {
-        return menuPrice;
+    public int getPrice() {
+        return price;
     }
 
-    public void setMenuPrice(int menuPrice) {
-        this.menuPrice = menuPrice;
+    public void setPrice(int price) {
+        this.price = price;
     }
 
-    public MenuCategory getMenuOption() {
-        return menuOption;
+    public MenuCategory getOption() {
+        return option;
     }
 
-    public void setMenuOption(MenuCategory menuOption) {
-        this.menuOption = menuOption;
+    public void setOption(MenuCategory option) {
+        this.option = option;
     }
 
-    public String getMenuRecommend() {
-        return menuRecommend;
+    public String getRecommend() {
+        return recommend;
     }
 
-    public void setMenuRecommend(String menuRecommend) {
-        this.menuRecommend = menuRecommend;
+    public void setRecommend(String recommend) {
+        this.recommend = recommend;
     }
 
     @Override
     public String toString() {
-        return "[1.메뉴 이름 = " + menuName + ", 2.가격 = " + menuPrice + '원' + ", 3.옵션 = " + menuOption + ", 4.추천 여부 = " + menuRecommend + ']';
+        return "[1.메뉴 이름 = " + name + ", 2.가격 = " + price + '원' + ", 3.옵션 = " + option + ", 4.추천 여부 = " + recommend + ']';
     }
 }

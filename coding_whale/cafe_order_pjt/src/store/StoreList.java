@@ -95,6 +95,7 @@ public class StoreList {
 
     // 신규 지점 등록
     public boolean registerNewStore(String newStoreName) {
+        // 중복 검사, 중복시 false 리턴
         if (isDuplicateName(newStoreName)) {
             return false;
         }
@@ -118,7 +119,6 @@ public class StoreList {
             saveStoreFile();
         } catch (IOException e) {
             System.out.println("파일 저장 중 오류가 발생했습니다.");
-            // 심각한 오류이므로, 실패를 알릴 수도 있음
             return false;
         }
 

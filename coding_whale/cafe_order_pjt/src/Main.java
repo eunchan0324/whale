@@ -391,7 +391,7 @@ public class Main {
                                             sc.nextLine();
 
                                             // 3. 찾은 Menu 객체에서 UUID를 꺼내서 사용
-                                            menuStatusList.updateStock(storeId, targetMenu.getMenuId(), newStock);
+                                            menuStatusList.updateStock(storeId, targetMenu.getId(), newStock);
                                         }
 
                                         // 3-3. 판매 상태 변경
@@ -431,23 +431,23 @@ public class Main {
                                                 continue;
                                             }
 
-                                            System.out.println("\n['" + targetMenu.getMenuName() + "' 메뉴의 상태를 변경합니다.");
+                                            System.out.println("\n['" + targetMenu.getName() + "' 메뉴의 상태를 변경합니다.");
                                             System.out.println("1. 판매 가능 (AVAILABLE)");
                                             System.out.println("2. 판매 중지 (SOLD_OUT)");
                                             System.out.print(" : ");
                                             int statusChoice = sc.nextInt();
                                             sc.nextLine();
 
-                                            MenuSaleStatus newstatus = null;
+                                            EMenuSaleStatus newstatus = null;
                                             if (statusChoice == 1) {
-                                                newstatus = MenuSaleStatus.AVAILABLE;
+                                                newstatus = EMenuSaleStatus.AVAILABLE;
                                             } else if (statusChoice == 2) {
-                                                newstatus = MenuSaleStatus.SOLD_OUT;
+                                                newstatus = EMenuSaleStatus.SOLD_OUT;
                                             }
 
                                             if (newstatus != null) {
                                                 // 찾은 Menu 객체에서 UUID를 꺼내 사용
-                                                menuStatusList.updateStatus(storeId, targetMenu.getMenuId(), newstatus);
+                                                menuStatusList.updateStatus(storeId, targetMenu.getId(), newstatus);
                                                 System.out.println("판매 상태가 '" + newstatus.getDisplayStatus() + "' (으)로 변경되었습니다.");
                                             } else {
                                                 System.out.println("번호를 잘못 입력하셨습니다. 이전 메뉴로 돌아갑니다.");
@@ -521,12 +521,12 @@ public class Main {
 
                                         // 5-1. 판매 메뉴 등록하기
                                         if (salesChoice == 1) {
-                                            menuStatusList.registerMenuForSale(storeId, targetMenu.getMenuId());
+                                            menuStatusList.registerMenuForSale(storeId, targetMenu.getId());
                                         }
 
                                         // 5-2. 판매 메뉴 삭제하기
                                         else if (salesChoice == 2) {
-                                            menuStatusList.removeMenuForSale(storeId, targetMenu.getMenuId());
+                                            menuStatusList.removeMenuForSale(storeId, targetMenu.getId());
                                         }
                                     }
                                 }
@@ -602,7 +602,6 @@ public class Main {
                                         int menuSelection = sc.nextInt();
                                         sc.nextLine();
 
-
                                         if (menuSelection == 0) {
                                             break; // 주문 완료
                                         }
@@ -616,15 +615,15 @@ public class Main {
                                         Menu targetMenu = orderableMenus.get(menuSelection - 1);
 
                                         // 재고 있을 때
-                                        if (menuStatusList.isAvailable(storeId, targetMenu.getMenuId())) {
+                                        if (menuStatusList.isAvailable(storeId, targetMenu.getId())) {
                                             OrderItem newItem = createOrderItemWithOptions(targetMenu, menuList);
                                             cart.add(newItem);
-                                            System.out.println("-> '" + targetMenu.getMenuName() + "' 메뉴가 장바구니에 담겼습니다.");
+                                            System.out.println("-> '" + targetMenu.getName() + "' 메뉴가 장바구니에 담겼습니다.");
                                         }
 
                                         // 재고 없을 때
                                         else {
-                                            System.out.println("죄송합니다. '" + targetMenu.getMenuName() + "' 메뉴는 현재 품절입니다.");
+                                            System.out.println("죄송합니다. '" + targetMenu.getName() + "' 메뉴는 현재 품절입니다.");
                                         }
 
                                         System.out.println("--- 현재 장바구니 : " + cart.size() + "개 ---");
@@ -646,7 +645,7 @@ public class Main {
 
                                         // 3-3. 재고 감소
                                         for (OrderItem item : cart) {
-                                            menuStatusList.decreaseStock(storeId, item.getMenu().getMenuId());
+                                            menuStatusList.decreaseStock(storeId, item.getMenu().getId());
                                         }
 
                                         System.out.println("주문이 완료되었습니다. 주문 번호 : " + finalOrder.getOrderId());
@@ -717,12 +716,12 @@ public class Main {
     public static OrderItem createOrderItemWithOptions(Menu menu, MenuList menuList) {
         Scanner sc = new Scanner(System.in);
         String finalOptions = "선택안함";
-        int finalPrice = menu.getMenuPrice();
+        int finalPrice = menu.getPrice();
         String finalTemp = "ICE";    // 기본값
         String finalCup = "일회용컵"; // 기본값
 
         // 1. 추가 옵션 선택 (COFFEE, LATTE, TEA 등)
-        if (menu.getMenuOption() == MenuCategory.COFFEE) {
+        if (menu.getOption() == MenuCategory.COFFEE) {
             System.out.println("샷 옵션을 선택해주세요");
             System.out.println("1.기본(2샷) | 2.연하게(1샷) | 3.샷추가(+500원) | 4.디카페인(+1000원)");
             System.out.print(" -> 선택: ");
@@ -731,14 +730,14 @@ public class Main {
             else if (choice == 4) { finalPrice += 1000; finalOptions = "디카페인"; }
             else if (choice == 2) { finalOptions = "연하게(1샷)"; }
             else { finalOptions = "기본(2샷)"; }
-        } else if (menu.getMenuOption() == MenuCategory.LATTE) {
+        } else if (menu.getOption() == MenuCategory.LATTE) {
             System.out.println("우유 옵션을 선택해주세요");
             System.out.println("1. 일반 우유 | 2. 오트(귀리) (+1000원)");
             System.out.print(" -> 선택: ");
             int choice = sc.nextInt(); sc.nextLine();
             if (choice == 2) { finalPrice += 1000; finalOptions = "오트(귀리)"; }
             else { finalOptions = "일반 우유"; }
-        } else if (menu.getMenuOption() == MenuCategory.TEA) {
+        } else if (menu.getOption() == MenuCategory.TEA) {
             System.out.println("물 양을 선택해주세요");
             System.out.println("1. 보통 | 2. 적게");
             System.out.print(" -> 선택: ");
@@ -748,7 +747,7 @@ public class Main {
         }
 
         // 2. 온도 선택 (COFFEE 또는 TEA 카테고리일 경우)
-        if (menu.getMenuOption() == MenuCategory.COFFEE || menu.getMenuOption() == MenuCategory.TEA) {
+        if (menu.getOption() == MenuCategory.COFFEE || menu.getOption() == MenuCategory.TEA) {
             while (true) {
                 System.out.println("1. HOT | 2. ICE");
                 System.out.print(" -> 온도를 선택해주세요 : ");
@@ -773,7 +772,7 @@ public class Main {
             } else { System.out.println("잘못된 번호입니다."); }
         }
 
-        System.out.println("\n-> [선택 완료] " + menu.getMenuName() + " (온도: " + finalTemp + ", 컵: " + finalCup + ", 옵션: " + finalOptions + ")");
+        System.out.println("\n-> [선택 완료] " + menu.getName() + " (온도: " + finalTemp + ", 컵: " + finalCup + ", 옵션: " + finalOptions + ")");
 
         return new OrderItem(menu, finalPrice, finalTemp, finalCup, finalOptions);
     }

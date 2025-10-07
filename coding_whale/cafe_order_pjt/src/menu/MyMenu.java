@@ -21,7 +21,7 @@ public class MyMenu {
         // 중복체크
         // todo : 메뉴의 동등성 비교 학습 (이 코드를 다르게 하는 방법)
         for (int i = 0; i < myMenu.size(); i++) {
-            if (입력한메뉴명.equals(myMenu.get(i).getMenuName())) {
+            if (입력한메뉴명.equals(myMenu.get(i).getName())) {
                 hasMyMenu = true;
             }
         }
@@ -71,7 +71,7 @@ public class MyMenu {
             String 삭제할메뉴명 = sc.nextLine();
 
             for (int i = 0; i < myMenu.size(); i++) {
-                if (삭제할메뉴명.equals(myMenu.get(i).getMenuName())) {
+                if (삭제할메뉴명.equals(myMenu.get(i).getName())) {
                     myMenu.remove(i);
                     System.out.println("입력한 나만의 메뉴가 삭제되었습니다.");
                     System.out.println();
