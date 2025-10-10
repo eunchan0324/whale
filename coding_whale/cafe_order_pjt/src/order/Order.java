@@ -13,6 +13,8 @@ public class Order {
     private int totalPrice;
     private OrderStatus status;
     private final ArrayList<OrderItem> items = new ArrayList<>();
+    private int waitingNumber;
+
 
     // 신규 주문용 생성자
     public Order(String customerId, int storeId, int totalPrice, OrderStatus status, ArrayList<OrderItem> items) {
@@ -26,13 +28,14 @@ public class Order {
     }
 
     // 파일 로드용 생성자
-    public Order(UUID orderId, String customerId, int storeId, LocalDateTime orderTime, int totalPrice, OrderStatus status) {
+    public Order(UUID orderId, String customerId, int storeId, LocalDateTime orderTime, int totalPrice, OrderStatus status, int waitingNumber) {
         this.orderId = orderId;
         this.customerId = customerId;
         this.storeId = storeId;
         this.orderTime = orderTime;
         this.totalPrice = totalPrice;
         this.status = status;
+        this.waitingNumber = waitingNumber;
     }
 
 
@@ -82,6 +85,14 @@ public class Order {
 
     public void setTotalPrice(int totalPrice) {
         this.totalPrice = totalPrice;
+    }
+
+    public int getWaitingNumber() {
+        return waitingNumber;
+    }
+
+    public void setWaitingNumber(int waitingNumber) {
+        this.waitingNumber = waitingNumber;
     }
 
 }

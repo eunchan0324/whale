@@ -19,6 +19,7 @@ public class OrderList {
     private ArrayList<Order> orderList = new ArrayList<>();
     private MenuList menuList;
     private StoreList storeList;
+    private int nextWaitingNumber = 1;
 
     public OrderList(MenuList menuList, StoreList storeList) throws IOException {
         this.menuList = menuList;
@@ -27,6 +28,13 @@ public class OrderList {
     }
 
     public void addOrder(Order order) throws IOException {
+        // 1. 새로운 주문에 대기번호를 설정
+        order.setWaitingNumber(this.nextWaitingNumber);
+
+        // 2. 다음 대기번호를 위해 카운터 1 증가
+        this.nextWaitingNumber++;
+
+        // 3. 주문 리스트에 추가하고 파일 저장
         this.orderList.add(order);
         saveOrderFile();
 
@@ -43,7 +51,8 @@ public class OrderList {
                     order.getStoreId() + "," +
                     order.getOrderTime() + "," +
                     order.getTotalPrice() + "," +
-                    order.getStatus().name() + "\n");
+                    order.getStatus().name() + "," +
+                    order.getWaitingNumber() + "\n");
         }
         orderWriter.close();
 
@@ -65,6 +74,12 @@ public class OrderList {
 
     public void loadOrderFile() throws IOException {
         Path orderFilePath = Constants.BASE_PATH.resolve("Orders.txt");
+
+        // 파일이 없으면 종료
+        if (!orderFilePath.toFile().exists()) {
+            return;
+        }
+
         BufferedReader orderReader = new BufferedReader((new FileReader(orderFilePath.toFile())));
 
         // 임시 보관소
@@ -79,48 +94,65 @@ public class OrderList {
             LocalDateTime orderTime = LocalDateTime.parse(parts[3]);
             int totalPrice = Integer.parseInt(parts[4]);
             OrderStatus status = OrderStatus.valueOf(parts[5]);
+            int waitingNumber = Integer.parseInt(parts[6]);
 
             // 임시 객체 생성자
-            Order order = new Order(orderId, customerId, storeId, orderTime, totalPrice, status);
+            Order order = new Order(orderId, customerId, storeId, orderTime, totalPrice, status, waitingNumber);
             ordersMap.put(orderId, order);
 
         }
         orderReader.close();
 
         Path orderItemsFilePath = Constants.BASE_PATH.resolve("Order_items.txt");
-        BufferedReader orderItemsReader = new BufferedReader((new FileReader(orderItemsFilePath.toFile())));
+
+        // 파일 존재 여부 확인
+        if (!orderItemsFilePath.toFile().exists()) {
+            // 없다면, 주문 아이템 로딩은 건너뛰기
+        } else {
+            BufferedReader orderItemsReader = new BufferedReader((new FileReader(orderItemsFilePath.toFile())));
 
 
-        while ((line = orderItemsReader.readLine()) != null) {
-            String[] parts = line.split((","));
-            UUID orderId = UUID.fromString(parts[0]);
-            UUID menuId = UUID.fromString(parts[1]);
-            int price = Integer.parseInt(parts[2]);
-            String temp = parts[3];
-            String cup = parts[4];
-            String options = parts[5];
+            while ((line = orderItemsReader.readLine()) != null) {
+                String[] parts = line.split((","));
+                UUID orderId = UUID.fromString(parts[0]);
+                UUID menuId = UUID.fromString(parts[1]);
+                int price = Integer.parseInt(parts[2]);
+                String temp = parts[3];
+                String cup = parts[4];
+                String options = parts[5];
 
-            // 1. orderId로 Map 임시 보관소에서 targetOrder 찾기
-            Order targetOrder = ordersMap.get(orderId);
+                // 1. orderId로 Map 임시 보관소에서 targetOrder 찾기
+                Order targetOrder = ordersMap.get(orderId);
 
-            // 안전장치
-            if (targetOrder == null) {
-                // 해당하는 주문이 없으면 건너뛰기
-                continue;
+                // 안전장치
+                if (targetOrder == null) {
+                    // 해당하는 주문이 없으면 건너뛰기
+                    continue;
+                }
+
+                //2. order.OrderItem 생성
+                Menu menu = menuList.getMenuById(menuId); // menuId로 menu 객체 찾기
+                OrderItem item = new OrderItem(menu, price, temp, cup, options);
+
+                // 3. Order에 order.OrderItem 추가
+                targetOrder.getItems().add(item);
+
             }
-
-            //2. order.OrderItem 생성
-            Menu menu = menuList.getMenuById(menuId); // menuId로 menu 객체 찾기
-            OrderItem item = new OrderItem(menu, price, temp, cup, options);
-
-            // 3. Order에 order.OrderItem 추가
-            targetOrder.getItems().add(item);
+            orderItemsReader.close();
 
         }
-        orderItemsReader.close();
-
         // 모든 로딩이 끝난 후, Map의 모든 order.Order 객체를 실제 orderList에 추가
         orderList.addAll(ordersMap.values());
+
+        // 이후, nextWaitingNumber를 업데이트
+        int maxWaitingNum = 0;
+        for (Order order : orderList) {
+            if (order.getWaitingNumber() > maxWaitingNum) {
+                maxWaitingNum = order.getWaitingNumber();
+            }
+        }
+        // 가장 큰 대기번호 + 1 을 다음 대기번호로 설정
+        this.nextWaitingNumber = maxWaitingNum + 1;
     }
 
     public void checkOrders() {
@@ -134,7 +166,7 @@ public class OrderList {
         // 1. 바깥쪽 루프 : 전체 주문(order.Order) 목록 순회
         for (Order order : orderList) {
             System.out.println("===================================");
-            System.out.println("주문 번호 : " + order.getOrderId());
+            System.out.println("대기 번호 : " + order.getWaitingNumber());
             System.out.println("주문 시간 : " + order.getOrderTime());
             System.out.println("주문 상태 : " + order.getStatus());
             System.out.println("--- 주문 메뉴 목록 ---");
@@ -152,7 +184,6 @@ public class OrderList {
             System.out.println("===================================");
             System.out.println();
 
-
         }
 
     }
@@ -162,7 +193,7 @@ public class OrderList {
         for (Order order : orderList) {
             if (order.getCustomerId().equals(customerId)) {
                 System.out.println("===================================");
-                System.out.println("주문 번호 : " + order.getOrderId());
+                System.out.println("대기 번호 : " + order.getWaitingNumber());
                 System.out.println("주문 시간 : " + order.getOrderTime());
                 System.out.println("주문 상태 : " + order.getStatus());
                 System.out.println("--- 주문 메뉴 목록 ---");
@@ -181,134 +212,6 @@ public class OrderList {
 
             }
         }
-    }
-
-    public ArrayList<Order> showAndGetPendingOrders() {
-
-        // 1. 상태 변경 가능한 주문 목록 필터링
-        ArrayList<Order> pendingOrders = new ArrayList<>();
-        for (Order order : orderList) {
-            if (order.getStatus() != OrderStatus.COMPLETED) {
-                pendingOrders.add((order));
-            }
-        }
-
-        // *주문 내역이 없다면
-        if (pendingOrders.isEmpty()) {
-            System.out.println("현재 주문 내역이 존재하지 않습니다.");
-            return pendingOrders;
-        }
-
-
-        System.out.println("\n--- 현재 처리 대기중인 주문 목록 ---");
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-
-        // 2. 필터링 된 목록을 기반으로 '임시 번호'를 붙여 출력
-        for (int i = 0; i < pendingOrders.size(); i++) {
-            Order order = pendingOrders.get(i);
-            System.out.println("===================================");
-            // UUID 대신 임시 번호 (i+1)를 출력
-            System.out.println("대기 번호 : " + (i + 1));
-            System.out.println("주문 시간 : " + order.getOrderTime().format(formatter));
-            System.out.println("주문 상태 : " + order.getStatus());
-            System.out.println("\n--- 주문 메뉴 ---");
-
-            // 2. 안쪽 루프 : 해당 주문(order.Order)에 포함된 메뉴(order.OrderItem) 목록 순회
-            for (OrderItem item : order.getItems()) {
-                System.out.println("- 메뉴 : " + item.getMenu().getName() +
-                        " | 온도 : " + item.getFinalTemp() +
-                        " | 컵 : " + item.getFinalCup() +
-                        " | 옵션 : " + item.getFinalOptions());
-            }
-            System.out.println("-----------------------------------");
-            System.out.println("총 결제 금액 : " + order.getTotalPrice() + "원");
-            System.out.println("===================================");
-            System.out.println();
-        }
-        return pendingOrders;
-    }
-
-    public void updateOrderStatus() throws IOException {
-
-        // 1. 목록 출력 및 리스트 받아오기
-        ArrayList<Order> pendingOrders = showAndGetPendingOrders();
-
-        // 2. 처리할 주문이 없으면 바로 종료
-        if (pendingOrders.isEmpty()) {
-            return;
-        }
-
-        Scanner sc = new Scanner(System.in);
-        Order targetOrder = null;
-
-        // 3. 번호 입력받는 로직
-        while (true) {
-            System.out.print("\n상태를 변경할 주문의 대기번호를 입력하세요 (취소 : 0) : ");
-            int selection = sc.nextInt();
-            sc.nextLine();
-
-            if (selection == 0) {
-                System.out.println("상태 변경을 취소합니다.");
-                return;
-            }
-
-            if (selection >= 1 && selection <= pendingOrders.size()) {
-                targetOrder = pendingOrders.get(selection - 1);
-                break;
-            } else {
-                System.out.println("잘못된 번호입니다. 목록에 있는 번호를 다시 입력해주세요.");
-            }
-        }
-
-        System.out.println("\n['" + targetOrder.getCustomerId() + "' 님의 주문] 상태를 변경합니다. (현재: " + targetOrder.getStatus() + ")");
-
-        switch (targetOrder.getStatus()) {
-            case ORDER_PLACED -> {
-                System.out.println("1. 준비중 (PREPARING)");
-                System.out.println("2. 준비완료/픽업대기 (READY)");
-                System.out.println("3. 픽업완료 (COMPLETED)");
-            }
-            case PREPARING -> {
-                System.out.println("2. 준비완료/픽업대기 (READY)");
-                System.out.println("3. 픽업완료 (COMPLETED)");
-            }
-            case READY -> {
-                System.out.println("3. 픽업완료 (COMPLETED)");
-            }
-        }
-
-        System.out.print("변경하고 싶은 상태의 번호를 입력해주세요 : ");
-        int changeStatue = sc.nextInt();
-        sc.nextLine();
-
-
-        switch (targetOrder.getStatus()) {
-            case ORDER_PLACED -> {
-                if (changeStatue == 1) {
-                    targetOrder.setStatus(OrderStatus.PREPARING);
-                } else if (changeStatue == 2) {
-                    targetOrder.setStatus((OrderStatus.READY));
-                } else if (changeStatue == 3) {
-                    targetOrder.setStatus(OrderStatus.COMPLETED);
-                }
-            }
-            case PREPARING -> {
-                if (changeStatue == 2) {
-                    targetOrder.setStatus((OrderStatus.READY));
-                } else if (changeStatue == 3) {
-                    targetOrder.setStatus(OrderStatus.COMPLETED);
-                }
-            }
-            case READY -> {
-                if (changeStatue == 3) {
-                    targetOrder.setStatus(OrderStatus.COMPLETED);
-                }
-            }
-        }
-
-        System.out.println("주문 상태 변경이 완료되었습니다.");
-        saveOrderFile();
-        System.out.println();
     }
 
     public void showAllSales() {
@@ -371,4 +274,153 @@ public class OrderList {
         System.out.println("--------------------");
     }
 
+    public void showAndGetPendingOrders() {
+        // 1. 상태 변경 가능한 주문 목록 필터링
+        ArrayList<Order> pendingOrders = getPendingOrders();
+
+        // *주문 내역이 없다면
+        if (pendingOrders.isEmpty()) {
+            System.out.println("현재 주문 내역이 존재하지 않습니다.");
+            return;
+        }
+
+        System.out.println("\n--- 현재 처리 대기중인 주문 목록 ---");
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+
+        // 2. 필터링 된 목록을 기반으로 '임시 번호'를 붙여 출력
+        for (Order order : pendingOrders) {
+            System.out.println("===================================");
+            // UUID 대신 임시 번호 (i+1)를 출력
+            System.out.println("대기 번호 : " + order.getWaitingNumber());
+            System.out.println("주문 시간 : " + order.getOrderTime().format(formatter));
+            System.out.println("주문 상태 : " + order.getStatus());
+            System.out.println("\n--- 주문 메뉴 ---");
+
+            // 2. 안쪽 루프 : 해당 주문(order.Order)에 포함된 메뉴(order.OrderItem) 목록 순회
+            for (OrderItem item : order.getItems()) {
+                System.out.println("- 메뉴 : " + item.getMenu().getName() +
+                        " | 온도 : " + item.getFinalTemp() +
+                        " | 컵 : " + item.getFinalCup() +
+                        " | 옵션 : " + item.getFinalOptions());
+            }
+            System.out.println("-----------------------------------");
+            System.out.println("총 결제 금액 : " + order.getTotalPrice() + "원");
+            System.out.println("===================================");
+            System.out.println();
+        }
+    }
+
+    public void updateOrderStatus() throws IOException {
+
+        // 1. 목록 조회
+        showAndGetPendingOrders();
+
+        // 2. 처리할 주문이 없는지 확인
+        if (!hasPendingOrders()) {
+            return;
+        }
+
+        Scanner sc = new Scanner(System.in);
+        Order targetOrder = null;
+
+        // 3. 번호 입력받는 로직
+        while (true) {
+            System.out.print("\n상태를 변경할 주문의 대기번호를 입력하세요 (취소 : 0) : ");
+            int waitingNumInput = sc.nextInt();
+            sc.nextLine();
+
+            if (waitingNumInput == 0) {
+                System.out.println("상태 변경을 취소합니다.");
+                return;
+            }
+
+            targetOrder = findPendingOrderByWaitNumber(waitingNumInput);
+
+            if (targetOrder != null) {
+                break; // 찾았으면 종료
+            } else{
+                System.out.println("잘못된 번호입니다. 목록에 있는 번호를 다시 입력해주세요.");
+            }
+        }
+
+        System.out.println("\n['" + targetOrder.getCustomerId() + "' 님의 주문] 상태를 변경합니다. (현재: " + targetOrder.getStatus() + ")");
+
+        switch (targetOrder.getStatus()) {
+            case ORDER_PLACED -> {
+                System.out.println("1. 준비중 (PREPARING)");
+                System.out.println("2. 준비완료/픽업대기 (READY)");
+                System.out.println("3. 픽업완료 (COMPLETED)");
+            }
+            case PREPARING -> {
+                System.out.println("2. 준비완료/픽업대기 (READY)");
+                System.out.println("3. 픽업완료 (COMPLETED)");
+            }
+            case READY -> {
+                System.out.println("3. 픽업완료 (COMPLETED)");
+            }
+        }
+
+        System.out.print("변경하고 싶은 상태의 번호를 입력해주세요 : ");
+        int changeStatue = sc.nextInt();
+        sc.nextLine();
+
+
+        switch (targetOrder.getStatus()) {
+            case ORDER_PLACED -> {
+                if (changeStatue == 1) {
+                    targetOrder.setStatus(OrderStatus.PREPARING);
+                } else if (changeStatue == 2) {
+                    targetOrder.setStatus((OrderStatus.READY));
+                } else if (changeStatue == 3) {
+                    targetOrder.setStatus(OrderStatus.COMPLETED);
+                }
+            }
+            case PREPARING -> {
+                if (changeStatue == 2) {
+                    targetOrder.setStatus((OrderStatus.READY));
+                } else if (changeStatue == 3) {
+                    targetOrder.setStatus(OrderStatus.COMPLETED);
+                }
+            }
+            case READY -> {
+                if (changeStatue == 3) {
+                    targetOrder.setStatus(OrderStatus.COMPLETED);
+                }
+            }
+        }
+
+        System.out.println("주문 상태 변경이 완료되었습니다.");
+        saveOrderFile();
+        System.out.println();
+    }
+
+    public boolean hasPendingOrders() {
+        for (Order order : orderList) {
+            if (order.getStatus() != OrderStatus.COMPLETED) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public Order findPendingOrderByWaitNumber(int waitingNumber) {
+        for (Order order : orderList) {
+            if (order.getWaitingNumber() == waitingNumber) {
+                return order;
+            }
+        }
+        return null;
+    }
+
+    public ArrayList<Order> getPendingOrders() {
+        ArrayList<Order> pendingOrders = new ArrayList<>();
+        for (Order order : this.orderList) {
+            if (order.getStatus() != OrderStatus.COMPLETED) {
+                pendingOrders.add((order));
+            }
+        }
+        return pendingOrders;
+    }
+
 }
+

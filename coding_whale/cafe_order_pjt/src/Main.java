@@ -9,6 +9,7 @@ import user.UserList;
 import user.UserRole;
 
 import java.io.*;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Scanner;
 
@@ -299,14 +300,14 @@ public class Main {
                                 // 1. 주문 관리
                                 if (menuSelect == 1) {
                                     System.out.println("[주문 관리]");
-                                    System.out.println("1. 주문 목록 변경");
+                                    System.out.println("1. 주문 목록 확인");
                                     System.out.println("2. 주문 상태 변경");
                                     System.out.println("3. 뒤로가기");
                                     System.out.print(" : ");
                                     int orderMenuChoice = sc.nextInt();
                                     sc.nextLine();
 
-                                    // 1-1. 주문 목록 변경
+                                    // 1-1. 주문 목록 확인
                                     if (orderMenuChoice == 1) {
                                         orderList.checkOrders();
                                     }
@@ -648,7 +649,7 @@ public class Main {
                                             menuStatusList.decreaseStock(storeId, item.getMenu().getId());
                                         }
 
-                                        System.out.println("주문이 완료되었습니다. 주문 번호 : " + finalOrder.getOrderId());
+                                        System.out.println("주문이 완료되었습니다. 대기 번호 : " + finalOrder.getWaitingNumber());
                                     }
                                 }
 
@@ -776,5 +777,7 @@ public class Main {
 
         return new OrderItem(menu, finalPrice, finalTemp, finalCup, finalOptions);
     }
+
+
 }
 
