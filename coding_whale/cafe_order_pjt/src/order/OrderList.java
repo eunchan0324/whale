@@ -10,6 +10,7 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Path;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
@@ -146,13 +147,28 @@ public class OrderList {
 
         // 이후, nextWaitingNumber를 업데이트
         int maxWaitingNum = 0;
+        LocalDate today = LocalDate.now();
+        LocalDate lastOrderDate = null;
+
         for (Order order : orderList) {
+            // 가장 최근 주문의 날짜 찾기
+            LocalDate orderDate = order.getOrderTime().toLocalDate();
+            if (lastOrderDate == null || orderDate.isAfter(lastOrderDate)) {
+                lastOrderDate = orderDate;
+            }
+
+            // 가장 큰 대기번호 찾기
             if (order.getWaitingNumber() > maxWaitingNum) {
                 maxWaitingNum = order.getWaitingNumber();
             }
         }
-        // 가장 큰 대기번호 + 1 을 다음 대기번호로 설정
-        this.nextWaitingNumber = maxWaitingNum + 1;
+
+        // 날짜 비교 : 오늘과 마지막 주문 날짜가 다르면 1부터 시작
+        if (lastOrderDate == null || !lastOrderDate.equals(today)) {
+            this.nextWaitingNumber = 1; // 날짜가 바뀌었으므로 초기화
+        } else {
+            this.nextWaitingNumber = maxWaitingNum + 1; // 같은 날일땐 이어서
+        }
     }
 
     public void checkOrders() {
@@ -338,7 +354,7 @@ public class OrderList {
 
             if (targetOrder != null) {
                 break; // 찾았으면 종료
-            } else{
+            } else {
                 System.out.println("잘못된 번호입니다. 목록에 있는 번호를 다시 입력해주세요.");
             }
         }
