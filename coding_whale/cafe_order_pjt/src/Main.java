@@ -1,4 +1,5 @@
 import menu.*;
+import menu.Menu;
 import order.Order;
 import order.OrderItem;
 import order.OrderList;
@@ -8,6 +9,8 @@ import user.User;
 import user.UserList;
 import user.UserRole;
 
+import javax.swing.*;
+import java.awt.*;
 import java.io.*;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -45,6 +48,9 @@ public class Main {
         MenuList menuList = new MenuList(menuStatusList, storeList);
         OrderList orderList = new OrderList(menuList, storeList);
         MyMenu myMenu = new MyMenu();
+
+        showMainScreen();
+
 
         Scanner sc = new Scanner(System.in);
 
@@ -726,25 +732,42 @@ public class Main {
             System.out.println("샷 옵션을 선택해주세요");
             System.out.println("1.기본(2샷) | 2.연하게(1샷) | 3.샷추가(+500원) | 4.디카페인(+1000원)");
             System.out.print(" -> 선택: ");
-            int choice = sc.nextInt(); sc.nextLine();
-            if (choice == 3) { finalPrice += 500; finalOptions = "샷추가(3샷)"; }
-            else if (choice == 4) { finalPrice += 1000; finalOptions = "디카페인"; }
-            else if (choice == 2) { finalOptions = "연하게(1샷)"; }
-            else { finalOptions = "기본(2샷)"; }
+            int choice = sc.nextInt();
+            sc.nextLine();
+            if (choice == 3) {
+                finalPrice += 500;
+                finalOptions = "샷추가(3샷)";
+            } else if (choice == 4) {
+                finalPrice += 1000;
+                finalOptions = "디카페인";
+            } else if (choice == 2) {
+                finalOptions = "연하게(1샷)";
+            } else {
+                finalOptions = "기본(2샷)";
+            }
         } else if (menu.getOption() == MenuCategory.LATTE) {
             System.out.println("우유 옵션을 선택해주세요");
             System.out.println("1. 일반 우유 | 2. 오트(귀리) (+1000원)");
             System.out.print(" -> 선택: ");
-            int choice = sc.nextInt(); sc.nextLine();
-            if (choice == 2) { finalPrice += 1000; finalOptions = "오트(귀리)"; }
-            else { finalOptions = "일반 우유"; }
+            int choice = sc.nextInt();
+            sc.nextLine();
+            if (choice == 2) {
+                finalPrice += 1000;
+                finalOptions = "오트(귀리)";
+            } else {
+                finalOptions = "일반 우유";
+            }
         } else if (menu.getOption() == MenuCategory.TEA) {
             System.out.println("물 양을 선택해주세요");
             System.out.println("1. 보통 | 2. 적게");
             System.out.print(" -> 선택: ");
-            int choice = sc.nextInt(); sc.nextLine();
-            if (choice == 2) { finalOptions = "물 양 적게"; }
-            else { finalOptions = "물 양 보통"; }
+            int choice = sc.nextInt();
+            sc.nextLine();
+            if (choice == 2) {
+                finalOptions = "물 양 적게";
+            } else {
+                finalOptions = "물 양 보통";
+            }
         }
 
         // 2. 온도 선택 (COFFEE 또는 TEA 카테고리일 경우)
@@ -752,10 +775,17 @@ public class Main {
             while (true) {
                 System.out.println("1. HOT | 2. ICE");
                 System.out.print(" -> 온도를 선택해주세요 : ");
-                int choice = sc.nextInt(); sc.nextLine();
-                if (choice == 1) { finalTemp = "HOT"; break; }
-                else if (choice == 2) { finalTemp = "ICE"; break; }
-                else { System.out.println("잘못된 번호입니다."); }
+                int choice = sc.nextInt();
+                sc.nextLine();
+                if (choice == 1) {
+                    finalTemp = "HOT";
+                    break;
+                } else if (choice == 2) {
+                    finalTemp = "ICE";
+                    break;
+                } else {
+                    System.out.println("잘못된 번호입니다.");
+                }
             }
         }
 
@@ -763,14 +793,21 @@ public class Main {
         while (true) {
             System.out.println("1. 매장컵 | 2. 개인컵 (-300원) | 3. 일회용컵");
             System.out.print(" -> 컵을 선택해주세요 : ");
-            int choice = sc.nextInt(); sc.nextLine();
-            if (choice == 1) { finalCup = "매장컵"; break;
+            int choice = sc.nextInt();
+            sc.nextLine();
+            if (choice == 1) {
+                finalCup = "매장컵";
+                break;
             } else if (choice == 2) {
                 finalCup = "개인컵";
                 finalPrice -= 300;
                 break;
-            } else if (choice == 3) { finalCup = "일회용컵"; break;
-            } else { System.out.println("잘못된 번호입니다."); }
+            } else if (choice == 3) {
+                finalCup = "일회용컵";
+                break;
+            } else {
+                System.out.println("잘못된 번호입니다.");
+            }
         }
 
         System.out.println("\n-> [선택 완료] " + menu.getName() + " (온도: " + finalTemp + ", 컵: " + finalCup + ", 옵션: " + finalOptions + ")");
@@ -778,6 +815,88 @@ public class Main {
         return new OrderItem(menu, finalPrice, finalTemp, finalCup, finalOptions);
     }
 
+    public static void showMainScreen() {
+        // 메인 선택 창
+        JFrame frame = new JFrame("카페 주문 프로그램");
 
+        JButton adminButton = new JButton("관리자");
+        JButton sellerButton = new JButton("판매자");
+        JButton customerButton = new JButton("구매자");
+
+        JPanel panel = new JPanel();
+        panel.setLayout(new GridLayout(3, 1, 10, 10));
+
+        panel.add(adminButton);
+        panel.add(sellerButton);
+        panel.add(customerButton);
+
+        // 버튼 이벤트
+        adminButton.addActionListener(e -> {
+            frame.dispose(); // 현재 창 닫기
+            openAdminWindow(); // 관리자 창 열기
+        });
+
+        sellerButton.addActionListener(e -> {
+            frame.dispose(); // 현재 창 닫기
+            openSellerWindow(); // 판매자 창 열기
+        });
+
+        customerButton.addActionListener(e -> {
+            frame.dispose(); // 현재 창 닫기
+             openCustomerWindow(); // 구매자 창 열기
+        });
+
+
+        frame.add(panel);
+        frame.setSize(400, 300);
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setVisible(true);
+    }
+
+    public static void openAdminWindow() {
+        JFrame adminFrame = new JFrame("관리자 메뉴");
+        JButton backButton = new JButton("뒤로가기");
+
+
+        backButton.addActionListener(e -> {
+            adminFrame.dispose();
+            showMainScreen();
+        });
+
+        adminFrame.add(backButton);
+        adminFrame.setSize(400, 400);
+        adminFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        adminFrame.setVisible(true);
+    }
+
+    public static void openSellerWindow() {
+        JFrame sellerFrame = new JFrame("판매자 메뉴");
+        JButton backButton = new JButton("뒤로가기");
+
+        backButton.addActionListener(e -> {
+            sellerFrame.dispose();
+            showMainScreen();
+        });
+
+        sellerFrame.add(backButton);
+        sellerFrame.setSize(400, 400);
+        sellerFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        sellerFrame.setVisible(true);
+    }
+
+    public static void openCustomerWindow() {
+        JFrame customerFrame = new JFrame("구매자 메뉴");
+        JButton backButton = new JButton("뒤로가기");
+
+        backButton.addActionListener(e -> {
+            customerFrame.dispose();
+            showMainScreen();
+        });
+
+        customerFrame.add(backButton);
+        customerFrame.setSize(400, 400);
+        customerFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        customerFrame.setVisible(true);
+    }
 }
 
