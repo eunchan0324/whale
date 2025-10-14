@@ -1,4 +1,4 @@
-package store;
+package backend.store;
 
 // Store 기능
 public class Store {

@@ -1,10 +1,6 @@
-package order;
+package backend.order;
 
-import menu.Menu;
-import menu.MenuCategory;
-import menu.MenuList;
-
-import java.util.Scanner;
+import backend.menu.Menu;
 
 public class OrderItem {
     private Menu menu;

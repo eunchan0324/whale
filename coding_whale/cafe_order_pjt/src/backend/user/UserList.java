@@ -1,8 +1,8 @@
-package user;
+package backend.user;
 
-import constant.Constants;
-import store.Store;
-import store.StoreList;
+import backend.constant.Constants;
+import backend.store.Store;
+import backend.store.StoreList;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -32,7 +32,7 @@ public class UserList {
 
     Scanner sc = new Scanner(System.in);
 
-    // 모든 user.User Load + load store.Store
+    // 모든 backend.user.User Load + load backend.store.Store
     public UserList(StoreList storeList) {
         this.storeList = storeList;
 

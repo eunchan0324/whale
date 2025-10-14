@@ -1,4 +1,4 @@
-package menu;
+package backend.menu;
 
 public enum MenuCategory {
     COFFEE(1),

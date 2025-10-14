@@ -1,4 +1,4 @@
-package order;
+package backend.order;
 
 public enum OrderStatus {
     ORDER_PLACED(0),

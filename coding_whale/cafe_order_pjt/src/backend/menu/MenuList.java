@@ -1,7 +1,7 @@
-package menu;
+package backend.menu;
 
-import constant.Constants;
-import store.StoreList;
+import backend.constant.Constants;
+import backend.store.StoreList;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -25,7 +25,7 @@ public class MenuList {
         loadFile();
     }
 
-    // menu.Menu Create
+    // backend.menu.Menu Create
     public void menuCreate() throws IOException {
         Scanner sc = new Scanner(System.in);
 
@@ -61,7 +61,7 @@ public class MenuList {
         System.out.println();
     }
 
-    // menu.Menu Read - 관리자용
+    // backend.menu.Menu Read - 관리자용
     public void showAllMenus() {
         // 메뉴가 아무것도 등록되지 않았다면
         if (menus.isEmpty()) {
@@ -81,7 +81,7 @@ public class MenuList {
         System.out.println("---------------------------------");
     }
 
-    // menu.Menu Read - 구매자용
+    // backend.menu.Menu Read - 구매자용
     public ArrayList<Menu> showAndGetOrderableMenus(int storeId) {
         ArrayList<Menu> orderableMenus = new ArrayList<>();
         for (Menu menu : menus) {
@@ -146,12 +146,12 @@ public class MenuList {
 
     }
 
-    // menu.Menu Stock Read - 재고 확인 판매자용
+    // backend.menu.Menu Stock Read - 재고 확인 판매자용
     public void showStockStatusForSeller(int storeId) {
         showAndGetSellableMenus((storeId));
     }
 
-    // menu.Menu Update
+    // backend.menu.Menu Update
     public void menuEdit(Menu 수정할메뉴) throws IOException {
         Scanner sc = new Scanner(System.in);
         boolean checker = false;
@@ -213,7 +213,7 @@ public class MenuList {
         }
     }
 
-    // menu.Menu Delete
+    // backend.menu.Menu Delete
     public void menuDelete(Menu 삭제할메뉴) throws IOException {
         boolean checker = false;
 
@@ -236,7 +236,7 @@ public class MenuList {
 
     }
 
-    // menu.Menu Empty Check
+    // backend.menu.Menu Empty Check
     public boolean menuIsEmpty() {
         if (menus.isEmpty()) {
             return true;
@@ -244,7 +244,7 @@ public class MenuList {
         return false;
     }
 
-    // find menu.Menu - 매개변수와 같은 이름의 _객체 반환
+    // find backend.menu.Menu - 매개변수와 같은 이름의 _객체 반환
     public Menu findMenu(String 주문할메뉴) {
         for (Menu menu : menus) {
             if (menu.getName().equals(주문할메뉴)) {
@@ -335,7 +335,7 @@ public class MenuList {
         }
 
         if (hasBestMenu == true) {
-            System.out.println("[Best menu.Menu]");
+            System.out.println("[Best backend.menu.Menu]");
             for (int i = 0; i < menus.size(); i++) {
                 if ("Best".equals(menus.get(i).getRecommend())) {
                     System.out.println("- " + menus.get(i).getName());
@@ -352,7 +352,7 @@ public class MenuList {
         }
 
         if (hasNewMenu == true) {
-            System.out.println("[New menu.Menu]");
+            System.out.println("[New backend.menu.Menu]");
             for (int i = 0; i < menus.size(); i++) {
                 if ("New".equals(menus.get(i).getRecommend())) {
                     System.out.println("- " + menus.get(i).getName());

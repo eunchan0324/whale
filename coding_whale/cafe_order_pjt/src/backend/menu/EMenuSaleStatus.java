@@ -1,4 +1,4 @@
-package menu;
+package backend.menu;
 
 public enum EMenuSaleStatus {
     AVAILABLE("판매중"),

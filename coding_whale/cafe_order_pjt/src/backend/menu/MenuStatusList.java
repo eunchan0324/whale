@@ -1,6 +1,6 @@
-package menu;
+package backend.menu;
 
-import constant.Constants;
+import backend.constant.Constants;
 
 import java.io.*;
 import java.nio.file.Path;
@@ -55,7 +55,7 @@ public class MenuStatusList {
         reader.close();
     }
 
-    // 판매자 id로 menu.MenuStatus 객체 반환
+    // 판매자 id로 backend.menu.MenuStatus 객체 반환
     public MenuStatus findMenuStatus(int storeId, UUID menuId) {
         for (MenuStatus status : menuStatuses) {
             if (status.getStoreId() == storeId && status.getMenuId().equals(menuId)) {
@@ -154,7 +154,7 @@ public class MenuStatusList {
             return;
         }
 
-        // 2. 등록되지 않은 메뉴라면, 새로운 menu.MenuStatus 객체 생성
+        // 2. 등록되지 않은 메뉴라면, 새로운 backend.menu.MenuStatus 객체 생성
         // 초기 재고는 0개, 판매 상태는 AVAILABLE
         MenuStatus newMenuStatus = new MenuStatus(storeId, menuId, EMenuSaleStatus.AVAILABLE, 0);
 

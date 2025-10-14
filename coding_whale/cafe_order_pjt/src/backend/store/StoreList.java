@@ -1,6 +1,6 @@
-package store;
+package backend.store;
 
-import constant.Constants;
+import backend.constant.Constants;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -25,7 +25,7 @@ public class StoreList {
         }
     }
 
-    // store save (stores.txt)
+    // backend.store save (stores.txt)
     public void saveStoreFile() throws IOException {
         Path storeFilePath = Constants.BASE_PATH.resolve("Stores.txt");
         FileWriter storeWriter = new FileWriter(storeFilePath.toFile());
@@ -39,7 +39,7 @@ public class StoreList {
         storeWriter.close();
     }
 
-    // store load (stores.txt)
+    // backend.store load (stores.txt)
     public void loadStoreFIle() throws IOException {
         Path storeFilePath = Constants.BASE_PATH.resolve("Stores.txt");
         BufferedReader storeReader = new BufferedReader(new FileReader(storeFilePath.toFile()));
@@ -58,7 +58,7 @@ public class StoreList {
 
     // 입력받은 지점 ID로 store반환
     public Store findStoreById(int storeId) {
-        // 매개변수 storeId가 stores에 있다면, store 반환
+        // 매개변수 storeId가 stores에 있다면, backend.store 반환
         for (Store store : stores) {
             if (storeId == store.getStoreId()) {
                 return store;

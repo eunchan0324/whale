@@ -1,4 +1,4 @@
-package user;
+package backend.user;
 
 public enum UserRole {
     ADMIN(1, "관리자"),

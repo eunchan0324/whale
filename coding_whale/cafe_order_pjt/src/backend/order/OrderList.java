@@ -1,9 +1,9 @@
-package order;
+package backend.order;
 
-import constant.Constants;
-import menu.Menu;
-import menu.MenuList;
-import store.StoreList;
+import backend.constant.Constants;
+import backend.menu.Menu;
+import backend.menu.MenuList;
+import backend.store.StoreList;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -131,18 +131,18 @@ public class OrderList {
                     continue;
                 }
 
-                //2. order.OrderItem 생성
-                Menu menu = menuList.getMenuById(menuId); // menuId로 menu 객체 찾기
+                //2. backend.order.OrderItem 생성
+                Menu menu = menuList.getMenuById(menuId); // menuId로 backend.menu 객체 찾기
                 OrderItem item = new OrderItem(menu, price, temp, cup, options);
 
-                // 3. Order에 order.OrderItem 추가
+                // 3. Order에 backend.order.OrderItem 추가
                 targetOrder.getItems().add(item);
 
             }
             orderItemsReader.close();
 
         }
-        // 모든 로딩이 끝난 후, Map의 모든 order.Order 객체를 실제 orderList에 추가
+        // 모든 로딩이 끝난 후, Map의 모든 backend.order.Order 객체를 실제 orderList에 추가
         orderList.addAll(ordersMap.values());
 
         // 이후, nextWaitingNumber를 업데이트
@@ -179,7 +179,7 @@ public class OrderList {
 
 
         System.out.println("--- 전체 주문 내역 --- ");
-        // 1. 바깥쪽 루프 : 전체 주문(order.Order) 목록 순회
+        // 1. 바깥쪽 루프 : 전체 주문(backend.order.Order) 목록 순회
         for (Order order : orderList) {
             System.out.println("===================================");
             System.out.println("대기 번호 : " + order.getWaitingNumber());
@@ -187,7 +187,7 @@ public class OrderList {
             System.out.println("주문 상태 : " + order.getStatus());
             System.out.println("--- 주문 메뉴 목록 ---");
 
-            // 2. 안쪽 루프 : 해당 주문(order.Order)에 포함된 메뉴(order.OrderItem) 목록 순회
+            // 2. 안쪽 루프 : 해당 주문(backend.order.Order)에 포함된 메뉴(backend.order.OrderItem) 목록 순회
             for (OrderItem item : order.getItems()) {
                 System.out.println("- 메뉴 : " + item.getMenu().getName() +
                         " | 온도 : " + item.getFinalTemp() +
@@ -263,7 +263,7 @@ public class OrderList {
         // 1. storeId(int)을 key로, 누적 매출액(interger)을 value로 갖는 Map 생성
         Map<Integer, Integer> salesBySeller = new HashMap<>();
 
-        // 2. 전체 주문 목록 순회하며 COMPLETED order 객체 찾기
+        // 2. 전체 주문 목록 순회하며 COMPLETED backend.order 객체 찾기
         for (Order order : orderList) {
             if (order.getStatus() == OrderStatus.COMPLETED) {
                 // 3. salesBySeller Map에 추가
@@ -312,7 +312,7 @@ public class OrderList {
             System.out.println("주문 상태 : " + order.getStatus());
             System.out.println("\n--- 주문 메뉴 ---");
 
-            // 2. 안쪽 루프 : 해당 주문(order.Order)에 포함된 메뉴(order.OrderItem) 목록 순회
+            // 2. 안쪽 루프 : 해당 주문(backend.order.Order)에 포함된 메뉴(backend.order.OrderItem) 목록 순회
             for (OrderItem item : order.getItems()) {
                 System.out.println("- 메뉴 : " + item.getMenu().getName() +
                         " | 온도 : " + item.getFinalTemp() +

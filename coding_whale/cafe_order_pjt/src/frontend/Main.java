@@ -1,3 +1,5 @@
+package frontend;
+
 import backend.menu.*;
 import backend.menu.Menu;
 import backend.order.Order;
@@ -11,7 +13,7 @@ import backend.user.UserRole;
 
 import javax.swing.*;
 import java.awt.*;
-import java.io.*;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Scanner;
 

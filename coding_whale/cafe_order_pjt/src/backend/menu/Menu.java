@@ -1,4 +1,4 @@
-package menu;
+package backend.menu;
 
 import java.util.UUID;
 
