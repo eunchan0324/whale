@@ -233,7 +233,7 @@ public class UserList {
         }
     }
 
-    // 로그인 로직
+    // 로그인 로직 (CLI)
     public User performLogin(ArrayList<User> targetList, String systemName) {
         System.out.println();
         System.out.println("[" + systemName + " 로그인]");
@@ -295,9 +295,39 @@ public class UserList {
         }
     }
 
-    // 관리자 로그인
+    // 관리자 로그인 (CLI)
     public User adminLogin() {
         return performLogin(adminList, "관리자");
+    }
+
+    // 관리자 로그인 (GUI)
+    public User adminLogin(String id, String password) {
+        return performLoginWithCredentials(adminList, id, password);
+    }
+
+    // 로그인 로직 (GUI)
+    private User performLoginWithCredentials(ArrayList<User> targetList, String id, String password) {
+        // 리스트가 비어있으면
+        if (targetList.isEmpty()) {
+            return null;
+        }
+
+        // 사용자 찾기
+        User 찾은사용자 = findUser(id, targetList);
+
+        // ID가 없으면
+        if (찾은사용자 == null) {
+            return null;
+        }
+
+        // 비밀번호 확인
+        if (!password.equals(찾은사용자.getPassword())) {
+            return null;
+        }
+
+        // 로그인 성공
+        return 찾은사용자;
+
     }
 
     // 판매자 로그인

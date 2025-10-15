@@ -17,6 +17,14 @@ import java.util.Scanner;
 
 
 public class Main {
+    private static StoreList storeList;
+    private static UserList userList;
+    private static MenuStatusList menuStatusList;
+    private static MenuList menuList;
+    private static OrderList orderList;
+    private static MyMenu myMenu;
+
+
     public static void main(String[] args) throws IOException {
         // 변수
 //        int 수용량 = 5; // 배열의 전체 크기
@@ -41,12 +49,13 @@ public class Main {
 //        backend.menu.Menu backend.menu = new backend.menu.Menu();
         // 객체 생성 == MenuList의 인스턴스 menuList 생성
 
-        StoreList storeList = new StoreList();
-        UserList userList = new UserList(storeList);
-        MenuStatusList menuStatusList = new MenuStatusList();
-        MenuList menuList = new MenuList(menuStatusList, storeList);
-        OrderList orderList = new OrderList(menuList, storeList);
-        MyMenu myMenu = new MyMenu();
+        storeList = new StoreList();
+        userList = new UserList(storeList);
+        menuStatusList = new MenuStatusList();
+        menuList = new MenuList(menuStatusList, storeList);
+        orderList = new OrderList(menuList, storeList);
+        myMenu = new MyMenu();
+
 
         showMainScreen();
 
@@ -837,7 +846,7 @@ public class Main {
         // logic
         adminButton.addActionListener(e -> {
             frame.dispose(); // 현재 창 닫기
-            openAdminWindow(); // 관리자 창 열기
+            showAdminLogin(); // 관리자 창 열기
         });
 
         sellerButton.addActionListener(e -> {
@@ -849,6 +858,93 @@ public class Main {
             frame.dispose(); // 현재 창 닫기
             openCustomerWindow(); // 구매자 창 열기
         });
+    }
+
+    public static void showAdminLogin() {
+        // ======= VIEW 화면 구성 =======
+        JFrame loginFrame = new JFrame("관리자 로그인");
+
+        // 1. 입력 필드 영역
+        JPanel inputPanel = new JPanel();
+        inputPanel.setLayout(new GridLayout(2, 2, 10, 10));
+
+        JLabel idLabel = new JLabel("아이디 : ");
+        JTextField idField = new JTextField(15);
+
+        JLabel pwLabel = new JLabel("비밀번호 : ");
+        JPasswordField pwField = new JPasswordField(15);
+
+        inputPanel.add(idLabel);
+        inputPanel.add(idField);
+        inputPanel.add(pwLabel);
+        inputPanel.add(pwField);
+
+        // 2. 버튼 영역
+        JPanel buttonPanel = new JPanel();
+        buttonPanel.setLayout(new FlowLayout()); // 가로로 나란히 배치
+
+        JButton loginButton = new JButton("로그인");
+        JButton backButton = new JButton("뒤로가기");
+
+        buttonPanel.add(loginButton);
+        buttonPanel.add(backButton);
+
+        // 3. 프레임 구성
+        loginFrame.setLayout(new BorderLayout(10, 10));
+        loginFrame.add(inputPanel, BorderLayout.CENTER);
+        loginFrame.add(buttonPanel, BorderLayout.SOUTH);
+
+        loginFrame.setSize(400, 200);
+        loginFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        loginFrame.setVisible(true);
+
+
+        // ======= CONTROLLER 로직 처리 =======
+        // 로그인 버튼 동작
+        loginButton.addActionListener(e -> {
+            // 1. 입력값 가져오기
+            String id = idField.getText();
+            String password = new String(pwField.getPassword());
+
+            // 2. 유효성 검사
+            if (id.trim().isEmpty() || password.isEmpty()) {
+                JOptionPane.showMessageDialog(loginFrame,
+                        "아이디와 비밀번호를 모두 입력해주세요.",
+                        "입력 오류",
+                        JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
+            // 3. 로그인 시도 (Model 호출)
+            User loggedInAdmin = userList.adminLogin(id, password);
+
+            // 4. 결과 처리
+            if (loggedInAdmin != null) {
+                // 로그인 성공
+                JOptionPane.showMessageDialog(loginFrame,
+                        "환영합니다, 관리자님!",
+                        "로그인 성공",
+                        JOptionPane.INFORMATION_MESSAGE);
+                loginFrame.dispose();
+                openAdminWindow(); // 관리자 메뉴로 이동
+            } else {
+                // 로그인 실패
+                JOptionPane.showMessageDialog(loginFrame,
+                        "로그인 실패! 아이디 또는 비밇번호를 확인해주세요.",
+                        "로그인 실패",
+                        JOptionPane.ERROR_MESSAGE);
+                pwField.setText(""); // 비밀번호 필드 초기화
+                idField.requestFocus(); // 아이디 필드에 포커스
+            }
+        });
+
+        // 뒤로가기 버튼 동작
+        backButton.addActionListener(e -> {
+            loginFrame.dispose();
+            showMainScreen();
+        });
+
+
     }
 
     public static void openAdminWindow() {
