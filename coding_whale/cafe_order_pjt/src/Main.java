@@ -10,6 +10,7 @@ import backend.user.UserList;
 import backend.user.UserRole;
 
 import javax.swing.*;
+import javax.swing.border.Border;
 import java.awt.*;
 import java.io.*;
 import java.util.ArrayList;
@@ -26,29 +27,6 @@ public class Main {
 
 
     public static void main(String[] args) throws IOException {
-        // 변수
-//        int 수용량 = 5; // 배열의 전체 크기
-//        String[] menuName = new String[수용량];
-//        int[] menuPrice = new int[수용량];
-//        String[] menuOption = new String[수용량];
-//        int 칸 = 0; // 현재 차있는 배열의 크기
-
-
-        // 배열
-//        ArrayList<Integer> menuPrice = new ArrayList<>();
-//        ArrayList<String> menuOption = new ArrayList<>();
-
-
-        // 클래스
-        // + 메뉴를 담는 바구니 (메뉴 리스트) 필요
-        // 메뉴 리스트라는 클래스 만들기
-        // 메뉴 리스트 안에 같은 자료형 (배열) 이 들어감
-        // 클래스 이름은 : 메뉴 / 메뉴 리스트로 정하기 (영어)
-
-        // 객체 생성 == Menu의 인스턴스 backend.menu 생성
-//        backend.menu.Menu backend.menu = new backend.menu.Menu();
-        // 객체 생성 == MenuList의 인스턴스 menuList 생성
-
         storeList = new StoreList();
         userList = new UserList(storeList);
         menuStatusList = new MenuStatusList();
@@ -950,16 +928,44 @@ public class Main {
 
     // 관리자 메뉴 창
     public static void openAdminWindow() {
-        // view
+        // ======= view =======
         JFrame adminFrame = new JFrame("관리자 메뉴");
-        JButton backButton = new JButton("뒤로가기");
 
-        adminFrame.add(backButton);
+        JButton menuButton = new JButton("1. 전체 메뉴 CRUD");
+        JButton sellerButton = new JButton("2. 판매자 계정 관리");
+        JButton salesButton = new JButton("3. 매출 관리");
+        JButton storeButton = new JButton("4. 지점 관리");
+        JButton backButton = new JButton("5. 로그아웃");
+
+        JPanel panel = new JPanel();
+        panel.setLayout(new GridLayout(5, 1, 10, 10));
+        panel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+
+        panel.add(menuButton);
+        panel.add(sellerButton);
+        panel.add(salesButton);
+        panel.add(storeButton);
+        panel.add(backButton);
+
+        adminFrame.add(panel);
         adminFrame.setSize(400, 400);
         adminFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         adminFrame.setVisible(true);
 
-        // logic
+        // ======= CONTROLLER =======
+        // 1. 메뉴 관리 버튼 동작
+        menuButton.addActionListener(e -> {
+            adminFrame.dispose();
+            showMenuManagementScreen(); // 메뉴 관리 화면으로 이동
+        });
+
+        // 2. 판매자 계정 관리 버튼 동작
+
+        // 3. 매출 관리 버튼 동작
+
+        // 4. 지점 관리 버튼 동작
+
+        // 5. 로그아웃 버튼 동작
         backButton.addActionListener(e -> {
             adminFrame.dispose();
             showMainScreen();
@@ -1280,6 +1286,284 @@ public class Main {
         customerFrame.setSize(400, 400);
         customerFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         customerFrame.setVisible(true);
+    }
+
+    // 관리자 메뉴 관리(CURD) 창
+    public static void showMenuManagementScreen() {
+        // ======= VIEW =======
+        JFrame menuFrame = new JFrame("메뉴 관리");
+
+        // 1. 컬럼 이름(헤더)과 데이터 준비 (Model)
+        String[] columnNames = {"ID", "이름", "가격", "카테고리"};
+
+        ArrayList<Menu> menus = menuList.getMenus(); // menuList에서 메뉴 목록 가져오기
+        Object[][] data = new Object[menus.size()][4];
+        for (int i = 0; i < menus.size(); i++) {
+            Menu m = menus.get(i);
+            data[i][0] = m.getId().toString().substring(0, 8);
+            data[i][1] = m.getName();
+            data[i][2] = m.getPrice();
+            data[i][3] = m.getOption().name();
+        }
+
+        // 2. JTable 생성
+        JTable menuTable = new JTable(data, columnNames);
+
+        // 3. JScrollPane에 JTable 추가 (스크롤 기능)
+        JScrollPane scrollPane = new JScrollPane(menuTable);
+
+        // 4. CRUD 버튼들
+        JPanel buttonPanel = new JPanel(new FlowLayout());
+        JButton addButton = new JButton("추가");
+        JButton editButton = new JButton("수정");
+        JButton deleteButton = new JButton("삭제");
+        JButton backButton = new JButton("뒤로가기");
+
+        buttonPanel.add(addButton);
+        buttonPanel.add(editButton);
+        buttonPanel.add(deleteButton);
+        buttonPanel.add(backButton);
+
+        // 5. 프레임에 컴포넌트 배치
+        menuFrame.setLayout(new BorderLayout(10, 10));
+        menuFrame.add(new JLabel("전체 메뉴 목록", SwingConstants.CENTER), BorderLayout.NORTH);
+        menuFrame.add(scrollPane, BorderLayout.CENTER);
+        menuFrame.add(buttonPanel, BorderLayout.SOUTH);
+
+        menuFrame.setSize(600, 400);
+        menuFrame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+        menuFrame.setVisible(true);
+
+        // ======= CONTROLLER =======
+        // 메뉴 추가
+        addButton.addActionListener(e -> {
+            showAddMenuDialog(menuFrame);
+        });
+
+        // 메뉴 수정
+        editButton.addActionListener(e -> {
+            // 1. 테이블에서 선택된 행의 인덱스를 가져옴
+            int selectedRow = menuTable.getSelectedRow();
+
+            // 2. 아무것도 선택하지 않았으면 경고
+            if (selectedRow == -1) {
+                JOptionPane.showMessageDialog(menuFrame, "수정할 메뉴를 선택해주세요.", "경고", JOptionPane.WARNING_MESSAGE);
+                return;
+            }
+
+            // 3. 선택된 행에 해당하는 Menu 객체를 가져옴
+            Menu selectedMenu = menuList.getMenus().get(selectedRow);
+
+            // 4. Menu 객체를 전달하여 수정 다이얼로그를 띄움
+            showEditMenuDialog(menuFrame, selectedMenu);
+        });
+
+        // 메뉴 삭제
+        deleteButton.addActionListener(e -> {
+            // 1. 테이블에서 선택된 행의 인덱스를 가져옴
+            int selectedRow = menuTable.getSelectedRow();
+
+            // 2. 아무것도 선택하지 않았으면 경고
+            if (selectedRow == -1) {
+                JOptionPane.showMessageDialog(menuFrame, "삭제할 메뉴를 선택해주세요.", "경고", JOptionPane.WARNING_MESSAGE);
+                return;
+            }
+
+            // 3. 사용자에게 삭제 여부 재확인
+            int confirm = JOptionPane.showConfirmDialog(
+                    menuFrame,
+                    "정말로 이 메뉴를 삭제하시겠습니까?",
+                    "삭제 확인",
+                    JOptionPane.YES_NO_OPTION);
+
+            // 4. 예(Yes)를 선택했을 때만 삭제 로직 실행
+            if (confirm == JOptionPane.YES_OPTION) {
+                try {
+                    // 5. 선택된 행에 해당하는 Menu 객체를 가져옴
+                    Menu selectedMenu = menuList.getMenus().get(selectedRow);
+
+                    // 6. Model 호출 : 선택된 메뉴의 UUID를 전달하여 삭제
+                    menuList.menuDelete(selectedMenu.getId());
+
+
+                    //7. 성공 메시지
+                    JOptionPane.showMessageDialog(menuFrame, "메뉴가 성공적으로 삭제되었습니다.");
+
+                    // 8. 화면 새로고침
+                    menuFrame.dispose();
+                    showMenuManagementScreen();
+
+                } catch (IOException ex) {
+                    JOptionPane.showMessageDialog(menuFrame, "파일 저장 중 오류가 발생했습니다.", "오류", JOptionPane.ERROR_MESSAGE);
+                }
+            }
+        });
+
+        // 뒤로가기 동작
+        backButton.addActionListener(e -> {
+            menuFrame.dispose();
+            openAdminWindow(); // 관리자 메뉴로 이동
+        });
+    }
+
+    // 관리자 메뉴 Create 팝업창
+    public static void showAddMenuDialog(JFrame parentFrame) {
+        // ======= VIEW =======
+        // 1. Dialog 생성 (parentFrame 위에 modal로 띄움)
+        JDialog dialog = new JDialog(parentFrame, "새 메뉴 추가", true);
+
+        // 2. 입력 필드
+        JPanel inputPanel = new JPanel(new GridLayout(3, 2, 10, 10));
+        inputPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+
+        inputPanel.add(new JLabel("이름: "));
+        JTextField nameField = new JTextField();
+        inputPanel.add(nameField);
+
+        inputPanel.add(new JLabel("가격: "));
+        JTextField priceField = new JTextField();
+        inputPanel.add(priceField);
+
+
+        inputPanel.add(new JLabel("카테고리:"));
+        // MenuCategory Enum 값으로 JComboBox 생성
+        JComboBox<MenuCategory> categoryComboBox = new JComboBox<>(MenuCategory.values());
+        inputPanel.add(categoryComboBox);
+
+        // 3. 확인, 취소 버튼
+        JPanel buttonPanel = new JPanel(new FlowLayout());
+        JButton okButton = new JButton("확인");
+        JButton cancelButton = new JButton("취소");
+        buttonPanel.add(okButton);
+        buttonPanel.add(cancelButton);
+
+        // 4. 다이얼로그에 컴포넌트 배치
+        dialog.setLayout(new BorderLayout());
+        dialog.add(inputPanel, BorderLayout.CENTER);
+        dialog.add(buttonPanel, BorderLayout.SOUTH);
+
+        dialog.pack(); // 컴포넌트에 맞게 창 크기 자동 조절
+        dialog.setLocationRelativeTo(parentFrame); // 부모 창 중앙에 위치
+
+
+        // ======= CONTROLLER =======
+        // 확인 버튼 동작
+        okButton.addActionListener(e -> {
+            try {
+                // 1. 입력값 가져오기
+                String name = nameField.getText();
+                int price = Integer.parseInt(priceField.getText());
+                MenuCategory category = (MenuCategory) categoryComboBox.getSelectedItem();
+
+                // 2. 유효성 검사
+                if (name.trim().isEmpty()) {
+                    JOptionPane.showMessageDialog(dialog, "이름을 입력해주세요.", "입력 오류", JOptionPane.WARNING_MESSAGE);
+                    return;
+                }
+
+                // 3. 메뉴 생성 (Model 호출)
+                menuList.menuCreate(name, price, category);
+
+                // 4. 성공 처리
+                JOptionPane.showMessageDialog(dialog, "메뉴가 성공적으로 추가되었습니다.", "성공", JOptionPane.INFORMATION_MESSAGE);
+                dialog.dispose(); // 팝업 닫기
+
+                // 메뉴 목록 화면 새로고침
+                parentFrame.dispose(); // 기존 메뉴 관리 창 닫기
+                showMenuManagementScreen(); // 새 정보가 반영된 메뉴 관리 창 다시 열기
+
+            } catch (NumberFormatException ex) {
+                JOptionPane.showMessageDialog(dialog, "가격은 숫자로 입력해주세요.", "입력 오류", JOptionPane.ERROR_MESSAGE);
+            } catch (IOException ex) {
+                JOptionPane.showMessageDialog(dialog, "파일 저장 중 오류가 발생했습니다.", "오류", JOptionPane.ERROR_MESSAGE);
+            }
+        });
+
+        // 취소 버튼 동작
+        cancelButton.addActionListener(e -> {
+            dialog.dispose(); // 팝업창 닫기
+        });
+
+
+        dialog.setVisible(true);
+    }
+
+    // 관리자 메뉴 Update 팝업창
+    public static void showEditMenuDialog(JFrame parentFrame, Menu menuToEdit) {
+        // ======= VIEW =======
+        JDialog dialog = new JDialog(parentFrame, "메뉴 수정", true);
+
+        JPanel inputPanel = new JPanel(new GridLayout(3, 2, 10, 10));
+        inputPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+
+        inputPanel.add(new JLabel("이름:"));
+        JTextField nameField = new JTextField();
+        inputPanel.add(nameField);
+
+        inputPanel.add(new JLabel("가격:"));
+        JTextField priceField = new JTextField();
+        inputPanel.add(priceField);
+
+        inputPanel.add(new JLabel("카테고리:"));
+        JComboBox<MenuCategory> categoryJComboBox = new JComboBox<>(MenuCategory.values());
+        inputPanel.add(categoryJComboBox);
+
+        // 전달받은 menuToEdit 객체로 입력 필드를 미리 채움
+        nameField.setText(menuToEdit.getName());
+        priceField.setText(String.valueOf(menuToEdit.getPrice()));
+        categoryJComboBox.setSelectedItem(menuToEdit.getOption());
+
+        JPanel buttonPanel = new JPanel(new FlowLayout());
+        JButton okButton = new JButton("확인");
+        JButton cancelButton = new JButton("취소");
+        buttonPanel.add(okButton);
+        buttonPanel.add(cancelButton);
+
+        dialog.setLayout(new BorderLayout());
+        dialog.add(inputPanel, BorderLayout.CENTER);
+        dialog.add(buttonPanel, BorderLayout.SOUTH);
+
+        dialog.pack();
+        dialog.setLocationRelativeTo(parentFrame);
+
+        // ======= CONTROLLER =======
+        // 확인 버튼 동작
+        okButton.addActionListener(e -> {
+            try {
+                String newName = nameField.getText();
+                int newPrice = Integer.parseInt(priceField.getText());
+                MenuCategory newCategory = (MenuCategory) categoryJComboBox.getSelectedItem();
+
+                if (newName.trim().isEmpty()) {
+                    JOptionPane.showMessageDialog(dialog, "이름을 입력해주세요.", "입력 오류", JOptionPane.WARNING_MESSAGE);
+                    return;
+                }
+
+                // Model 호출 : menuToEdit의 UUID와 새로운 정보 전달
+                menuList.menuEdit(menuToEdit.getId(), newName, newPrice, newCategory);
+
+                JOptionPane.showMessageDialog(dialog, "메뉴가 성공적으로 수정되었습니다.");
+                dialog.dispose();
+
+                // 화면 새로고침
+                parentFrame.dispose();
+                showMenuManagementScreen();
+
+
+            } catch (NumberFormatException ex) {
+                JOptionPane.showMessageDialog(dialog, "가격은 숫자로 입력해주세요.", "입력 오류", JOptionPane.ERROR_MESSAGE);
+            } catch (IOException ex) {
+                JOptionPane.showMessageDialog(dialog, "파일 저장 중 오류가 발생했습니다.", "오류", JOptionPane.ERROR_MESSAGE);
+            }
+        });
+
+        // 취소 버튼 동작
+        cancelButton.addActionListener(e -> {
+            dialog.dispose();
+        });
+
+        dialog.setVisible(true);
+
     }
 }
 

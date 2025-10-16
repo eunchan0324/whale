@@ -19,13 +19,30 @@ public class MenuList {
     private MenuStatusList menuStatusList;
     private StoreList storeList;
 
+    // menus getter
+    public ArrayList<Menu> getMenus() {
+        return menus;
+    }
+
     public MenuList(MenuStatusList menuStatusList, StoreList storeList) throws IOException {
         this.menuStatusList = menuStatusList;
         this.storeList = storeList;
         loadFile();
     }
 
-    // backend.menu.Menu Create
+    // Menu 생성 (GUI)
+    public void menuCreate(String name, int price, MenuCategory category) throws IOException {
+        // 새 Menu 객체 생성 (UUID는 자동 생성됨)
+        Menu newMenu = new Menu(name, price, category);
+
+        // 리스트에 추가
+        menus.add(newMenu);
+
+        // 파일 저장
+        saveFile();
+    }
+
+    // backend.menu.Menu Create (CLI)
     public void menuCreate() throws IOException {
         Scanner sc = new Scanner(System.in);
 
@@ -52,10 +69,7 @@ public class MenuList {
         Menu menu = new Menu(menuName, menuPrice, menuOption);
         menus.add(menu);
 
-        Path menuFilePath = Constants.BASE_PATH.resolve("Menus.txt");
-        FileWriter writer = new FileWriter(menuFilePath.toFile(), true);
-        writer.write(menu.getId() + "," + menu.getName() + "," + menu.getPrice() + "," + menu.getOption() + "\n");
-        writer.close();
+        saveFile();
 
         System.out.println("등록이 완료되었습니다.");
         System.out.println();
@@ -151,7 +165,29 @@ public class MenuList {
         showAndGetSellableMenus((storeId));
     }
 
-    // backend.menu.Menu Update
+    // Menu Update (GUI)
+    public void menuEdit(UUID menuId, String newName, int newPrice, MenuCategory newCategory) throws IOException {
+        // 1. 수정할 메뉴를 UUID로 찾기
+        Menu targetMenu = null;
+        for (Menu menu : menus) {
+            if (menu.getId().equals(menuId)) {
+                targetMenu = menu;
+                break;
+            }
+        }
+
+        // 2. 찾았으면 정보 업데이트 *못찾는 경우는 JTable에서 선택했기 때문에 거의 발생하지 않음
+        if (targetMenu != null) {
+            targetMenu.setName(newName);
+            targetMenu.setPrice(newPrice);
+            targetMenu.setOption(newCategory);
+
+            // 3. 파일에 저장
+            saveFile();
+        }
+    }
+
+    // backend.menu.Menu Update (CLI)
     public void menuEdit(Menu 수정할메뉴) throws IOException {
         Scanner sc = new Scanner(System.in);
         boolean checker = false;
@@ -213,7 +249,26 @@ public class MenuList {
         }
     }
 
-    // backend.menu.Menu Delete
+    // Menu Delete (GUI)
+    public void menuDelete(UUID menuId) throws IOException {
+        // 1. menus 리스트에서 해당 UUID를 가진 Menu 객체를 찾아 제거
+        Menu menuToRemove = null;
+        for (Menu menu : menus) {
+            if (menu.getId().equals(menuId)) {
+                menuToRemove = menu;
+                break;
+            }
+        }
+
+        if (menuToRemove != null) {
+            menus.remove(menuToRemove);
+        }
+
+        // 2. 파일 저장
+        saveFile();
+    }
+
+    // backend.menu.Menu Delete (CLI)
     public void menuDelete(Menu 삭제할메뉴) throws IOException {
         boolean checker = false;
 
@@ -263,7 +318,6 @@ public class MenuList {
             writer.write(menu.getId().toString() + "," + menu.getName() + "," + menu.getPrice() + "," + menu.getOption().name() + "\n");
         }
         writer.close();
-        System.out.println("--- 변경사항이 저장되었습니다---\n");
     }
 
     // Menu 파일 load (Menus.txt)
