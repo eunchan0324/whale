@@ -4,10 +4,7 @@ import backend.constant.Constants;
 import backend.store.Store;
 import backend.store.StoreList;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Scanner;
@@ -45,6 +42,22 @@ public class UserList {
         }
     }
 
+    // 구매자 회원가입 (GUI)
+    public boolean registerCustomer(String id, String password) throws IOException {
+        // ID 중복 검사
+        if (findUser(id, customerList) != null) {
+            return false; // 중복
+        }
+
+        // 사용자 객체 생성 및 추가
+        User user = new User(id, password, UserRole.CUSTOMER);
+        customerList.add(user);
+
+        // 파일 저장
+        saveCustomerFile();
+
+        return true;
+    }
 
     // 회원가입 - All role
     public void registerUser(UserRole role, ArrayList<User> targetList, String fileName) throws IOException {
@@ -146,11 +159,7 @@ public class UserList {
                 User user = new User(thisId, thisPassword, role);
                 targetList.add(user);
 
-                // todo : saveCustomerFile() 로 리팩토링
-                Path userFilePath = Constants.BASE_PATH.resolve(fileName);
-                FileWriter writer = new FileWriter(userFilePath.toFile(), true);
-                writer.write(user.getId() + "," + user.getPassword() + "," + user.getRole() + "\n");
-                writer.close();
+                saveCustomerFile();
                 break;
             }
 
@@ -295,16 +304,6 @@ public class UserList {
         }
     }
 
-    // 관리자 로그인 (CLI)
-    public User adminLogin() {
-        return performLogin(adminList, "관리자");
-    }
-
-    // 관리자 로그인 (GUI)
-    public User adminLogin(String id, String password) {
-        return performLoginWithCredentials(adminList, id, password);
-    }
-
     // 로그인 로직 (GUI)
     private User performLoginWithCredentials(ArrayList<User> targetList, String id, String password) {
         // 리스트가 비어있으면
@@ -330,14 +329,34 @@ public class UserList {
 
     }
 
-    // 판매자 로그인
+    // 관리자 로그인 (CLI)
+    public User adminLogin() {
+        return performLogin(adminList, "관리자");
+    }
+
+    // 관리자 로그인 (GUI)
+    public User adminLogin(String id, String password) {
+        return performLoginWithCredentials(adminList, id, password);
+    }
+
+    // 판매자 로그인 (CLI)
     public User sellerLogin() {
         return performLogin(sellerList, "판매자");
     }
 
-    // 구매자 로그인
+    // 판매자 로그인 (GUI)
+    public User sellerLogin(String id, String password) {
+        return performLoginWithCredentials(sellerList, id, password);
+    }
+
+    // 구매자 로그인 (CLI)
     public User customerLogin() {
         return performLogin(customerList, "구매자");
+    }
+
+    // 구매자 로그인 (GUI)
+    public User customerLogin(String id, String password) {
+        return performLoginWithCredentials(customerList, id, password);
     }
 
     // 판매자 계정 조회(read)
@@ -471,7 +490,7 @@ public class UserList {
         for (User seller : sellerList) {
             writer.write(seller.getId() + "," +
                     seller.getPassword() + "," +
-                    seller.getRole() + "," +
+                    seller.getRole().name() + "," +
                     seller.getStoreId() + "\n"
             );
         }
@@ -513,6 +532,19 @@ public class UserList {
             adminList.add(user);
         }
         reader.close();
+    }
+
+    // Customer Save (customer.txt) + Add customerList
+    public void saveCustomerFile() throws IOException {
+        Path customerFilePath = Constants.BASE_PATH.resolve("Customer.txt");
+        FileWriter writer = new FileWriter(customerFilePath.toFile());
+
+        for (User customer : customerList) {
+            writer.write(customer.getId() + "," +
+                    customer.getPassword() + "," +
+                    customer.getRole().name() + "\n");
+        }
+        writer.close();
     }
 
     // Customer.txt load + customerList add

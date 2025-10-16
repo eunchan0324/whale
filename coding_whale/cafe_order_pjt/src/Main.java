@@ -846,20 +846,21 @@ public class Main {
         // logic
         adminButton.addActionListener(e -> {
             frame.dispose(); // 현재 창 닫기
-            showAdminLogin(); // 관리자 창 열기
+            showAdminLogin(); // 관리자 로그인 창 열기
         });
 
         sellerButton.addActionListener(e -> {
             frame.dispose(); // 현재 창 닫기
-            openSellerWindow(); // 판매자 창 열기
+            showSellerLogin(); // 판매자 로그인 창 열기
         });
 
         customerButton.addActionListener(e -> {
             frame.dispose(); // 현재 창 닫기
-            openCustomerWindow(); // 구매자 창 열기
+            showCustomerLogin(); // 구매자 로그인 창 열기
         });
     }
 
+    // 관리자 로그인 창
     public static void showAdminLogin() {
         // ======= VIEW 화면 구성 =======
         JFrame loginFrame = new JFrame("관리자 로그인");
@@ -947,6 +948,7 @@ public class Main {
 
     }
 
+    // 관리자 메뉴 창
     public static void openAdminWindow() {
         // view
         JFrame adminFrame = new JFrame("관리자 메뉴");
@@ -964,7 +966,97 @@ public class Main {
         });
     }
 
-    public static void openSellerWindow() {
+    // 판매자 로그인 창
+    public static void showSellerLogin() {
+        // ======= VIEW 화면 구성 =======
+        JFrame loginFrame = new JFrame("판매자 로그인");
+
+        // 1. 입력 필드 영역
+        JPanel inputPanel = new JPanel();
+        inputPanel.setLayout(new GridLayout(2, 2, 10, 10));
+
+        JLabel idLabel = new JLabel("아이디 : ");
+        JTextField idField = new JTextField(15);
+
+        JLabel pwLabel = new JLabel("비밀번호 : ");
+        JPasswordField pwField = new JPasswordField(15);
+
+        inputPanel.add(idLabel);
+        inputPanel.add(idField);
+        inputPanel.add(pwLabel);
+        inputPanel.add(pwField);
+
+        // 2. 버튼 영역
+        JPanel buttonPanel = new JPanel();
+        buttonPanel.setLayout(new FlowLayout());
+
+        JButton loginButton = new JButton("로그인");
+        JButton backButton = new JButton("뒤로가기");
+
+        buttonPanel.add(loginButton);
+        buttonPanel.add(backButton);
+
+        // 3. 프레임 구성
+        loginFrame.setLayout(new BorderLayout(10, 10));
+        loginFrame.add(inputPanel, BorderLayout.CENTER);
+        loginFrame.add(buttonPanel, BorderLayout.SOUTH);
+
+        loginFrame.setSize(400, 200);
+        loginFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        loginFrame.setVisible(true);
+
+        // ======= CONTROLLER 로직 처리 =======
+        loginButton.addActionListener(e -> {
+            // 1. 입력값 가져오기
+            String id = idField.getText();
+            String password = new String(pwField.getPassword());
+
+            // 2. 유효성 검사
+            if (id.trim().isEmpty() || password.isEmpty()) {
+                JOptionPane.showMessageDialog(loginFrame,
+                        "아이디와 비밀번호를 모두 입력해주세요.",
+                        "입력 오류",
+                        JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
+            // 3. 로그인 시도 (Model 호출)
+            User loggedInSeller = userList.sellerLogin(id, password);
+
+            // 4. 결과 처리
+            if (loggedInSeller != null) {
+                // 로그인 성공
+                // 4-1. 지점 정보 가져오기
+                int storeId = loggedInSeller.getStoreId();
+                String storeName = storeList.findStoreById(storeId).getStoreName();
+
+                // 2. 환영 메세지 (지점명 포함)
+                JOptionPane.showMessageDialog(loginFrame,
+                        "환영합니다, " + storeName + " 지점 판매자님!");
+
+                // 3. 판매자 메뉴로 이동 (loggedInSeller 객체 넘김)
+                loginFrame.dispose();
+                openSellerWindow(loggedInSeller);
+            } else {
+                // 로그인 실패
+                JOptionPane.showMessageDialog(loginFrame,
+                        "로그인 실패! 아이디 또는 비밀번호를 확인해주세요.",
+                        "로그인 실패",
+                        JOptionPane.ERROR_MESSAGE);
+                pwField.setText(""); // 비밀번호 필드 초기화
+                idField.requestFocus(); // 아이디 필드에 포커스
+            }
+        });
+
+        // 뒤로가기 버튼 동작
+        backButton.addActionListener(e -> {
+            loginFrame.dispose();
+            showMainScreen();
+        });
+    }
+
+    // 판매자 메뉴 창
+    public static void openSellerWindow(User loggedInSeller) {
         JFrame sellerFrame = new JFrame("판매자 메뉴");
         JButton backButton = new JButton("뒤로가기");
 
@@ -979,7 +1071,203 @@ public class Main {
         sellerFrame.setVisible(true);
     }
 
-    public static void openCustomerWindow() {
+    // 구매자 로그인 창
+    public static void showCustomerLogin() {
+        // =======  VIEW =======
+        JFrame loginFrame = new JFrame();
+
+        // 1. 입력 필드 영역
+        JPanel inputPanel = new JPanel();
+        inputPanel.setLayout(new GridLayout(2, 2, 10, 10));
+
+        JLabel idLabel = new JLabel("아이디 : ");
+        JTextField idField = new JTextField(15);
+
+        JLabel pwLabel = new JLabel("비밀번호 : ");
+        JPasswordField pwField = new JPasswordField(15);
+
+        inputPanel.add(idLabel);
+        inputPanel.add(idField);
+        inputPanel.add(pwLabel);
+        inputPanel.add(pwField);
+
+        // 2. 버튼 영역
+        JPanel buttonPanel = new JPanel();
+        buttonPanel.setLayout(new FlowLayout());
+
+        JButton loginButton = new JButton("로그인");
+        JButton registerButton = new JButton("회원가입");
+        JButton backButton = new JButton("뒤로가기");
+
+        buttonPanel.add(loginButton);
+        buttonPanel.add(registerButton);
+        buttonPanel.add(backButton);
+
+        // 3. 프레임 구성
+        loginFrame.setLayout(new BorderLayout(10, 10));
+        loginFrame.add(inputPanel, BorderLayout.CENTER);
+        loginFrame.add(buttonPanel, BorderLayout.SOUTH);
+
+        loginFrame.setSize(400, 200);
+        loginFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        loginFrame.setVisible(true);
+
+        // ======= CONTROLLER =======
+        // 로그인 버튼 동작
+        loginButton.addActionListener(e -> {
+            // 입력값 가져오기
+            String id = idField.getText();
+            String password = new String(pwField.getPassword());
+
+            // 유효성 검사
+            if (id.trim().isEmpty() || password.isEmpty()) {
+                JOptionPane.showMessageDialog(loginFrame,
+                        "아이디와 비밀번호를 모두 입력해주세요.",
+                        "입력 오류",
+                        JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
+            // 3. 로그인 시도 (Model 호출)
+            User loggedInCustomer = userList.customerLogin(id, password);
+
+            // 4. 결과 처리
+            if (loggedInCustomer != null) {
+                // 로그인 성공
+                JOptionPane.showMessageDialog(loginFrame,
+                        "환영합니다!",
+                        "로그인 성공",
+                        JOptionPane.INFORMATION_MESSAGE);
+                loginFrame.dispose();
+                openCustomerWindow(loggedInCustomer); // 구매자 메뉴로 이동
+            } else {
+                // 로그인 실패
+                JOptionPane.showMessageDialog(loginFrame,
+                        "로그인 실패! 아이디 또는 비밀번호를 확인해주세요.",
+                        "로그인 실패",
+                        JOptionPane.ERROR_MESSAGE);
+                pwField.setText(""); // 비밀번호 필드 초기화
+                idField.requestFocus(); // 아이디 필드에 포커스
+            }
+        });
+
+        // 회원가입 버튼 동작
+        registerButton.addActionListener(e -> {
+            loginFrame.dispose();
+            showCustomerSignup();
+
+        });
+
+        // 뒤로가기 버튼 동작
+        backButton.addActionListener(e -> {
+            loginFrame.dispose();
+            showMainScreen();
+        });
+    }
+
+    // 구매자 회원가입 창
+    public static void showCustomerSignup() {
+        // ======= VIEW =======
+        JFrame signupFrame = new JFrame("구매자 회원가입");
+
+        // input 영역
+        JPanel inputPanel = new JPanel();
+        inputPanel.setLayout(new GridLayout(3, 2, 10, 10));
+
+        JLabel idLabel = new JLabel("아이디 :");
+        JTextField idField = new JTextField(15);
+
+        JLabel pwLabel = new JLabel("비밀번호 : ");
+        JPasswordField pwField = new JPasswordField(15);
+
+        JLabel pwCheckLabel = new JLabel("비밀번호 확인 : ");
+        JPasswordField pwCheckField = new JPasswordField(15);
+
+        inputPanel.add(idLabel);
+        inputPanel.add(idField);
+        inputPanel.add(pwLabel);
+        inputPanel.add(pwField);
+        inputPanel.add(pwCheckLabel);
+        inputPanel.add(pwCheckField);
+
+        // button 영역
+        JPanel buttonPanel = new JPanel();
+        buttonPanel.setLayout(new FlowLayout());
+
+        JButton signupButton = new JButton("회원가입");
+        JButton backButton = new JButton("뒤로가기");
+
+        buttonPanel.add(signupButton);
+        buttonPanel.add(backButton);
+
+        signupFrame.setLayout(new BorderLayout(10, 10));
+        signupFrame.add(inputPanel, BorderLayout.CENTER);
+        signupFrame.add(buttonPanel, BorderLayout.SOUTH);
+
+        signupFrame.setSize(400, 250);
+        signupFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        signupFrame.setVisible(true);
+
+        // ======= CONTROLLER =======
+        // 회원가입 동작
+        signupButton.addActionListener(e -> {
+            // 입력 받기
+            String id = idField.getText();
+            String password = new String(pwField.getPassword());
+            String passwordCheck = new String(pwCheckField.getPassword());
+
+            // 입력 유효성 검사
+            // 입력란이 비어있을 때
+            if (id.trim().isEmpty() || password.isEmpty() || passwordCheck.isEmpty()) {
+                JOptionPane.showMessageDialog(signupFrame,
+                        "아이디, 비밀번호, 비밀번호 확인을 모두 입력해주세요.",
+                        "입력 오류",
+                        JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
+            // pw, pwCheck가 동일하지 않을 때
+            if (!password.equals(passwordCheck)) {
+                JOptionPane.showMessageDialog(signupFrame,
+                        "비밀번호가 일치하지 않습니다.",
+                        "입력 오류",
+                        JOptionPane.ERROR_MESSAGE);
+                pwField.setText("");
+                pwCheckField.setText("");
+                pwField.requestFocus();
+                return;
+            }
+
+            // 유효하다면 회원가입 시도 (Model 호출)
+            try {
+                boolean success = userList.registerCustomer(id, password);
+
+                if (success) {
+                    JOptionPane.showMessageDialog(signupFrame, "회원가입 성공! 로그인 화면으로 돌아갑니다.", "성공", JOptionPane.INFORMATION_MESSAGE);
+                    signupFrame.dispose();
+                    showCustomerLogin(); // 로그인 화면으로 이동
+                } else {
+                    JOptionPane.showMessageDialog(signupFrame, "이미 존재하는 아이디입니다. 다시 입력해주세요.", "오류", JOptionPane.ERROR_MESSAGE);
+                    idField.setText("");
+                    idField.requestFocus();
+                }
+            } catch (IOException ex) {
+                JOptionPane.showMessageDialog(signupButton, "파일 저장 중 오류가 발생했습니다", "오류", JOptionPane.ERROR_MESSAGE);
+                ex.printStackTrace();
+            }
+
+        });
+
+        // 뒤로가기 동작
+        backButton.addActionListener(e -> {
+            signupFrame.dispose();
+            showCustomerLogin(); // 구매자 로그인 화면으로 돌아가기
+        });
+
+    }
+
+    // 구매자 메뉴 창
+    public static void openCustomerWindow(User loggedInCustomer) {
         JFrame customerFrame = new JFrame("구매자 메뉴");
         JButton backButton = new JButton("뒤로가기");
 
