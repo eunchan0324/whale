@@ -93,7 +93,7 @@ public class StoreList {
         return false; // 중복 없음
     }
 
-    // 신규 지점 등록
+    // 신규 지점 등록 (CLI)
     public boolean registerNewStore(String newStoreName) {
         // 중복 검사, 중복시 false 리턴
         if (isDuplicateName(newStoreName)) {
@@ -126,6 +126,50 @@ public class StoreList {
         return true; // 모든 과정 성공
 
     }
+
+    // 신규 지점 등록 (GUI)
+    public void registerNewStoreGUI(String newStoreName) throws IOException, IllegalArgumentException {
+        // 중복 여부를 예외로 알림
+        if (isDuplicateName(newStoreName)) {
+            throw new IllegalArgumentException("이미 존재하는 지점명입니다.");
+        }
+
+        // MaxId 구하기
+        int maxId = 0;
+        for (Store store : stores) {
+            if (store.getStoreId() > maxId) {
+                maxId = store.getStoreId();
+            }
+        }
+        int newId = maxId + 1;
+
+        // stores에 newStore 더하기
+        Store newStore = new Store(newId, newStoreName);
+        stores.add(newStore);
+
+        // 파일 저장
+        saveStoreFile();
+    }
+
+    // 지점 삭제 (GUI)
+    public void deleteStore(int storeId) throws IOException {
+        // 1. stores 리스트에서 해당 ID를 가진 Store 객체를 찾아 제거
+        Store storeToRemove = null;
+        for (Store store : stores) {
+            if (store.getStoreId() == storeId) {
+                storeToRemove = store;
+                break;
+            }
+        }
+
+        if (storeToRemove != null) {
+            stores.remove(storeToRemove);
+        }
+
+        // 2. 파일 저장
+        saveStoreFile();
+    }
+
 
 
 }

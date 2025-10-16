@@ -4,6 +4,7 @@ import backend.order.Order;
 import backend.order.OrderItem;
 import backend.order.OrderList;
 import backend.order.OrderStatus;
+import backend.store.Store;
 import backend.store.StoreList;
 import backend.user.User;
 import backend.user.UserList;
@@ -818,7 +819,7 @@ public class Main {
         frame.add(panel);
         frame.setSize(400, 300);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setVisible(true);
+
 
 
         // logic
@@ -836,9 +837,11 @@ public class Main {
             frame.dispose(); // 현재 창 닫기
             showCustomerLogin(); // 구매자 로그인 창 열기
         });
+
+        frame.setVisible(true);
     }
 
-    // 관리자 로그인 창
+    // [관리자] 로그인 창
     public static void showAdminLogin() {
         // ======= VIEW 화면 구성 =======
         JFrame loginFrame = new JFrame("관리자 로그인");
@@ -875,7 +878,7 @@ public class Main {
 
         loginFrame.setSize(400, 200);
         loginFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        loginFrame.setVisible(true);
+
 
 
         // ======= CONTROLLER 로직 처리 =======
@@ -923,18 +926,20 @@ public class Main {
             showMainScreen();
         });
 
+        loginFrame.setVisible(true);
+
 
     }
 
-    // 관리자 메뉴 창
+    // [관리자] 메뉴 창
     public static void openAdminWindow() {
         // ======= view =======
         JFrame adminFrame = new JFrame("관리자 메뉴");
 
         JButton menuButton = new JButton("1. 전체 메뉴 CRUD");
-        JButton sellerButton = new JButton("2. 판매자 계정 관리");
-        JButton salesButton = new JButton("3. 매출 관리");
-        JButton storeButton = new JButton("4. 지점 관리");
+        JButton storeButton = new JButton("2. 지점 관리");
+        JButton sellerButton = new JButton("3. 판매자 계정 관리");
+        JButton salesButton = new JButton("4. 매출 관리");
         JButton backButton = new JButton("5. 로그아웃");
 
         JPanel panel = new JPanel();
@@ -942,15 +947,15 @@ public class Main {
         panel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
 
         panel.add(menuButton);
+        panel.add(storeButton);
         panel.add(sellerButton);
         panel.add(salesButton);
-        panel.add(storeButton);
         panel.add(backButton);
 
         adminFrame.add(panel);
         adminFrame.setSize(400, 400);
         adminFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        adminFrame.setVisible(true);
+
 
         // ======= CONTROLLER =======
         // 1. 메뉴 관리 버튼 동작
@@ -960,6 +965,10 @@ public class Main {
         });
 
         // 2. 판매자 계정 관리 버튼 동작
+        storeButton.addActionListener(e -> {
+            adminFrame.dispose();
+            showStoreManagementScreen(); // 지점 관리 화면으로 이동
+        });
 
         // 3. 매출 관리 버튼 동작
 
@@ -970,9 +979,11 @@ public class Main {
             adminFrame.dispose();
             showMainScreen();
         });
+
+        adminFrame.setVisible(true);
     }
 
-    // 판매자 로그인 창
+    // [판매자] 로그인 창
     public static void showSellerLogin() {
         // ======= VIEW 화면 구성 =======
         JFrame loginFrame = new JFrame("판매자 로그인");
@@ -1009,7 +1020,7 @@ public class Main {
 
         loginFrame.setSize(400, 200);
         loginFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        loginFrame.setVisible(true);
+
 
         // ======= CONTROLLER 로직 처리 =======
         loginButton.addActionListener(e -> {
@@ -1059,9 +1070,11 @@ public class Main {
             loginFrame.dispose();
             showMainScreen();
         });
+
+        loginFrame.setVisible(true);
     }
 
-    // 판매자 메뉴 창
+    // [판매자] 메뉴 창
     public static void openSellerWindow(User loggedInSeller) {
         JFrame sellerFrame = new JFrame("판매자 메뉴");
         JButton backButton = new JButton("뒤로가기");
@@ -1077,7 +1090,7 @@ public class Main {
         sellerFrame.setVisible(true);
     }
 
-    // 구매자 로그인 창
+    // [구매자] 로그인 창
     public static void showCustomerLogin() {
         // =======  VIEW =======
         JFrame loginFrame = new JFrame();
@@ -1116,7 +1129,7 @@ public class Main {
 
         loginFrame.setSize(400, 200);
         loginFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        loginFrame.setVisible(true);
+
 
         // ======= CONTROLLER =======
         // 로그인 버튼 동작
@@ -1169,9 +1182,11 @@ public class Main {
             loginFrame.dispose();
             showMainScreen();
         });
+
+        loginFrame.setVisible(true);
     }
 
-    // 구매자 회원가입 창
+    // [구매자] 회원가입 창
     public static void showCustomerSignup() {
         // ======= VIEW =======
         JFrame signupFrame = new JFrame("구매자 회원가입");
@@ -1212,7 +1227,7 @@ public class Main {
 
         signupFrame.setSize(400, 250);
         signupFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        signupFrame.setVisible(true);
+
 
         // ======= CONTROLLER =======
         // 회원가입 동작
@@ -1270,9 +1285,10 @@ public class Main {
             showCustomerLogin(); // 구매자 로그인 화면으로 돌아가기
         });
 
+        signupFrame.setVisible(true);
     }
 
-    // 구매자 메뉴 창
+    // [구매자] 메뉴 창
     public static void openCustomerWindow(User loggedInCustomer) {
         JFrame customerFrame = new JFrame("구매자 메뉴");
         JButton backButton = new JButton("뒤로가기");
@@ -1288,7 +1304,7 @@ public class Main {
         customerFrame.setVisible(true);
     }
 
-    // 관리자 메뉴 관리(CURD) 창
+    // [관리자] 메뉴 관리(CURD) 창
     public static void showMenuManagementScreen() {
         // ======= VIEW =======
         JFrame menuFrame = new JFrame("메뉴 관리");
@@ -1332,7 +1348,7 @@ public class Main {
 
         menuFrame.setSize(600, 400);
         menuFrame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-        menuFrame.setVisible(true);
+
 
         // ======= CONTROLLER =======
         // 메뉴 추가
@@ -1404,9 +1420,11 @@ public class Main {
             menuFrame.dispose();
             openAdminWindow(); // 관리자 메뉴로 이동
         });
+
+        menuFrame.setVisible(true);
     }
 
-    // 관리자 메뉴 Create 팝업창
+    // [관리자] 메뉴 Create 팝업창
     public static void showAddMenuDialog(JFrame parentFrame) {
         // ======= VIEW =======
         // 1. Dialog 생성 (parentFrame 위에 modal로 띄움)
@@ -1488,7 +1506,7 @@ public class Main {
         dialog.setVisible(true);
     }
 
-    // 관리자 메뉴 Update 팝업창
+    // [관리자] 메뉴 Update 팝업창
     public static void showEditMenuDialog(JFrame parentFrame, Menu menuToEdit) {
         // ======= VIEW =======
         JDialog dialog = new JDialog(parentFrame, "메뉴 수정", true);
@@ -1565,5 +1583,152 @@ public class Main {
         dialog.setVisible(true);
 
     }
+
+    // [관리자] 지점 관리 창
+    public static void showStoreManagementScreen() {
+        // ======= VIEW =======
+        JFrame storeFrame = new JFrame("지점 관리");
+
+        // 1. 컬럼 이름(헤더)과 데이터 준비 (Model)
+        String[] columnNames = {"지점ID", "지점명"};
+
+        ArrayList<Store> stores = storeList.getStores(); // storeList에서 지점 목록 가져오기
+        Object[][] data = new Object[stores.size()][2];
+        for (int i = 0; i < stores.size(); i++) {
+            Store s = stores.get(i);
+            data[i][0] = s.getStoreId();
+            data[i][1] = s.getStoreName();
+        }
+
+        // 2. JTable 및 JScrollPane 생성
+        JTable storeTable = new JTable(data, columnNames);
+        JScrollPane scrollPane = new JScrollPane(storeTable);
+
+        // 3. 버튼들
+        JPanel buttonPanel = new JPanel(new FlowLayout());
+        JButton addButton = new JButton("지점 추가");
+        JButton deleteButton = new JButton("지점 삭제");
+        JButton backButton = new JButton("뒤로가기");
+        buttonPanel.add(addButton);
+        buttonPanel.add(deleteButton);
+        buttonPanel.add(backButton);
+
+        // 4. 프레임에 컴포넌트 배치
+        storeFrame.setLayout(new BorderLayout(10, 10));
+        storeFrame.add(new JLabel("전체 지점 목록", SwingConstants.CENTER), BorderLayout.NORTH);
+        storeFrame.add(scrollPane, BorderLayout.CENTER);
+        storeFrame.add(buttonPanel, BorderLayout.SOUTH);
+
+        storeFrame.setSize(500, 400);
+        storeFrame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+
+
+        // ======= CONTROLLER =======
+        // 지점 추가 버튼 클릭
+        addButton.addActionListener(e -> {
+            showAddStoreDialog(storeFrame);
+        });
+
+        // 지점 삭제 버튼 클릭
+        deleteButton.addActionListener(e -> {
+            int selectedRow = storeTable.getSelectedRow();
+            if (selectedRow == -1) {
+                JOptionPane.showMessageDialog(storeFrame, "삭제할 지점을 선택해주세요.", "경고", JOptionPane.WARNING_MESSAGE);
+                return;
+            }
+
+            int confirm = JOptionPane.showConfirmDialog(storeFrame, "정말로 이 지점을 삭제하시겠습니까?", "삭제 확인", JOptionPane.YES_NO_OPTION);
+
+            if (confirm == JOptionPane.YES_OPTION) {
+                try {
+                    // 선택된 행의 첫 번째 컬럼(지점 ID) 값 가져오기
+                    int storeId = (int) storeTable.getValueAt(selectedRow, 0);
+
+                    // Model 호출
+                    storeList.deleteStore(storeId);
+
+                    JOptionPane.showMessageDialog(storeFrame, "지점이 삭제되었습니다.");
+
+                    // 화면 새로고침
+                    storeFrame.dispose();
+                    showStoreManagementScreen();
+
+                } catch (IOException ex) {
+                    JOptionPane.showMessageDialog(storeFrame, "파일 저장 중 오류가 발생했습니다.", "오류", JOptionPane.ERROR_MESSAGE);
+                }
+            }
+        });
+
+
+        // 뒤로가기 버튼 동작
+        backButton.addActionListener(e -> {
+            storeFrame.dispose();
+            openAdminWindow();
+        });
+
+        storeFrame.setVisible(true);
+    }
+
+    // [관리자] 지점 추가 다이얼로그
+    public static void showAddStoreDialog(JFrame parentFrame) {
+        // ======= VIEW =======
+        JDialog dialog = new JDialog(parentFrame, "새 지점 추가", true);
+
+        JPanel inputPanel = new JPanel(new GridLayout(1, 2, 10, 10));
+        inputPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+
+        inputPanel.add(new JLabel("지점명:"));
+        JTextField nameField = new JTextField(15);
+        inputPanel.add(nameField);
+
+        JPanel buttonPanel = new JPanel(new FlowLayout());
+        JButton okButton = new JButton("확인");
+        JButton cancelButton = new JButton("취소");
+        buttonPanel.add(okButton);
+        buttonPanel.add(cancelButton);
+
+        dialog.setLayout(new BorderLayout());
+        dialog.add(inputPanel, BorderLayout.CENTER);
+        dialog.add(buttonPanel, BorderLayout.SOUTH);
+
+        dialog.pack();
+        dialog.setLocationRelativeTo(parentFrame);
+
+
+        // ======= CONTORLLER =======
+        // 확인 버튼 컨트롤러
+        okButton.addActionListener(e -> {
+            try {
+                String name = nameField.getText();
+                if (name.trim().isEmpty()) {
+                    JOptionPane.showMessageDialog(dialog, "지점명을 입력해주세요.", "입력 오류", JOptionPane.WARNING_MESSAGE);
+                    return;
+                }
+
+                // Model 호출
+                storeList.registerNewStoreGUI(name);
+
+                // 성공 시
+                JOptionPane.showMessageDialog(dialog, "지점이 추가되었습니다.");
+                dialog.dispose();
+                parentFrame.dispose();
+                showStoreManagementScreen(); // 화면 새로고침
+
+            } catch (IllegalArgumentException ex) {
+                JOptionPane.showMessageDialog(dialog, "이미 존재하는 지점명입니다.", "오류", JOptionPane.ERROR_MESSAGE);
+            } catch (IOException ex) {
+                JOptionPane.showMessageDialog(dialog, "파일 저장 중 오류가 발생했습니다.", "오류", JOptionPane.ERROR_MESSAGE);
+            }
+        });
+
+        // 취소 버튼 컨트롤러
+        cancelButton.addActionListener(e -> {
+            dialog.dispose();
+        });
+
+        dialog.setVisible(true);
+    }
+
+
 }
 
