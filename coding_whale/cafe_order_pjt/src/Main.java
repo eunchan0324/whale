@@ -889,7 +889,7 @@ public class Main {
             String password = new String(pwField.getPassword());
 
             // 2. 유효성 검사
-            if (id.trim().isEmpty() || password.isEmpty()) {
+            if (id == null || id.isEmpty() || password.isEmpty()) {
                 JOptionPane.showMessageDialog(loginFrame,
                         "아이디와 비밀번호를 모두 입력해주세요.",
                         "입력 오류",
