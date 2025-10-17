@@ -1872,6 +1872,23 @@ public class Main {
         return;
       }
 
+      // 유효하다면 회원가입 시도 (Model 호출)
+      try {
+        boolean success = userList.registerSeller(id, password, storeId);
+
+        if (success) {
+          JOptionPane.showMessageDialog(dialog, "판매자 계정 생성 성공!", "성공", JOptionPane.INFORMATION_MESSAGE);
+          dialog.dispose();
+          showSellerManagementScreen();
+        } else {
+          JOptionPane.showMessageDialog(dialog, "이미 존재하는 ID입니다. 다시 입력해주세요.", "오류", JOptionPane.ERROR_MESSAGE);
+          idField.setText("");
+          idField.requestFocus();
+        }
+      } catch (IOException ex) {
+        JOptionPane.showMessageDialog(dialog, "파일 저장 중 오류가 발생했습니다", "오류", JOptionPane.ERROR_MESSAGE);
+        ex.printStackTrace();
+      }
 
 
     });

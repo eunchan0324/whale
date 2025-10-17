@@ -42,6 +42,23 @@ public class UserList {
         }
     }
 
+    // 판매자 회원가입 (GUI)
+    public boolean registerSeller(String id, String password, int storeId) throws IOException {
+        // ID 중복 검사
+        if (findUser(id, sellerList) != null) {
+            return false; // 중복
+        }
+
+        // 사용자 객체 생성 및 추가
+        User user = new User(id, password, UserRole.SELLER, storeId);
+        sellerList.add(user);
+
+        // 파일 저장
+        saveSellerFile();
+
+        return true;
+    }
+
     // 구매자 회원가입 (GUI)
     public boolean registerCustomer(String id, String password) throws IOException {
         // ID 중복 검사
