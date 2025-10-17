@@ -15,6 +15,7 @@ import javax.swing.border.Border;
 import java.awt.*;
 import java.io.*;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Scanner;
 
 
@@ -1779,6 +1780,22 @@ public class Main {
     });
 
     // 계정 수정 버튼 동작
+    editButton.addActionListener(e -> {
+      // 1. 테이블에서 선택된 행의 인덱스를 가져옴
+      int selectedRow = sellerTable.getSelectedRow();
+
+      // 2. 아무것도 선택하지 않았으면 경고
+      if (selectedRow == -1) {
+        JOptionPane.showMessageDialog(sellerFrame, "수정할 메뉴를 선택해주세요.", "경고", JOptionPane.WARNING_MESSAGE);
+        return;
+      }
+
+      // 3. 선택된 행에 해당하는 User 객체를 가져옴
+      User selectedUser = userList.getSellerList().get(selectedRow);
+
+      // 4. Menu 객체를 전달하여 수정 다이얼로그를 띄움
+      showEditSellerDialog(sellerFrame, selectedUser);
+    });
 
     // 계정 삭제 버튼 동작
 
@@ -1889,8 +1906,6 @@ public class Main {
         JOptionPane.showMessageDialog(dialog, "파일 저장 중 오류가 발생했습니다", "오류", JOptionPane.ERROR_MESSAGE);
         ex.printStackTrace();
       }
-
-
     });
 
     // 취소 버튼 동작
@@ -1900,6 +1915,120 @@ public class Main {
 
     dialog.setVisible(true);
 
+  }
+
+  // [관리자] 판매자 계정 수정 다이얼로그
+  public static void showEditSellerDialog(JFrame parentFrame, User sellerToEdit) {
+    // ======= VIEW =======
+    JDialog dialog = new JDialog(parentFrame, "판매자 계정 수정", true);
+
+    String[] columnNames = {"지점ID", "지점명", "배정상태"};
+
+    ArrayList<Store> stores = storeList.getStores();
+    Object[][] data = new Object[stores.size()][3];
+
+    // 이미 배정된 지점 ID 목록을 미리 확보 - Set 사용
+    java.util.Set<Integer> assignedStoreIds = new java.util.HashSet<>();
+    ArrayList<User> sellerList = userList.getSellerList();
+    for (User seller : sellerList) {
+      assignedStoreIds.add(seller.getStoreId());
+    }
+
+    for (int i = 0; i < stores.size(); i++) {
+      Store s = stores.get(i);
+      String status = (assignedStoreIds.contains(s.getStoreId())) ? "[배정됨]" : "[사용가능]";
+      data[i][0] = s.getStoreId();
+      data[i][1] = s.getStoreName();
+      data[i][2] = status;
+    }
+
+    // JTable 및 ScrollPane 생성
+    JTable sellerTable = new JTable(data, columnNames);
+    JScrollPane scrollPane = new JScrollPane(sellerTable);
+
+    // input
+    JPanel inputPanel = new JPanel(new GridLayout(3, 2, 10, 10));
+    inputPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+
+    inputPanel.add(new JLabel("ID:"));
+    JTextField idField = new JTextField();
+    inputPanel.add(idField);
+
+    inputPanel.add(new JLabel("Password:"));
+    JPasswordField pwField = new JPasswordField();
+    inputPanel.add(pwField);
+
+    inputPanel.add(new JLabel("지점ID:"));
+    JTextField storeIdField = new JTextField();
+    inputPanel.add(storeIdField);
+
+    // 전달받은 selllerToEdit 객체로 입력 필드를 미리 채움
+    idField.setText(sellerToEdit.getId());
+    pwField.setText(String.valueOf(sellerToEdit.getPassword()));
+    storeIdField.setText(String.valueOf(sellerToEdit.getStoreId()));
+
+    // 버튼들
+    JPanel buttonPanel = new JPanel(new FlowLayout());
+    JButton okButton = new JButton("확인");
+    JButton cancelButton = new JButton("취소");
+    buttonPanel.add(okButton);
+    buttonPanel.add(cancelButton);
+
+    dialog.setLayout(new BorderLayout());
+    dialog.add(inputPanel, BorderLayout.NORTH);
+    dialog.add(sellerTable, BorderLayout.CENTER);
+    dialog.add(buttonPanel, BorderLayout.SOUTH);
+
+    dialog.pack();
+    dialog.setLocationRelativeTo(parentFrame);
+
+    // ======= CONTROLLER =======
+    // 확인 버튼 동작
+    okButton.addActionListener(e -> {
+
+      try {
+        String newId = idField.getText();
+        String newPassword = new String(pwField.getPassword());
+        int newStoreId = Integer.parseInt(storeIdField.getText());
+
+        // 유효성 검사
+        if (newId.trim().isEmpty()) {
+          JOptionPane.showMessageDialog(dialog, "이름을 입력해주세요.", "입력 오류", JOptionPane.WARNING_MESSAGE);
+          return;
+        }
+
+        if (newPassword.trim().isEmpty()) {
+          JOptionPane.showMessageDialog(dialog, "비밀번호를 입력해주세요.", "입력 오류", JOptionPane.WARNING_MESSAGE);
+          return;
+        }
+
+        if (newStoreId <= 0) {
+          JOptionPane.showMessageDialog(dialog, "유효한 지점ID를 입력해주세요.", "입력 오류", JOptionPane.WARNING_MESSAGE);
+          return;
+        }
+
+        // Model 호출
+        userList.sellerAccountUpdate(newId, newPassword, newStoreId);
+
+        JOptionPane.showMessageDialog(dialog, "판매자 계정 수정 완료");
+        dialog.dispose();
+
+        // 화면 새로고침
+        parentFrame.dispose();
+        showSellerManagementScreen();
+
+      } catch (IOException ex) {
+        JOptionPane.showMessageDialog(dialog, "파일 저장 중 오류가 발생했습니다.", "오류", JOptionPane.ERROR_MESSAGE);
+      }
+
+    });
+
+    // 취소 버튼 동작
+    cancelButton.addActionListener(e -> {
+      dialog.dispose();
+    });
+
+    dialog.setVisible(true);
   }
 
 

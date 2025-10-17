@@ -388,6 +388,20 @@ public class UserList {
         }
     }
 
+    // [관리자] 판매자 계정 수정 UPDATE (GUI)
+    public void sellerAccountUpdate(String id, String password, int storeId) throws IOException {
+        // id로 찾은 seller 수정
+        for (User seller : sellerList) {
+            if (seller.getId().equals(id)) {
+                seller.setPassword(password);
+                seller.setStoreId(storeId);
+            }
+        }
+
+        // 파일 저장
+        saveSellerFile();
+    }
+
     // 판매자 계정 수정(update)
     public void sellerAccountUpdate() throws IOException {
         System.out.println("[판매자 계정 수정]");
