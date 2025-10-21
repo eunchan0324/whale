@@ -15,6 +15,7 @@ import javax.swing.border.Border;
 import java.awt.*;
 import java.io.*;
 import java.util.*;
+import java.util.concurrent.BrokenBarrierException;
 
 
 public class Main {
@@ -1987,6 +1988,12 @@ public class Main {
         sellerFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
         // ======= CONTROLLER =======
+        // 2. 재고 관리 버튼
+        stockButton.addActionListener(e -> {
+            sellerFrame.dispose();
+            showStockManagementScreen(loggedInSeller);
+        });
+
         // 3. 판매 메뉴 관리 버튼
         menuButton.addActionListener(e -> {
             sellerFrame.dispose();
@@ -2142,6 +2149,220 @@ public class Main {
         });
 
         frame.setVisible(true);
+    }
+
+    // [판매자] 재고 관리 화면
+    public static void showStockManagementScreen(User seller) {
+        // ======= VIEW =======
+        JFrame frame = new JFrame("재고 관리 - " + seller.getId());
+
+        int storeId = seller.getStoreId();
+
+        // 1. 현재 판매 중인 메뉴 목록 가져오기 (AVAILABLE 상태인 메뉴만)
+        ArrayList<Menu> sellableMenus = new ArrayList<>();
+        ArrayList<MenuStatus> menuStatusesForStore = new ArrayList<>();
+
+        for (Menu menu : menuList.getMenus()) {
+            MenuStatus status = menuStatusList.findMenuStatus(storeId, menu.getId());
+            // 판매 메뉴로 등록된 것만 (status가 null이 아닌 것)
+            if (status != null) {
+                sellableMenus.add(menu);
+                menuStatusesForStore.add(status);
+            }
+        }
+
+        // 2. 판매 중인 메뉴가 없음켠 안내
+        if (sellableMenus.isEmpty()) {
+            JOptionPane.showMessageDialog(null,
+                    "판매 중인 메뉴가 없습니다. \n 먼저 '판매 메뉴 관리'에서 메뉴를 등록해주세요.",
+                    "알림",
+                    JOptionPane.INFORMATION_MESSAGE);
+            openSellerWindow(seller);
+            return;
+        }
+
+        // 3. JTable용 데이터 준비
+        String[] columnNames = {"메뉴명", "재고 수량", "판매 상태", "수정"};
+        Object[][] data = new Object[sellableMenus.size()][4];
+
+        for (int i = 0; i < sellableMenus.size(); i++) {
+            Menu menu = sellableMenus.get(i);
+            MenuStatus status = menuStatusesForStore.get(i);
+
+            data[i][0] = menu.getName();
+            data[i][1] = status.getStock() + "개";
+            data[i][2] = status.getStatus().getDisplayStatus();
+            data[i][3] = "수정"; // 버튼 텍스트
+        }
+
+        // 4. JTable 생성
+        JTable stockTable = new JTable(data, columnNames) {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return false; // 직접 편집 불가 (수정 버튼으로만 수정)
+            }
+        };
+
+        JScrollPane scrollPane = new JScrollPane(stockTable);
+
+        // 5. 버튼 패널
+        JPanel buttonPanel = new JPanel(new FlowLayout());
+        JButton editButton = new JButton("재고/상태 수정");
+        JButton backButton = new JButton("뒤로가기");
+
+        buttonPanel.add(editButton);
+        buttonPanel.add(backButton);
+
+        // 6. 레이아웃
+        frame.setLayout(new BorderLayout(10, 10));
+        frame.add(new JLabel("판매 중인 메뉴의 재고 및 상태 관리", SwingConstants.CENTER), BorderLayout.NORTH);
+        frame.add(scrollPane, BorderLayout.CENTER);
+        frame.add(buttonPanel, BorderLayout.SOUTH);
+
+        frame.setSize(700, 500);
+        frame.setLocationRelativeTo(null);
+        frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+
+        // ======= CONTORLLER =======
+        // 재고/상태 수정 버튼
+        editButton.addActionListener(e -> {
+            int selectedRow = stockTable.getSelectedRow();
+
+            if (selectedRow == -1) {
+                JOptionPane.showMessageDialog(frame,
+                        "수정할 메뉴를 선택해주세요.",
+                        "알림",
+                        JOptionPane.WARNING_MESSAGE);
+                return;
+            }
+
+            // 선택한 메뉴와 상태 정보 가져오기
+            Menu selectedMenu = sellableMenus.get(selectedRow);
+            MenuStatus selcectedStatus = menuStatusesForStore.get(selectedRow);
+
+            // 수정 다이얼로그 열기
+            showStockEditDialog(frame, seller, selectedMenu, selcectedStatus);
+        });
+
+        // 뒤로가기 버튼
+        backButton.addActionListener(e -> {
+            frame.dispose();
+            openSellerWindow(seller);
+        });
+
+        frame.setVisible(true);
+
+    }
+
+    // [판매자] 재고/상태 수정 다이얼로그
+    public static void showStockEditDialog(JFrame parentFrame, User seller, Menu menu, MenuStatus menuStatus) {
+        // ======= VIEW =======
+        JDialog dialog = new JDialog(parentFrame, "재고/상태 수정 - " + menu.getName(), true);
+
+        // 입력 패널
+        JPanel inputPanel = new JPanel(new GridLayout(3, 2, 10, 10));
+        inputPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 10, 20));
+
+        // 메뉴명 (읽기 전용)
+        inputPanel.add(new JLabel("메뉴명:"));
+        JLabel menuNameLabel = new JLabel(menu.getName());
+        menuNameLabel.setFont(new Font(menuNameLabel.getFont().getName(), Font.BOLD, 12));
+        inputPanel.add(menuNameLabel);
+
+        // 재고 수량
+        inputPanel.add(new JLabel("재고 수량:"));
+        JTextField stockField = new JTextField(String.valueOf(menuStatus.getStock()));
+        inputPanel.add(stockField);
+
+        // 판매 상태
+        inputPanel.add(new JLabel("판매 상태:"));
+        String[] statusOptions = {"판매중 (AVAILABLE)", "품절 (SOLD_OUT)"};
+        JComboBox<String> statusComboBox = new JComboBox<>(statusOptions);
+
+        // 현재 상태로 초기화
+        if (menuStatus.getStatus() == EMenuSaleStatus.AVAILABLE) {
+            statusComboBox.setSelectedIndex(0);
+        } else {
+            statusComboBox.setSelectedIndex(1);
+        }
+        inputPanel.add(statusComboBox);
+
+        // 버튼 패널
+        JPanel buttonPanel = new JPanel(new FlowLayout());
+        JButton saveButton = new JButton("저장");
+        JButton cancelButton = new JButton("취소");
+        buttonPanel.add(saveButton);
+        buttonPanel.add(cancelButton);
+
+        // 레이아웃
+        dialog.setLayout(new BorderLayout(10, 10));
+        dialog.add(inputPanel, BorderLayout.CENTER);
+        dialog.add(buttonPanel, BorderLayout.SOUTH);
+
+        dialog.pack();
+        dialog.setLocationRelativeTo(parentFrame);
+
+        // ======= CONTROLLER =======
+        // 저장 버튼
+        saveButton.addActionListener(e -> {
+            try {
+                // 1. 재고 수량 읽기
+                int newStock;
+                try {
+                    newStock = Integer.parseInt(stockField.getText().trim());
+
+                } catch (NumberFormatException ex) {
+                    JOptionPane.showMessageDialog(dialog,
+                            "재고 수량은 숫자로 입력해주세요.",
+                            "입력 오류",
+                            JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+
+                if (newStock < 0) {
+                    JOptionPane.showMessageDialog(dialog,
+                            "재고 수량은 0 이상이여야 합니다.",
+                            "입력 오류",
+                            JOptionPane.WARNING_MESSAGE);
+                    return;
+                }
+
+                // 2. 판매 상태 읽기
+                int statusIndex = statusComboBox.getSelectedIndex();
+                EMenuSaleStatus newStatus = (statusIndex == 0) ? EMenuSaleStatus.AVAILABLE : EMenuSaleStatus.SOLD_OUT;
+
+                // 3. Model 호출 - 재고 수량 업데이트
+                menuStatusList.updateStock(seller.getStoreId(), menu.getId(), newStock);
+
+                // 4. Model 호출 - 판매 상태 업데이트
+                menuStatusList.updateStatus(seller.getStoreId(), menu.getId(), newStatus);
+
+                JOptionPane.showMessageDialog(dialog,
+                        "재고 및 상태가 수정되었습니다!",
+                        "성공",
+                        JOptionPane.INFORMATION_MESSAGE);
+
+                dialog.dispose();
+
+                // 화면 새로고침
+                parentFrame.dispose();
+                showStockManagementScreen(seller);
+
+            } catch (IOException ex) {
+                JOptionPane.showMessageDialog(dialog,
+                        "파일 저장 중 오류가 발생했습니다.",
+                        "오류",
+                        JOptionPane.ERROR_MESSAGE);
+                ex.printStackTrace();
+            }
+        });
+
+        // 취소 버튼
+        cancelButton.addActionListener(e -> {
+            dialog.dispose();
+        });
+
+        dialog.setVisible(true);
     }
 
     /**
