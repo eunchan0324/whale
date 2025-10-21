@@ -3,6 +3,7 @@ package backend.order;
 import backend.constant.Constants;
 import backend.menu.Menu;
 import backend.menu.MenuList;
+import backend.store.Store;
 import backend.store.StoreList;
 
 import java.io.BufferedReader;
@@ -257,6 +258,7 @@ public class OrderList {
         System.out.println(storeName + " 지점 전체 매출 : " + totalPrice + "원");
     }
 
+    // 지점별 매출 현황
     public void showSalesBySeller() {
         System.out.println("[지점별 매출 현황]");
 
@@ -436,6 +438,68 @@ public class OrderList {
             }
         }
         return pendingOrders;
+    }
+
+    /**
+     * GUI
+     */
+    // 전체 매출 데이터를 JTable용 2차원 배열로 반환
+    public Object[][] getSalesDataForTable(StoreList storeList) {
+        // 1. 지점별 매출 집계
+        Map<Integer, Integer> salesByStore = new HashMap<>();
+        Map<Integer, Integer> orderCountByStore = new HashMap<>();
+
+        for (Order order : orderList) {
+            if (order.getStatus() == OrderStatus.COMPLETED) {
+                int storeId = order.getStoreId();
+                int price = order.getTotalPrice();
+
+                // 매출 누적
+                salesByStore.put(storeId, salesByStore.getOrDefault(storeId, 0) + price);
+                // 주문 수 누적
+                orderCountByStore.put(storeId, orderCountByStore.getOrDefault(storeId, 0) + 1);
+            }
+        }
+
+        // 2. 2차원 배열로 변환
+        Object[][] data = new Object[salesByStore.size()][3];
+        int i = 0;
+        for (Map.Entry<Integer, Integer> entry : salesByStore.entrySet()) {
+            int storeId = entry.getKey();
+            Store store = storeList.findStoreById(storeId);
+            String storeName = (store != null) ? store.getStoreName() : "알 수 없음";
+
+            data[i][0] = storeName; // 지점명
+            data[i][1] = orderCountByStore.get(storeId);
+            data[i][2] = entry.getValue() + "원";
+            i++;
+        }
+
+        return data;
+    }
+
+    // 특정 지점의 매출 데이터를 JTable용 2차원 배열로 전환
+    public Object[][] getSalesDataByStore(int storeId, StoreList storeList) {
+        int totalSales = 0;
+        int totalOrders = 0;
+
+        for (Order order : orderList) {
+            if (order.getStatus() == OrderStatus.COMPLETED && order.getStoreId() == storeId) {
+                totalSales += order.getTotalPrice();
+                totalOrders++;
+            }
+        }
+
+        // 한 행만 반환
+        Object[][] data = new Object[1][3];
+        Store store = storeList.findStoreById(storeId);
+        String storeName = (store != null) ? store.getStoreName() : "알 수 없음";
+
+        data[0][0] = storeName;
+        data[0][1] = totalOrders;
+        data[0][2] = totalSales + "원";
+
+        return data;
     }
 
 }

@@ -979,6 +979,10 @@ public class Main {
         });
 
         // 4. 매출 관리 버튼 동작
+        salesButton.addActionListener(e -> {
+            adminFrame.dispose();
+            showSalesViewScreen(); // 매출 관리 화면으로 이동
+        });
 
         // 5. 로그아웃 버튼 동작
         backButton.addActionListener(e -> {
@@ -1757,6 +1761,109 @@ public class Main {
         });
 
         dialog.setVisible(true);
+    }
+
+    // [관리자] 매출 조회 창
+    public static void showSalesViewScreen() {
+        // ======= VIEW =======
+        JFrame frame = new JFrame("매출 조회");
+
+        // 상단 : 조회 방식 선택
+        JPanel topPanel = new JPanel(new FlowLayout());
+        topPanel.add(new JLabel("조회 방식:"));
+
+        String[] viewOptions = {"전체 매출", "지점별 매출"};
+        JComboBox<String> viewComboBox = new JComboBox<>(viewOptions);
+        topPanel.add(viewComboBox);
+
+
+        // 지점 선택 콤보박스 (초기에는 숨김)
+        JLabel storeLabel = new JLabel("지점:");
+        storeLabel.setVisible(false);
+
+        JComboBox<String> storeComboBox = new JComboBox<>(); // 지점 선택용
+        storeComboBox.setVisible(false); // 처음엔 숨김
+
+        // 지점 목록 채우기
+        ArrayList<Store> stores = storeList.getStores();
+        for (Store store : stores) {
+            storeComboBox.addItem(store.getStoreId() + " - " + store.getStoreName());
+        }
+
+        topPanel.add(storeLabel);
+        topPanel.add(storeComboBox);
+
+        // 중간 : JTable로 매출 데이터 표시
+        String[] columnNames = {"지점명", "주문 수 ", "총 매출"};
+
+        // 초기 데이터 : 전체 매출
+        Object[][] initalData = orderList.getSalesDataForTable(storeList);
+        JTable salesTable = new JTable(initalData, columnNames);
+        JScrollPane scrollPane = new JScrollPane(salesTable);
+
+        // 하단 : 뒤로가기 버튼
+        JPanel buttonPanel = new JPanel(new FlowLayout());
+        JButton backButton = new JButton("뒤로가기");
+        buttonPanel.add(backButton);
+
+        // 레이아웃 구성
+        frame.setLayout(new BorderLayout(10, 10));
+        frame.add(topPanel, BorderLayout.NORTH);
+        frame.add(scrollPane, BorderLayout.CENTER);
+        frame.add(buttonPanel, BorderLayout.SOUTH);
+
+        frame.setSize(600, 400);
+        frame.setLocationRelativeTo(null);
+
+        // ======= CONTROLLER =======
+        // 조회 방식 변경 이벤트
+        viewComboBox.addActionListener(e -> {
+            String selected = (String) viewComboBox.getSelectedItem();
+
+            if ("지점별 매출".equals(selected)) {
+                // 지점 선택 콤보박스 표시
+                storeLabel.setVisible(true);
+                storeComboBox.setVisible(true);
+
+                // 첫 번째 지점의 매출 표시
+                if (storeComboBox.getItemCount() > 0) {
+                    String selectedStore = (String) storeComboBox.getSelectedItem();
+                    int storeId = Integer.parseInt(selectedStore.split(" - ")[0]);
+
+                    Object[][] data = orderList.getSalesDataByStore(storeId, storeList);
+                    salesTable.setModel(new javax.swing.table.DefaultTableModel(data, columnNames));
+                }
+            } else {
+                // 전체 매출 표시
+                storeLabel.setVisible(false);
+                storeComboBox.setVisible(false);
+
+                Object[][] data = orderList.getSalesDataForTable(storeList);
+                salesTable.setModel(new javax.swing.table.DefaultTableModel(data, columnNames));
+            }
+
+            frame.revalidate();
+            frame.repaint();
+        });
+
+        // 지점 선택 변경 이벤트
+        storeComboBox.addActionListener(e -> {
+            if (storeComboBox.isVisible() && storeComboBox.getSelectedItem() != null) {
+                String selectedStore = (String) storeComboBox.getSelectedItem();
+                int storeId = Integer.parseInt(selectedStore.split(" - ")[0]);
+
+                Object[][] data = orderList.getSalesDataByStore(storeId, storeList);
+                salesTable.setModel(new javax.swing.table.DefaultTableModel(data, columnNames));
+            }
+        });
+
+        // 뒤로가기 버튼
+        backButton.addActionListener(e -> {
+            frame.dispose();
+            openAdminWindow();
+        });
+
+        frame.setVisible(true);
     }
 
     /**
