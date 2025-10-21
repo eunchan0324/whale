@@ -1613,16 +1613,26 @@ public class Main {
         ArrayList<Store> stores = storeList.getStores();
         Object[][] data = new Object[stores.size()][3];
 
-        // 이미 배정된 지점 ID 목록을 미리 확보 - Set 사용
+        // 이미 배정된 지점 ID 목록 - Set 사용 (단, 현재 수정중인 판매자의 지점은 제외)
         java.util.Set<Integer> assignedStoreIds = new java.util.HashSet<>();
         ArrayList<User> sellerList = userList.getSellerList();
         for (User seller : sellerList) {
-            assignedStoreIds.add(seller.getStoreId());
+            if (!seller.getId().equals(sellerToEdit.getId())) {
+                assignedStoreIds.add(seller.getStoreId());
+            }
         }
 
         for (int i = 0; i < stores.size(); i++) {
             Store s = stores.get(i);
-            String status = (assignedStoreIds.contains(s.getStoreId())) ? "[배정됨]" : "[사용가능]";
+            // 현재 판매자의 지점이면 [현재 담당] 표시
+            String status;
+            if (s.getStoreId() == sellerToEdit.getStoreId()) {
+                status = "[현재 담당]";
+            } else if (assignedStoreIds.contains(s.getStoreId())) {
+                status = "[배정됨]";
+            } else {
+                status = "[사용가능]";
+            }
             data[i][0] = s.getStoreId();
             data[i][1] = s.getStoreName();
             data[i][2] = status;
@@ -1636,22 +1646,23 @@ public class Main {
         JPanel inputPanel = new JPanel(new GridLayout(3, 2, 10, 10));
         inputPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
+        // ID는 수정 불가 (비활성화)
         inputPanel.add(new JLabel("ID:"));
         JTextField idField = new JTextField();
+        idField.setEditable(false); // 편집 불가
+        idField.setBackground(Color.LIGHT_GRAY);
         inputPanel.add(idField);
+        idField.setText(sellerToEdit.getId());
 
         inputPanel.add(new JLabel("Password:"));
         JPasswordField pwField = new JPasswordField();
+        pwField.setText(sellerToEdit.getPassword());
         inputPanel.add(pwField);
 
         inputPanel.add(new JLabel("지점ID:"));
         JTextField storeIdField = new JTextField();
-        inputPanel.add(storeIdField);
-
-        // 전달받은 selllerToEdit 객체로 입력 필드를 미리 채움
-        idField.setText(sellerToEdit.getId());
-        pwField.setText(String.valueOf(sellerToEdit.getPassword()));
         storeIdField.setText(String.valueOf(sellerToEdit.getStoreId()));
+        inputPanel.add(storeIdField);
 
         // 버튼들
         JPanel buttonPanel = new JPanel(new FlowLayout());
@@ -1673,28 +1684,23 @@ public class Main {
         okButton.addActionListener(e -> {
 
             try {
-                String newId = idField.getText();
+                String id = idField.getText(); // 비활성화
                 String newPassword = new String(pwField.getPassword());
                 int newStoreId = Integer.parseInt(storeIdField.getText());
 
                 // 유효성 검사
-                if (newId.trim().isEmpty()) {
-                    JOptionPane.showMessageDialog(dialog, "이름을 입력해주세요.", "입력 오류", JOptionPane.WARNING_MESSAGE);
-                    return;
-                }
-
                 if (newPassword.trim().isEmpty()) {
                     JOptionPane.showMessageDialog(dialog, "비밀번호를 입력해주세요.", "입력 오류", JOptionPane.WARNING_MESSAGE);
                     return;
                 }
 
                 if (newStoreId <= 0) {
-                    JOptionPane.showMessageDialog(dialog, "유효한 지점ID를 입력해주세요.", "입력 오류", JOptionPane.WARNING_MESSAGE);
+                    JOptionPane.showMessageDialog(dialog, "지점 ID는 1 이상이여야 합니다.", "입력 오류", JOptionPane.WARNING_MESSAGE);
                     return;
                 }
 
                 // Model 호출
-                userList.sellerAccountUpdate(newId, newPassword, newStoreId);
+                userList.sellerAccountUpdate(id, newPassword, newStoreId);
 
                 JOptionPane.showMessageDialog(dialog, "판매자 계정 수정 완료");
                 dialog.dispose();
@@ -1703,8 +1709,16 @@ public class Main {
                 parentFrame.dispose();
                 showSellerManagementScreen();
 
+            } catch (NumberFormatException ex) {
+                JOptionPane.showMessageDialog(dialog, "지점 ID는 정수로 입력해주세요.", "입력 오류", JOptionPane.ERROR_MESSAGE);
+                storeIdField.requestFocus();
+            } catch (IllegalArgumentException ex) {
+                JOptionPane.showMessageDialog(dialog, ex.getMessage(), "입력 오류", JOptionPane.ERROR_MESSAGE);
+                storeIdField.setText(String.valueOf(sellerToEdit.getStoreId())); // 원래 값으로 복원
+                storeIdField.requestFocus();
             } catch (IOException ex) {
                 JOptionPane.showMessageDialog(dialog, "파일 저장 중 오류가 발생했습니다.", "오류", JOptionPane.ERROR_MESSAGE);
+                ex.printStackTrace();
             }
 
         });

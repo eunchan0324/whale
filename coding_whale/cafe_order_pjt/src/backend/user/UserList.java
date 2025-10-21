@@ -404,13 +404,34 @@ public class UserList {
 
     // [관리자] 판매자 계정 수정 UPDATE (GUI)
     public void sellerAccountUpdate(String id, String password, int storeId) throws IOException {
-        // id로 찾은 seller 수정
+        // 수정 대상 판매자 찾기
+        User targetSeller = findUser(id, sellerList);
+        if (targetSeller == null) {
+            throw new IllegalArgumentException("존재하지 않는 판매자 ID입니다.");
+        }
+
+        // storeId 존재 여부 검사
+        Store store = storeList.findStoreById(storeId);
+        if (store == null) {
+            throw new IllegalArgumentException("존재하지 않는 지점 ID입니다.");
+        }
+
+        // storeId 중복 검사 (자기 자신이 원래 가진 지점은 제외)
         for (User seller : sellerList) {
+            // 자기 자신은 건너뛰기
             if (seller.getId().equals(id)) {
-                seller.setPassword(password);
-                seller.setStoreId(storeId);
+                continue;
+            }
+
+            // 다른 판매자가 이미 사용중인 지점인지 확인
+            if (seller.getStoreId() == storeId) {
+                throw new IllegalArgumentException("중복된 지점 ID입니다.");
             }
         }
+
+        // 검증 완료 후, 수정
+        targetSeller.setPassword(password);
+        targetSeller.setStoreId(storeId);
 
         // 파일 저장
         saveSellerFile();
