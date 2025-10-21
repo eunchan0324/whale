@@ -481,7 +481,14 @@ public class UserList {
         }
     }
 
-    // 판매자 계정 삭제(delete)
+    // 판매자 계정 삭제 (GUI)
+    public void sellerAccountDelete(User seller) throws IOException {
+        sellerList.remove(seller);
+
+        saveSellerFile();
+    }
+
+    // 판매자 계정 삭제(delete) (CLI)
     public void sellerAccountDelete() throws IOException {
         System.out.println("[판매자 계정 삭제]");
 

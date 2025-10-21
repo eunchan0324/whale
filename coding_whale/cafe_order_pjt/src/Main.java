@@ -1480,6 +1480,34 @@ public class Main {
         });
 
         // 계정 삭제 버튼 동작
+        deleteButton.addActionListener(e -> {
+            int selectedRow = sellerTable.getSelectedRow();
+            if (selectedRow == -1) {
+                JOptionPane.showMessageDialog(sellerFrame, "삭제할 판매자를 선택해주세요.", "경고", JOptionPane.WARNING_MESSAGE);
+                return;
+            }
+
+            int confirm = JOptionPane.showConfirmDialog(sellerFrame, "정말로 이 판매자를 삭제하시겠습니까?", "삭제 확인", JOptionPane.YES_NO_OPTION);
+
+            if (confirm == JOptionPane.YES_OPTION) {
+                try {
+                    // 선택된 행의 인덱스로 ArrayList에서 객체 가져오기
+                    User seller = userList.getSellerList().get(selectedRow);
+
+                    // Model 호출
+                    userList.sellerAccountDelete(seller);
+
+                    JOptionPane.showMessageDialog(sellerFrame, "판매자 계정 삭제 완료", "성공", JOptionPane.INFORMATION_MESSAGE);
+
+                    // 화면 새로고침
+                    sellerFrame.dispose();
+                    showSellerManagementScreen();
+                } catch (IOException ex) {
+                    JOptionPane.showMessageDialog(sellerFrame, "파일 저장 중 오류가 발생했습니다.", "오류", JOptionPane.ERROR_MESSAGE);
+                    ex.printStackTrace();
+                }
+            }
+        });
 
         // 뒤로가기 버튼 동작
         backButton.addActionListener(e -> {
