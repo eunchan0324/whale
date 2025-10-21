@@ -190,6 +190,7 @@ public class OrderList {
 
             // 2. 안쪽 루프 : 해당 주문(backend.order.Order)에 포함된 메뉴(backend.order.OrderItem) 목록 순회
             for (OrderItem item : order.getItems()) {
+                // todo : 주문 목록이 없을 때 처리
                 System.out.println("- 메뉴 : " + item.getMenu().getName() +
                         " | 온도 : " + item.getFinalTemp() +
                         " | 컵 : " + item.getFinalCup() +

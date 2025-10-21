@@ -474,5 +474,12 @@ public class MenuList {
         return menus;
     }
 
+    /**
+     * GUI
+     */
+    public ArrayList<Menu> getManageableMenus() {
+        return new ArrayList<>(menus);
+    }
+
 
 }

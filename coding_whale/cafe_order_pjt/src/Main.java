@@ -14,9 +14,7 @@ import javax.swing.*;
 import javax.swing.border.Border;
 import java.awt.*;
 import java.io.*;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Scanner;
+import java.util.*;
 
 
 public class Main {
@@ -942,7 +940,7 @@ public class Main {
         JButton storeButton = new JButton("2. 지점 관리");
         JButton sellerButton = new JButton("3. 판매자 계정 관리");
         JButton salesButton = new JButton("4. 매출 관리");
-        JButton backButton = new JButton("5. 로그아웃");
+        JButton backButton = new JButton("로그아웃");
 
         JPanel panel = new JPanel();
         panel.setLayout(new GridLayout(5, 1, 10, 10));
@@ -1962,18 +1960,188 @@ public class Main {
 
     // [판매자] 메뉴 창
     public static void openSellerWindow(User loggedInSeller) {
-        JFrame sellerFrame = new JFrame("판매자 메뉴");
-        JButton backButton = new JButton("뒤로가기");
+        // ======= VIEW =======
+        JFrame sellerFrame = new JFrame("판매자 메뉴 - " + loggedInSeller.getId());
 
+        JButton orderButton = new JButton("1. 주문 관리");
+        JButton stockButton = new JButton("2. 재고 관리");
+        JButton menuButton = new JButton("3. 판매 메뉴 관리");
+        JButton salesButton = new JButton("4. 매출 조회");
+        JButton recommendButton = new JButton("5. 추천 메뉴 관리");
+        JButton backButton = new JButton("로그아웃");
+
+        JPanel panel = new JPanel();
+        panel.setLayout(new GridLayout(6, 1, 10, 10));
+        panel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+
+        panel.add(orderButton);
+        panel.add(stockButton);
+        panel.add(menuButton);
+        panel.add(salesButton);
+        panel.add(recommendButton);
+        panel.add(backButton);
+
+        sellerFrame.add(panel);
+        sellerFrame.setSize(400, 400);
+        sellerFrame.setLocationRelativeTo(null);
+        sellerFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+
+        // ======= CONTROLLER =======
+        // 3. 판매 메뉴 관리 버튼
+        menuButton.addActionListener(e -> {
+            sellerFrame.dispose();
+            showSellingMenuManagementScreen(loggedInSeller);
+        });
+
+        // 로그 아웃 버튼
         backButton.addActionListener(e -> {
             sellerFrame.dispose();
             showMainScreen();
         });
 
-        sellerFrame.add(backButton);
-        sellerFrame.setSize(400, 400);
-        sellerFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+
         sellerFrame.setVisible(true);
+    }
+
+    // [판매자] 판매 메뉴 관리 화면
+    public static void showSellingMenuManagementScreen(User seller) {
+        // 전체 메뉴 중 판매할 메뉴 선택
+        // ======= VIEW =======
+        JFrame frame = new JFrame("판매 메뉴 관리 - " + seller.getId());
+
+        int storeId = seller.getStoreId();
+
+        // 1. 관리 가능한 메뉴 목록 가져오기
+        ArrayList<Menu> allMenus = menuList.getManageableMenus();
+
+        if (allMenus.isEmpty()) {
+            JOptionPane.showMessageDialog(null, "등록된 메뉴가 없습니다.", "알림", JOptionPane.INFORMATION_MESSAGE);
+            openSellerWindow(seller);
+            return;
+        }
+
+        // 2. 현재 이 지점에서 판매중인 메뉴 ID 목록 가져오기
+        Set<UUID> sellingMenuIds = new HashSet<>();
+        for (MenuStatus ms : menuStatusList.getMenuStatuses()) {
+            if (ms.getStoreId() == storeId) {
+                sellingMenuIds.add(ms.getMenuId());
+            }
+        }
+
+        // 3. JTable용 데이터 준비 (체크박스 포함)
+        String[] columnNames = {"판매중", "메뉴명", "가격", "카테고리"};
+        Object[][] data = new Object[allMenus.size()][4];
+
+        for (int i = 0; i < allMenus.size(); i++) {
+            Menu menu = allMenus.get(i);
+            data[i][0] = sellingMenuIds.contains(menu.getId()); // 체크박스
+            data[i][1] = menu.getName();
+            data[i][2] = menu.getPrice() + "원";
+            data[i][3] = menu.getOption();
+        }
+
+        // 4. JTable 생성
+        JTable menuTable = new JTable(data, columnNames) {
+            @Override
+            public Class<?> getColumnClass(int column) {
+                if (column == 0) return Boolean.class; // 체크박스
+                return String.class;
+            }
+
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return column == 0; // 체크박스만 편집 가능
+            }
+        };
+
+        JScrollPane scrollPane = new JScrollPane(menuTable);
+
+        // 5. 버튼 패널
+        JPanel buttonPanel = new JPanel(new FlowLayout());
+        JButton applyButton = new JButton("적용하기");
+        JButton selectAllButton = new JButton("전체 선택");
+        JButton deselectAllButton = new JButton("전체 해제");
+        JButton backBButton = new JButton("뒤로가기");
+
+        buttonPanel.add(applyButton);
+        buttonPanel.add(selectAllButton);
+        buttonPanel.add(deselectAllButton);
+        buttonPanel.add(backBButton);
+
+        // 6. 레이아웃
+        frame.setLayout(new BorderLayout(10, 10));
+        frame.add(new JLabel("판매할 메뉴를 선택하세요 (체크: 판매중, 미체크: 판매 안 함)", SwingConstants.CENTER), BorderLayout.NORTH);
+        frame.add(scrollPane, BorderLayout.CENTER);
+        frame.add(buttonPanel, BorderLayout.SOUTH);
+
+        frame.setSize(700, 500);
+        frame.setLocationRelativeTo(null);
+        frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+
+        // ======= CONTROLLER =======
+        // 적용하기 버튼
+        applyButton.addActionListener(e -> {
+            try {
+                // 변경 전 상태 저장
+                Set<UUID> oldSellingMenuIds = new HashSet<>(sellingMenuIds);
+
+                // 변경 후 상태 읽기
+                Set<UUID> newSellingMenuIds = new HashSet<>();
+                for (int i = 0; i < menuTable.getRowCount(); i++) {
+                    Boolean isChecked = (Boolean) menuTable.getValueAt(i, 0);
+                    if (isChecked != null && isChecked) {
+                        UUID menuId = allMenus.get(i).getId();
+                        newSellingMenuIds.add(menuId);
+                    }
+                }
+
+                // 신규 등록할 메뉴 (체크되었는데 기존에 없던 것)
+                for (UUID menuId : newSellingMenuIds) {
+                    if (!oldSellingMenuIds.contains(menuId)) {
+                        menuStatusList.registerMenuForSale(storeId, menuId);
+                    }
+                }
+
+                // 삭제할 메뉴 (체크 해제되었는데 기존에 없던 것)
+                for (UUID menuId : oldSellingMenuIds) {
+                    if (!newSellingMenuIds.contains(menuId)) {
+                        menuStatusList.removeMenuForSale(storeId, menuId);
+
+                    }
+                }
+
+                JOptionPane.showMessageDialog(frame, "판매 메뉴가 업데이트되었습니다!", "성공", JOptionPane.INFORMATION_MESSAGE);
+
+                // 화면 새로 고침
+                frame.dispose();
+                showSellingMenuManagementScreen(seller);
+            } catch (IOException ex) {
+                JOptionPane.showMessageDialog(frame, "파일 저장 중 오류가 발생했습니다.", "오류", JOptionPane.ERROR_MESSAGE);
+                ex.printStackTrace();
+            }
+        });
+
+        // 전체 선택 버튼
+        selectAllButton.addActionListener(e -> {
+            for (int i = 0; i < menuTable.getRowCount(); i++) {
+                menuTable.setValueAt(true, i, 0);
+            }
+        });
+
+        // 전체 해제 버튼
+        deselectAllButton.addActionListener(e -> {
+            for (int i = 0; i < menuTable.getRowCount(); i++) {
+                menuTable.setValueAt(false, i, 0);
+            }
+        });
+
+        // 뒤로가기 버튼
+        backBButton.addActionListener(e -> {
+            frame.dispose();
+            openSellerWindow(seller);
+        });
+
+        frame.setVisible(true);
     }
 
     /**

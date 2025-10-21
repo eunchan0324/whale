@@ -10,6 +10,10 @@ import java.util.UUID;
 public class MenuStatusList {
     ArrayList<MenuStatus> menuStatuses = new ArrayList<>();
 
+    public ArrayList<MenuStatus> getMenuStatuses() {
+        return menuStatuses;
+    }
+
     // 생성자 - loadMenuStatusFile()
     public MenuStatusList() {
         try {
