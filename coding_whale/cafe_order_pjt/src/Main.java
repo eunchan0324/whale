@@ -1584,6 +1584,10 @@ public class Main {
                     idField.setText("");
                     idField.requestFocus();
                 }
+            } catch (IllegalArgumentException ex) {
+                JOptionPane.showMessageDialog(dialog, ex.getMessage(), "입력 오류", JOptionPane.ERROR_MESSAGE);
+                storeIdField.setText("");
+                storeIdField.requestFocus();
             } catch (IOException ex) {
                 JOptionPane.showMessageDialog(dialog, "파일 저장 중 오류가 발생했습니다", "오류", JOptionPane.ERROR_MESSAGE);
                 ex.printStackTrace();

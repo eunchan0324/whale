@@ -49,6 +49,20 @@ public class UserList {
             return false; // 중복
         }
 
+        // storeId 존재 여부 검사
+        Store store = storeList.findStoreById(storeId);
+        if (store == null) {
+            throw new IllegalArgumentException("존재하지 않는 지점 ID입니다.");
+        }
+
+        // storeId 중복 검사
+        for (User seller : sellerList) {
+            if (seller.getStoreId() == storeId) {
+                throw new IllegalArgumentException("이미 배정된 지점입니다.");
+            }
+        }
+
+
         // 사용자 객체 생성 및 추가
         User user = new User(id, password, UserRole.SELLER, storeId);
         sellerList.add(user);
