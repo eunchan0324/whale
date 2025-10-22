@@ -24,6 +24,11 @@ public class MenuList {
         return menus;
     }
 
+    public int getMenuCount() {
+        return menus.size();
+    }
+
+    // 생성자
     public MenuList(MenuStatusList menuStatusList, StoreList storeList) throws IOException {
         this.menuStatusList = menuStatusList;
         this.storeList = storeList;
@@ -424,7 +429,7 @@ public class MenuList {
     // menuId로 해당 객체 반환하기
     public Menu getMenuById(UUID menuId) {
         for (Menu menu : menus) {
-            if (menu.getId() == menuId) {
+            if (menu.getId().equals(menuId)) {
                 return menu;
             }
         }

@@ -134,6 +134,13 @@ public class OrderList {
 
                 //2. backend.order.OrderItem 생성
                 Menu menu = menuList.getMenuById(menuId); // menuId로 backend.menu 객체 찾기
+
+                // 안전장치 추가
+                if (menu == null) {
+                    System.out.println("경고: 메뉴 ID" + menuId + "를 찾을 수 없어 해당 주문 항목을 건너뜁니다.");
+                    continue;
+                }
+
                 OrderItem item = new OrderItem(menu, price, temp, cup, options);
 
                 // 3. Order에 backend.order.OrderItem 추가
@@ -144,7 +151,13 @@ public class OrderList {
 
         }
         // 모든 로딩이 끝난 후, Map의 모든 backend.order.Order 객체를 실제 orderList에 추가
-        orderList.addAll(ordersMap.values());
+        for (Order order : ordersMap.values()) {
+            if (!order.getItems().isEmpty()) {
+                orderList.add(order);
+            } else {
+                System.err.println("경고 : 주문 " + order.getOrderId() + "은(는) 유효한 메뉴 항목이 없어 제외되었습니다.");
+            }
+        }
 
         // 이후, nextWaitingNumber를 업데이트
         int maxWaitingNum = 0;

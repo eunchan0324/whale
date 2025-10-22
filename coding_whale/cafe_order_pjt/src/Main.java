@@ -14,6 +14,7 @@ import javax.swing.*;
 import javax.swing.border.Border;
 import java.awt.*;
 import java.io.*;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.concurrent.BrokenBarrierException;
 
@@ -798,7 +799,7 @@ public class Main {
 
         System.out.println("\n-> [선택 완료] " + menu.getName() + " (온도: " + finalTemp + ", 컵: " + finalCup + ", 옵션: " + finalOptions + ")");
 
-        return new OrderItem(menu, finalPrice, finalTemp, finalCup, finalOptions);
+        return new OrderItem(menu, finalPrice, finalOptions, finalCup, finalTemp);
     }
 
     public static void showMainScreen() {
@@ -1988,6 +1989,12 @@ public class Main {
         sellerFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
         // ======= CONTROLLER =======
+        // 1. 주문 관리 버튼
+        orderButton.addActionListener(e -> {
+            sellerFrame.dispose();
+            showOrderManagementScreen(loggedInSeller);
+        });
+
         // 2. 재고 관리 버튼
         stockButton.addActionListener(e -> {
             sellerFrame.dispose();
@@ -2010,7 +2017,519 @@ public class Main {
         sellerFrame.setVisible(true);
     }
 
-    // [판매자] 판매 메뉴 관리 화면
+    // [판매자] 1. 주문 관리 화면
+    public static void showOrderManagementScreen(User seller) {
+        int storeId = seller.getStoreId();
+        String storeName = storeList.findStoreById(storeId).getStoreName();
+
+        // === VIEW ===
+        JFrame frame = new JFrame("주문 관리 - " + storeName);
+        frame.setSize(900, 600);
+        frame.setLocationRelativeTo(null);
+        frame.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+        frame.setLayout(new BorderLayout());
+
+        // 진행 중인 주문 가져오기 (전체 주문 중, COMPLETED가 아닌 것)
+        ArrayList<Order> allPendingOrders = orderList.getPendingOrders();
+
+        // 본인 지점 주문만 필터링
+        ArrayList<Order> myStorePendingOrders = new ArrayList<>();
+        for (Order order : allPendingOrders) {
+            if (order.getStoreId() == storeId) {
+                myStorePendingOrders.add(order);
+            }
+        }
+
+        // 주문이 없을 때 처리
+        if (myStorePendingOrders.isEmpty()) {
+            JLabel messageLabel = new JLabel("현재 처리할 주문이 없습니다.");
+            messageLabel.setHorizontalAlignment(JLabel.CENTER);
+
+            JPanel emptyPanel = new JPanel(new GridLayout(2, 1));
+            emptyPanel.add(messageLabel);
+
+            JPanel buttonPanel = new JPanel(new FlowLayout());
+            JButton backButton = new JButton("뒤로가기");
+            buttonPanel.add(backButton);
+            emptyPanel.add(buttonPanel);
+
+            frame.add(emptyPanel, BorderLayout.CENTER);
+
+            backButton.addActionListener(e -> {
+                frame.dispose();
+                openSellerWindow(seller);
+            });
+
+            frame.setVisible(true);
+            return;
+        }
+
+        // JTable 데이터 준비
+        String[] columnNames = {"대기번호", "고객ID", "메뉴", "수량", "주문상태", "주문시간"};
+        Object[][] data = new Object[myStorePendingOrders.size()][6];
+
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+
+        for (int i = 0; i < myStorePendingOrders.size(); i++) {
+            Order order = myStorePendingOrders.get(i);
+            data[i][0] = order.getWaitingNumber();
+            data[i][1] = order.getCustomerId();
+
+            // 메뉴명 (여러 개면 "아메리카노 외 2건")
+            if (order.getItems().size() == 1) {
+                data[i][2] = order.getItems().get(0).getMenu().getName();
+            } else {
+                data[i][2] = order.getItems().get(0).getMenu().getName() + " 외" + (order.getItems().size() - 1) + "건";
+            }
+
+            data[i][3] = order.getItems().size();
+            data[i][4] = order.getStatus().toString();
+            data[i][5] = order.getOrderTime().format(formatter);
+        }
+
+        JTable orderTable = new JTable(data, columnNames);
+        orderTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        orderTable.setRowHeight(25);
+        JScrollPane scrollPane = new JScrollPane(orderTable);
+        frame.add(scrollPane, BorderLayout.CENTER);
+
+        // 버튼 패널
+        JPanel buttonPanel = new JPanel(new FlowLayout());
+        JButton detailButton = new JButton("상세 보기");
+        JButton changeButton = new JButton("상태 변경");
+        JButton backButton = new JButton("뒤로가기");
+
+        buttonPanel.add(detailButton);
+        buttonPanel.add(changeButton);
+        buttonPanel.add(backButton);
+        frame.add(buttonPanel, BorderLayout.SOUTH);
+
+        // === CONTROLLER ===
+        // 상세 보기 버튼
+        detailButton.addActionListener(e -> {
+            int selectedRow = orderTable.getSelectedRow();
+            if (selectedRow == -1) {
+                JOptionPane.showMessageDialog(frame, "주문을 선택해주세요.", "알림", JOptionPane.WARNING_MESSAGE);
+                return;
+            }
+
+            Order selectedOrder = myStorePendingOrders.get(selectedRow);
+            showOrderDetailDialog(frame, selectedOrder);
+        });
+
+        // 상태 변경 버튼
+        changeButton.addActionListener(e -> {
+            int selectedRow = orderTable.getSelectedRow();
+            if (selectedRow == -1) {
+                JOptionPane.showMessageDialog(frame, "주문을 선택해주세요!", "알림", JOptionPane.WARNING_MESSAGE);
+                return;
+            }
+
+            Order selectedOrder = myStorePendingOrders.get(selectedRow);
+            showOrderStatusDialog(frame, seller, selectedOrder);
+        });
+
+        // 뒤로가기 버튼
+        backButton.addActionListener(e -> {
+            frame.dispose();
+            openSellerWindow(seller);
+        });
+
+        frame.setVisible(true);
+    }
+
+    // [판매자] 1-1. 주문 상태 변경 다이얼로그
+    public static void showOrderStatusDialog(JFrame parentFrame, User seller, Order order) {
+        // === VIEW ===
+        JDialog dialog = new JDialog(parentFrame, "주문 상태 변경", true);
+        dialog.setSize(450, 400);
+        dialog.setLayout(new BorderLayout(10, 10));
+
+        // 상단 정보 패널
+        JPanel infoPanel = new JPanel(new GridLayout(6, 1, 5, 5));
+        infoPanel.add(new JLabel("대기번호: " + order.getWaitingNumber()));
+        infoPanel.add(new JLabel("고객 ID: " + order.getCustomerId()));
+        infoPanel.add(new JLabel("현재 상태: " + order.getStatus().toString()));
+        infoPanel.add(new JLabel("")); // 간격
+        infoPanel.add(new JLabel("--- 주문 메뉴 ---"));
+
+        // 주문 메뉴 목록 표시
+        StringBuilder menuInfo = new StringBuilder("<html>");
+        for (OrderItem item : order.getItems()) {
+            menuInfo.append(item.getMenu().getName())
+                    .append(" (")
+                    .append(item.getFinalTemp())
+                    .append(", ")
+                    .append(item.getFinalCup())
+                    .append(")<br>");
+        }
+        menuInfo.append("</html>");
+        infoPanel.add(new JLabel(menuInfo.toString()));
+
+        dialog.add(infoPanel, BorderLayout.NORTH);
+
+        // 중앙 선택 패널
+        JPanel selectPanel = new JPanel(new BorderLayout(5, 5));
+        selectPanel.setBorder(BorderFactory.createEmptyBorder(0, 15, 10, 15));
+
+        JLabel label = new JLabel("변경할 상태를 선택해주세요:");
+        selectPanel.add(label, BorderLayout.NORTH);
+
+        // 현재 상태에 따라 다음 상태 옵션 생성
+        String[] statusOptions = getNextStatusOptions(order.getStatus());
+        JComboBox<String> statusCombo = new JComboBox<>(statusOptions);
+        selectPanel.add(statusCombo, BorderLayout.CENTER);
+
+        dialog.add(selectPanel, BorderLayout.CENTER);
+
+        // 하단 버튼 패널
+        JPanel buttonPanel = new JPanel(new FlowLayout());
+        JButton confirmButton = new JButton("확인");
+        JButton cancelButton = new JButton("취소");
+
+        buttonPanel.add(confirmButton);
+        buttonPanel.add(cancelButton);
+        dialog.add(buttonPanel, BorderLayout.SOUTH);
+
+        // === CONTORLLER ===
+        // 확인 버튼 동작
+        confirmButton.addActionListener(e -> {
+            try {
+                int selectedIndex = statusCombo.getSelectedIndex();
+                OrderStatus newStatus = getStatusFromSelection(order.getStatus(), selectedIndex);
+
+                if (newStatus == null) {
+                    JOptionPane.showMessageDialog(dialog,
+                            "올바른 상태를 선택해주세요!",
+                            "오류",
+                            JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+
+                // 상태 변경
+                order.setStatus(newStatus);
+                orderList.saveOrderFile();
+
+                JOptionPane.showMessageDialog(dialog,
+                        "주문 상태가 '" + newStatus.toString() + "'(으)로 변경되었습니다!");
+
+                dialog.dispose();
+                parentFrame.dispose();
+                showOrderManagementScreen(seller);
+
+            } catch (IOException ex) {
+                JOptionPane.showMessageDialog(dialog,
+                        "상태 변경 중 오류가 발생했습니다: " + ex.getMessage(),
+                        "오류", JOptionPane.ERROR_MESSAGE);
+            }
+        });
+
+        // 취소 버튼 동작
+        cancelButton.addActionListener(e -> {
+            dialog.dispose();
+        });
+
+        dialog.setLocationRelativeTo(parentFrame);
+        dialog.setVisible(true);
+
+    }
+
+    // [판매자] 1-1-1. 헬퍼 메서드 : 현재 상태에 따라 변경 가능한 다음 상태 옵션 반환
+    private static String[] getNextStatusOptions(OrderStatus currentStatus) {
+        return switch (currentStatus) {
+            case ORDER_PLACED -> new String[]{"준비중 (PREPARING)", "준비완료/픽업대기 (READY)", "픽업완료 (COMPLETED)"};
+            case PREPARING -> new String[]{"준비완료/픽업대기 (READY)", "픽업완료 (COMPLETED)"};
+            case READY -> new String[]{"픽업완료 (COMPLETED)"};
+            case COMPLETED -> new String[]{"이미 완료된 주문입니다"};
+        };
+    }
+
+    // [판매자] 1-1-2. 헬퍼 메서드 : 선택된 인덱스와 현재 상태를 기반으로 새 상태 반환
+    private static OrderStatus getStatusFromSelection(OrderStatus currentStatus, int selectedIndex) {
+        return switch (currentStatus) {
+            case ORDER_PLACED -> {
+                if (selectedIndex == 0) yield OrderStatus.PREPARING;
+                if (selectedIndex == 1) yield OrderStatus.READY;
+                if (selectedIndex == 2) yield OrderStatus.COMPLETED;
+                yield null;
+            }
+            case PREPARING -> {
+                if (selectedIndex == 0) yield OrderStatus.READY;
+                if (selectedIndex == 1) yield OrderStatus.COMPLETED;
+                yield null;
+            }
+            case READY -> {
+                if (selectedIndex == 0) yield OrderStatus.COMPLETED;
+                yield null;
+            }
+            case COMPLETED -> null;
+        };
+    }
+
+    // [판매자] 1-2. 주문 상세 보기 다이이얼로그
+    public static void showOrderDetailDialog(JFrame parentFrame, Order order) {
+        // === VIEW ===
+        JDialog dialog = new JDialog(parentFrame, "주문 상세 정보", true);
+        dialog.setSize(500, 400);
+        dialog.setLayout(new BorderLayout(10, 10));
+
+        // 상단 주문 정보
+        JPanel infoPanel = new JPanel(new GridLayout(5, 1, 5, 5));
+        infoPanel.setBorder(BorderFactory.createEmptyBorder(15, 15, 10, 15));
+        infoPanel.add(new JLabel("대기번호: " + order.getWaitingNumber()));
+        infoPanel.add(new JLabel("고객 ID: " + order.getCustomerId()));
+        infoPanel.add(new JLabel("주문 상태: " + order.getStatus()));
+
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        infoPanel.add(new JLabel("주문 시간: " + order.getOrderTime().format(formatter)));
+        infoPanel.add(new JLabel("총 결제 금액: " + order.getTotalPrice() + "원"));
+        dialog.add(infoPanel, BorderLayout.NORTH);
+
+        // 중앙 메뉴 목록 (JTable)
+        String[] columnNames = {"메뉴명", "온도", "컵", "옵션", "가격"};
+        Object[][] data = new Object[order.getItems().size()][5];
+
+        for (int i = 0; i < order.getItems().size(); i++) {
+            OrderItem item = order.getItems().get(i);
+            data[i][0] = item.getMenu().getName();
+            data[i][1] = item.getFinalTemp();
+            data[i][2] = item.getFinalCup();
+            data[i][3] = item.getFinalOptions();
+            data[i][4] = item.getFinalPrice() + "원";
+        }
+
+        JTable menuTable = new JTable(data, columnNames);
+        menuTable.setRowHeight(25);
+        menuTable.setEnabled(false); // 읽기 전용
+        JScrollPane scrollPane = new JScrollPane(menuTable);
+        dialog.add(scrollPane, BorderLayout.CENTER);
+
+        // 하단 닫기 버튼
+        JPanel buttonPanel = new JPanel(new FlowLayout());
+        JButton closeButton = new JButton("닫기");
+        closeButton.addActionListener(e -> dialog.dispose());
+        buttonPanel.add(closeButton);
+        dialog.add(buttonPanel, BorderLayout.SOUTH);
+
+        dialog.setLocationRelativeTo(parentFrame);
+        dialog.setVisible(true);
+    }
+
+    // [판매자] 2. 재고 관리 화면
+    public static void showStockManagementScreen(User seller) {
+        // ======= VIEW =======
+        JFrame frame = new JFrame("재고 관리 - " + seller.getId());
+
+        int storeId = seller.getStoreId();
+
+        // 1. 현재 판매 중인 메뉴 목록 가져오기 (AVAILABLE 상태인 메뉴만)
+        ArrayList<Menu> sellableMenus = new ArrayList<>();
+        ArrayList<MenuStatus> menuStatusesForStore = new ArrayList<>();
+
+        for (Menu menu : menuList.getMenus()) {
+            MenuStatus status = menuStatusList.findMenuStatus(storeId, menu.getId());
+            // 판매 메뉴로 등록된 것만 (status가 null이 아닌 것)
+            if (status != null) {
+                sellableMenus.add(menu);
+                menuStatusesForStore.add(status);
+            }
+        }
+
+        // 2. 판매 중인 메뉴가 없음켠 안내
+        if (sellableMenus.isEmpty()) {
+            JOptionPane.showMessageDialog(null,
+                    "판매 중인 메뉴가 없습니다. \n 먼저 '판매 메뉴 관리'에서 메뉴를 등록해주세요.",
+                    "알림",
+                    JOptionPane.INFORMATION_MESSAGE);
+            openSellerWindow(seller);
+            return;
+        }
+
+        // 3. JTable용 데이터 준비
+        String[] columnNames = {"메뉴명", "재고 수량", "판매 상태", "수정"};
+        Object[][] data = new Object[sellableMenus.size()][4];
+
+        for (int i = 0; i < sellableMenus.size(); i++) {
+            Menu menu = sellableMenus.get(i);
+            MenuStatus status = menuStatusesForStore.get(i);
+
+            data[i][0] = menu.getName();
+            data[i][1] = status.getStock() + "개";
+            data[i][2] = status.getStatus().getDisplayStatus();
+            data[i][3] = "수정"; // 버튼 텍스트
+        }
+
+        // 4. JTable 생성
+        JTable stockTable = new JTable(data, columnNames) {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return false; // 직접 편집 불가 (수정 버튼으로만 수정)
+            }
+        };
+
+        JScrollPane scrollPane = new JScrollPane(stockTable);
+
+        // 5. 버튼 패널
+        JPanel buttonPanel = new JPanel(new FlowLayout());
+        JButton editButton = new JButton("재고/상태 수정");
+        JButton backButton = new JButton("뒤로가기");
+
+        buttonPanel.add(editButton);
+        buttonPanel.add(backButton);
+
+        // 6. 레이아웃
+        frame.setLayout(new BorderLayout(10, 10));
+        frame.add(new JLabel("판매 중인 메뉴의 재고 및 상태 관리", SwingConstants.CENTER), BorderLayout.NORTH);
+        frame.add(scrollPane, BorderLayout.CENTER);
+        frame.add(buttonPanel, BorderLayout.SOUTH);
+
+        frame.setSize(700, 500);
+        frame.setLocationRelativeTo(null);
+        frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+
+        // ======= CONTORLLER =======
+        // 재고/상태 수정 버튼
+        editButton.addActionListener(e -> {
+            int selectedRow = stockTable.getSelectedRow();
+
+            if (selectedRow == -1) {
+                JOptionPane.showMessageDialog(frame,
+                        "수정할 메뉴를 선택해주세요.",
+                        "알림",
+                        JOptionPane.WARNING_MESSAGE);
+                return;
+            }
+
+            // 선택한 메뉴와 상태 정보 가져오기
+            Menu selectedMenu = sellableMenus.get(selectedRow);
+            MenuStatus selcectedStatus = menuStatusesForStore.get(selectedRow);
+
+            // 수정 다이얼로그 열기
+            showStockEditDialog(frame, seller, selectedMenu, selcectedStatus);
+        });
+
+        // 뒤로가기 버튼
+        backButton.addActionListener(e -> {
+            frame.dispose();
+            openSellerWindow(seller);
+        });
+
+        frame.setVisible(true);
+
+    }
+
+    // [판매자] 2-1. 재고/상태 수정 다이얼로그
+    public static void showStockEditDialog(JFrame parentFrame, User seller, Menu menu, MenuStatus menuStatus) {
+        // ======= VIEW =======
+        JDialog dialog = new JDialog(parentFrame, "재고/상태 수정 - " + menu.getName(), true);
+
+        // 입력 패널
+        JPanel inputPanel = new JPanel(new GridLayout(3, 2, 10, 10));
+        inputPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 10, 20));
+
+        // 메뉴명 (읽기 전용)
+        inputPanel.add(new JLabel("메뉴명:"));
+        JLabel menuNameLabel = new JLabel(menu.getName());
+        menuNameLabel.setFont(new Font(menuNameLabel.getFont().getName(), Font.BOLD, 12));
+        inputPanel.add(menuNameLabel);
+
+        // 재고 수량
+        inputPanel.add(new JLabel("재고 수량:"));
+        JTextField stockField = new JTextField(String.valueOf(menuStatus.getStock()));
+        inputPanel.add(stockField);
+
+        // 판매 상태
+        inputPanel.add(new JLabel("판매 상태:"));
+        String[] statusOptions = {"판매중 (AVAILABLE)", "품절 (SOLD_OUT)"};
+        JComboBox<String> statusComboBox = new JComboBox<>(statusOptions);
+
+        // 현재 상태로 초기화
+        if (menuStatus.getStatus() == EMenuSaleStatus.AVAILABLE) {
+            statusComboBox.setSelectedIndex(0);
+        } else {
+            statusComboBox.setSelectedIndex(1);
+        }
+        inputPanel.add(statusComboBox);
+
+        // 버튼 패널
+        JPanel buttonPanel = new JPanel(new FlowLayout());
+        JButton saveButton = new JButton("저장");
+        JButton cancelButton = new JButton("취소");
+        buttonPanel.add(saveButton);
+        buttonPanel.add(cancelButton);
+
+        // 레이아웃
+        dialog.setLayout(new BorderLayout(10, 10));
+        dialog.add(inputPanel, BorderLayout.CENTER);
+        dialog.add(buttonPanel, BorderLayout.SOUTH);
+
+        dialog.pack();
+        dialog.setLocationRelativeTo(parentFrame);
+
+        // ======= CONTROLLER =======
+        // 저장 버튼
+        saveButton.addActionListener(e -> {
+            try {
+                // 1. 재고 수량 읽기
+                int newStock;
+                try {
+                    newStock = Integer.parseInt(stockField.getText().trim());
+
+                } catch (NumberFormatException ex) {
+                    JOptionPane.showMessageDialog(dialog,
+                            "재고 수량은 숫자로 입력해주세요.",
+                            "입력 오류",
+                            JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+
+                if (newStock < 0) {
+                    JOptionPane.showMessageDialog(dialog,
+                            "재고 수량은 0 이상이여야 합니다.",
+                            "입력 오류",
+                            JOptionPane.WARNING_MESSAGE);
+                    return;
+                }
+
+                // 2. 판매 상태 읽기
+                int statusIndex = statusComboBox.getSelectedIndex();
+                EMenuSaleStatus newStatus = (statusIndex == 0) ? EMenuSaleStatus.AVAILABLE : EMenuSaleStatus.SOLD_OUT;
+
+                // 3. Model 호출 - 재고 수량 업데이트
+                menuStatusList.updateStock(seller.getStoreId(), menu.getId(), newStock);
+
+                // 4. Model 호출 - 판매 상태 업데이트
+                menuStatusList.updateStatus(seller.getStoreId(), menu.getId(), newStatus);
+
+                JOptionPane.showMessageDialog(dialog,
+                        "재고 및 상태가 수정되었습니다!",
+                        "성공",
+                        JOptionPane.INFORMATION_MESSAGE);
+
+                dialog.dispose();
+
+                // 화면 새로고침
+                parentFrame.dispose();
+                showStockManagementScreen(seller);
+
+            } catch (IOException ex) {
+                JOptionPane.showMessageDialog(dialog,
+                        "파일 저장 중 오류가 발생했습니다.",
+                        "오류",
+                        JOptionPane.ERROR_MESSAGE);
+                ex.printStackTrace();
+            }
+        });
+
+        // 취소 버튼
+        cancelButton.addActionListener(e -> {
+            dialog.dispose();
+        });
+
+        dialog.setVisible(true);
+    }
+
+    // [판매자] 3. 판매 메뉴 관리 화면
     public static void showSellingMenuManagementScreen(User seller) {
         // 전체 메뉴 중 판매할 메뉴 선택
         // ======= VIEW =======
@@ -2151,219 +2670,8 @@ public class Main {
         frame.setVisible(true);
     }
 
-    // [판매자] 재고 관리 화면
-    public static void showStockManagementScreen(User seller) {
-        // ======= VIEW =======
-        JFrame frame = new JFrame("재고 관리 - " + seller.getId());
 
-        int storeId = seller.getStoreId();
 
-        // 1. 현재 판매 중인 메뉴 목록 가져오기 (AVAILABLE 상태인 메뉴만)
-        ArrayList<Menu> sellableMenus = new ArrayList<>();
-        ArrayList<MenuStatus> menuStatusesForStore = new ArrayList<>();
-
-        for (Menu menu : menuList.getMenus()) {
-            MenuStatus status = menuStatusList.findMenuStatus(storeId, menu.getId());
-            // 판매 메뉴로 등록된 것만 (status가 null이 아닌 것)
-            if (status != null) {
-                sellableMenus.add(menu);
-                menuStatusesForStore.add(status);
-            }
-        }
-
-        // 2. 판매 중인 메뉴가 없음켠 안내
-        if (sellableMenus.isEmpty()) {
-            JOptionPane.showMessageDialog(null,
-                    "판매 중인 메뉴가 없습니다. \n 먼저 '판매 메뉴 관리'에서 메뉴를 등록해주세요.",
-                    "알림",
-                    JOptionPane.INFORMATION_MESSAGE);
-            openSellerWindow(seller);
-            return;
-        }
-
-        // 3. JTable용 데이터 준비
-        String[] columnNames = {"메뉴명", "재고 수량", "판매 상태", "수정"};
-        Object[][] data = new Object[sellableMenus.size()][4];
-
-        for (int i = 0; i < sellableMenus.size(); i++) {
-            Menu menu = sellableMenus.get(i);
-            MenuStatus status = menuStatusesForStore.get(i);
-
-            data[i][0] = menu.getName();
-            data[i][1] = status.getStock() + "개";
-            data[i][2] = status.getStatus().getDisplayStatus();
-            data[i][3] = "수정"; // 버튼 텍스트
-        }
-
-        // 4. JTable 생성
-        JTable stockTable = new JTable(data, columnNames) {
-            @Override
-            public boolean isCellEditable(int row, int column) {
-                return false; // 직접 편집 불가 (수정 버튼으로만 수정)
-            }
-        };
-
-        JScrollPane scrollPane = new JScrollPane(stockTable);
-
-        // 5. 버튼 패널
-        JPanel buttonPanel = new JPanel(new FlowLayout());
-        JButton editButton = new JButton("재고/상태 수정");
-        JButton backButton = new JButton("뒤로가기");
-
-        buttonPanel.add(editButton);
-        buttonPanel.add(backButton);
-
-        // 6. 레이아웃
-        frame.setLayout(new BorderLayout(10, 10));
-        frame.add(new JLabel("판매 중인 메뉴의 재고 및 상태 관리", SwingConstants.CENTER), BorderLayout.NORTH);
-        frame.add(scrollPane, BorderLayout.CENTER);
-        frame.add(buttonPanel, BorderLayout.SOUTH);
-
-        frame.setSize(700, 500);
-        frame.setLocationRelativeTo(null);
-        frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-
-        // ======= CONTORLLER =======
-        // 재고/상태 수정 버튼
-        editButton.addActionListener(e -> {
-            int selectedRow = stockTable.getSelectedRow();
-
-            if (selectedRow == -1) {
-                JOptionPane.showMessageDialog(frame,
-                        "수정할 메뉴를 선택해주세요.",
-                        "알림",
-                        JOptionPane.WARNING_MESSAGE);
-                return;
-            }
-
-            // 선택한 메뉴와 상태 정보 가져오기
-            Menu selectedMenu = sellableMenus.get(selectedRow);
-            MenuStatus selcectedStatus = menuStatusesForStore.get(selectedRow);
-
-            // 수정 다이얼로그 열기
-            showStockEditDialog(frame, seller, selectedMenu, selcectedStatus);
-        });
-
-        // 뒤로가기 버튼
-        backButton.addActionListener(e -> {
-            frame.dispose();
-            openSellerWindow(seller);
-        });
-
-        frame.setVisible(true);
-
-    }
-
-    // [판매자] 재고/상태 수정 다이얼로그
-    public static void showStockEditDialog(JFrame parentFrame, User seller, Menu menu, MenuStatus menuStatus) {
-        // ======= VIEW =======
-        JDialog dialog = new JDialog(parentFrame, "재고/상태 수정 - " + menu.getName(), true);
-
-        // 입력 패널
-        JPanel inputPanel = new JPanel(new GridLayout(3, 2, 10, 10));
-        inputPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 10, 20));
-
-        // 메뉴명 (읽기 전용)
-        inputPanel.add(new JLabel("메뉴명:"));
-        JLabel menuNameLabel = new JLabel(menu.getName());
-        menuNameLabel.setFont(new Font(menuNameLabel.getFont().getName(), Font.BOLD, 12));
-        inputPanel.add(menuNameLabel);
-
-        // 재고 수량
-        inputPanel.add(new JLabel("재고 수량:"));
-        JTextField stockField = new JTextField(String.valueOf(menuStatus.getStock()));
-        inputPanel.add(stockField);
-
-        // 판매 상태
-        inputPanel.add(new JLabel("판매 상태:"));
-        String[] statusOptions = {"판매중 (AVAILABLE)", "품절 (SOLD_OUT)"};
-        JComboBox<String> statusComboBox = new JComboBox<>(statusOptions);
-
-        // 현재 상태로 초기화
-        if (menuStatus.getStatus() == EMenuSaleStatus.AVAILABLE) {
-            statusComboBox.setSelectedIndex(0);
-        } else {
-            statusComboBox.setSelectedIndex(1);
-        }
-        inputPanel.add(statusComboBox);
-
-        // 버튼 패널
-        JPanel buttonPanel = new JPanel(new FlowLayout());
-        JButton saveButton = new JButton("저장");
-        JButton cancelButton = new JButton("취소");
-        buttonPanel.add(saveButton);
-        buttonPanel.add(cancelButton);
-
-        // 레이아웃
-        dialog.setLayout(new BorderLayout(10, 10));
-        dialog.add(inputPanel, BorderLayout.CENTER);
-        dialog.add(buttonPanel, BorderLayout.SOUTH);
-
-        dialog.pack();
-        dialog.setLocationRelativeTo(parentFrame);
-
-        // ======= CONTROLLER =======
-        // 저장 버튼
-        saveButton.addActionListener(e -> {
-            try {
-                // 1. 재고 수량 읽기
-                int newStock;
-                try {
-                    newStock = Integer.parseInt(stockField.getText().trim());
-
-                } catch (NumberFormatException ex) {
-                    JOptionPane.showMessageDialog(dialog,
-                            "재고 수량은 숫자로 입력해주세요.",
-                            "입력 오류",
-                            JOptionPane.ERROR_MESSAGE);
-                    return;
-                }
-
-                if (newStock < 0) {
-                    JOptionPane.showMessageDialog(dialog,
-                            "재고 수량은 0 이상이여야 합니다.",
-                            "입력 오류",
-                            JOptionPane.WARNING_MESSAGE);
-                    return;
-                }
-
-                // 2. 판매 상태 읽기
-                int statusIndex = statusComboBox.getSelectedIndex();
-                EMenuSaleStatus newStatus = (statusIndex == 0) ? EMenuSaleStatus.AVAILABLE : EMenuSaleStatus.SOLD_OUT;
-
-                // 3. Model 호출 - 재고 수량 업데이트
-                menuStatusList.updateStock(seller.getStoreId(), menu.getId(), newStock);
-
-                // 4. Model 호출 - 판매 상태 업데이트
-                menuStatusList.updateStatus(seller.getStoreId(), menu.getId(), newStatus);
-
-                JOptionPane.showMessageDialog(dialog,
-                        "재고 및 상태가 수정되었습니다!",
-                        "성공",
-                        JOptionPane.INFORMATION_MESSAGE);
-
-                dialog.dispose();
-
-                // 화면 새로고침
-                parentFrame.dispose();
-                showStockManagementScreen(seller);
-
-            } catch (IOException ex) {
-                JOptionPane.showMessageDialog(dialog,
-                        "파일 저장 중 오류가 발생했습니다.",
-                        "오류",
-                        JOptionPane.ERROR_MESSAGE);
-                ex.printStackTrace();
-            }
-        });
-
-        // 취소 버튼
-        cancelButton.addActionListener(e -> {
-            dialog.dispose();
-        });
-
-        dialog.setVisible(true);
-    }
 
     /**
      * 구매자
