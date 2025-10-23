@@ -320,7 +320,14 @@ public class MenuList {
         FileWriter writer = new FileWriter(menuFilePath.toFile());
 
         for (Menu menu : menus) {
-            writer.write(menu.getId().toString() + "," + menu.getName() + "," + menu.getPrice() + "," + menu.getOption().name() + "\n");
+            // recommend가 null이면 빈 문자열로 저장
+            String recommendStr = (menu.getRecommend() != null) ? menu.getRecommend() : "";
+
+            writer.write(menu.getId().toString() + "," +
+                    menu.getName() + "," +
+                    menu.getPrice() + "," +
+                    menu.getOption().name() + "," +
+                    recommendStr + "\n");
         }
         writer.close();
     }
@@ -337,8 +344,14 @@ public class MenuList {
             String name = parts[1];
             int price = Integer.parseInt(parts[2]);
             MenuCategory option = MenuCategory.valueOf(parts[3]);
+            String recommend = null;
+
+            if (parts.length > 4 && !parts[4].isEmpty()) {
+                recommend = parts[4];
+            }
 
             Menu menu = new Menu(id, name, price, option);
+            menu.setRecommend(recommend);
             menus.add(menu);
 
         }
@@ -349,7 +362,9 @@ public class MenuList {
     public void menuRecommend() throws IOException {
         System.out.println();
         System.out.println("[추천 메뉴 등록 및 관리]");
+
         showAllMenus();
+
         System.out.print("등록된 메뉴 중, 추천 메뉴를 입력해주세요 : ");
         Scanner sc = new Scanner(System.in);
 
@@ -364,8 +379,7 @@ public class MenuList {
             sc.nextLine();
 
             Menu 찾은메뉴 = findMenu(추천메뉴명);
-            // 추천 이류를 현 객채의 Recommend 필드에 추가
-            // Best 를 선택했다면,
+            // 추천 이유를 현 객체의 Recommend 필드에 추가
             // todo : Enum으로 리팩토링
             if (추천이유 == 1) {
                 찾은메뉴.setRecommend("Best");

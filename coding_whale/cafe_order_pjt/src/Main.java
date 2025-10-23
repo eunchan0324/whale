@@ -2013,6 +2013,12 @@ public class Main {
             showSalesViewScreen(loggedInSeller);
         });
 
+        // 5. 추천 메뉴 관리 버튼
+        recommendButton.addActionListener(e -> {
+            sellerFrame.dispose();
+            showRecommendMenuManagementScreen(loggedInSeller);
+        });
+
         // 로그 아웃 버튼
         backButton.addActionListener(e -> {
             sellerFrame.dispose();
@@ -2767,6 +2773,107 @@ public class Main {
         frame.add(buttonPanel, BorderLayout.SOUTH);
 
         // === CONTROLLER ===
+        backButton.addActionListener(e -> {
+            frame.dispose();
+            openSellerWindow(seller);
+        });
+
+        frame.setVisible(true);
+    }
+
+    // [판매자] 5. 추천 메뉴 관리 화면
+    public static void showRecommendMenuManagementScreen(User seller) {
+        // === VIEW ===
+        JFrame frame = new JFrame("추천 메뉴 관리");
+        frame.setSize(700, 500);
+        frame.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+        frame.setLocationRelativeTo(null);
+        frame.setLayout(new BorderLayout(10, 10));
+
+        // 상단 안내 패널
+        JPanel infoPanel = new JPanel();
+        infoPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 5, 10));
+        JLabel infoLabel = new JLabel("메뉴별 추천 분류를 설정하세요 (Best: 베스트 메뉴, New: 신메뉴)");
+        infoLabel.setFont(new Font("맑은 고딕", Font.PLAIN, 12));
+        infoPanel.add(infoLabel);
+        frame.add(infoPanel, BorderLayout.NORTH);
+
+        // 전체 메뉴 가져오기
+        ArrayList<Menu> allMenus = menuList.getManageableMenus();
+
+        // JTable 설정
+        String[] columnNames = {"메뉴명", "가격", "카테고리", "추천 분류"};
+        Object[][] data = new Object[allMenus.size()][4];
+
+        for (int i = 0; i < allMenus.size(); i++) {
+            Menu menu = allMenus.get(i);
+            data[i][0] = menu.getName();
+            data[i][1] = menu.getPrice() + "원";
+            data[i][2] = menu.getOption().name();
+
+            // 현재 추천 상태
+            String currentRecommend = menu.getRecommend();
+            if (currentRecommend == null || currentRecommend.isEmpty()) {
+                data[i][3] = "없음";
+            } else {
+                data[i][3] = currentRecommend;
+            }
+        }
+
+        JTable menuTable = new JTable(data, columnNames) {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return column == 3; // 추천 분류 열만 편집 가능
+            }
+        };
+
+        menuTable.setRowHeight(30);
+
+        // 추천 분류 열에 JComboBox 설정
+        String[] recommendOptions = {"없음", "Best", "New"};
+        JComboBox<String> comboBox = new JComboBox<>(recommendOptions);
+        menuTable.getColumnModel().getColumn(3).setCellEditor(new DefaultCellEditor(comboBox));
+
+        JScrollPane scrollPane = new JScrollPane(menuTable);
+        frame.add(scrollPane, BorderLayout.CENTER);
+
+        // 버튼 패널
+        JPanel buttonPanel = new JPanel(new FlowLayout());
+        JButton applyButton = new JButton("적용");
+        JButton backButton = new JButton("뒤로가기");
+
+        buttonPanel.add(applyButton);
+        buttonPanel.add(backButton);
+        frame.add(buttonPanel, BorderLayout.SOUTH);
+
+        // === CONTROLLER ===
+        applyButton.addActionListener(e -> {
+            try {
+                // 테이블의 변경사항을 Menu 객체에 반영
+                for (int i = 0; i < allMenus.size(); i++) {
+                    Menu menu = allMenus.get(i);
+                    String newRecommend = (String) menuTable.getValueAt(i, 3);
+
+                    // "없음" 이면 null로 설정
+                    if ("없음".equals(newRecommend)) {
+                        menu.setRecommend(null);
+                    } else {
+                        menu.setRecommend(newRecommend);
+                    }
+                }
+
+                // 파일 저장
+                menuList.saveFile();
+
+                JOptionPane.showMessageDialog(frame, "추천 메뉴가 성공적으로 적용되었습니다.");
+            } catch (IOException ex) {
+                JOptionPane.showMessageDialog(frame,
+                        "저장 중 오류가 발생했습니다: " + ex.getMessage(),
+                        "오류", JOptionPane.ERROR_MESSAGE);
+            }
+        });
+
+        // 뒤로가기 버튼
         backButton.addActionListener(e -> {
             frame.dispose();
             openSellerWindow(seller);

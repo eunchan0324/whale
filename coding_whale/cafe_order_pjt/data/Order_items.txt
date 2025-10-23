@@ -1,2 +1,4 @@
-c6a7d623-4e87-4e3e-bfb1-5bc23548f796,47aa9d6b-0332-4a13-ba14-42a1026305dd,3000,기본(2샷),매장컵,ICE
-c6a7d623-4e87-4e3e-bfb1-5bc23548f796,47aa9d6b-0332-4a13-ba14-42a1026305dd,3000,연하게(1샷),매장컵,ICE
+04aed293-df4c-4aeb-8ab1-4c338a69c346,d31f9be7-ec1e-41c3-9194-edb16a5fef5e,3000,ICE,매장컵,기본(2샷)
+04aed293-df4c-4aeb-8ab1-4c338a69c346,d31f9be7-ec1e-41c3-9194-edb16a5fef5e,3000,ICE,매장컵,연하게(1샷)
+04aed293-df4c-4aeb-8ab1-4c338a69c346,05cec724-b993-4911-8ead-2fa8ce3c5139,4500,ICE,매장컵,오트(귀리)
+b3b26b3b-ed4b-4d2b-b95d-d23401aa0a86,d31f9be7-ec1e-41c3-9194-edb16a5fef5e,3000,ICE,매장컵,기본(2샷)
