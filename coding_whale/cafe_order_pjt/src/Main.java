@@ -803,8 +803,11 @@ public class Main {
     }
 
     public static void showMainScreen() {
-        // view
+        // === VIEW ===
         JFrame frame = new JFrame("카페 주문 프로그램");
+        frame.setSize(400, 300);
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setLocationRelativeTo(null);
 
         JButton adminButton = new JButton("관리자");
         JButton sellerButton = new JButton("판매자");
@@ -818,11 +821,8 @@ public class Main {
         panel.add(customerButton);
 
         frame.add(panel);
-        frame.setSize(400, 300);
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
-
-        // logic
+        // === CONTROLLER ===
         adminButton.addActionListener(e -> {
             frame.dispose(); // 현재 창 닫기
             showAdminLogin(); // 관리자 로그인 창 열기
@@ -881,6 +881,7 @@ public class Main {
 
         loginFrame.setSize(400, 200);
         loginFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        loginFrame.setLocationRelativeTo(null);
 
 
         // ======= CONTROLLER 로직 처리 =======
@@ -1906,6 +1907,7 @@ public class Main {
 
         loginFrame.setSize(400, 200);
         loginFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        loginFrame.setLocationRelativeTo(null);
 
 
         // ======= CONTROLLER 로직 처리 =======
@@ -2883,8 +2885,6 @@ public class Main {
     }
 
 
-
-
     /**
      * 구매자
      */
@@ -2927,6 +2927,7 @@ public class Main {
 
         loginFrame.setSize(400, 200);
         loginFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        loginFrame.setLocationRelativeTo(null);
 
 
         // ======= CONTROLLER =======
@@ -3088,18 +3089,192 @@ public class Main {
 
     // [구매자] 메뉴 창
     public static void openCustomerWindow(User loggedInCustomer) {
-        JFrame customerFrame = new JFrame("구매자 메뉴");
-        JButton backButton = new JButton("뒤로가기");
+        // === VIEW ===
+        JFrame customerFrame = new JFrame("카페 주문 서비스 - 고객");
+        customerFrame.setSize(500, 500);
+        customerFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        customerFrame.setLocationRelativeTo(null);
+        customerFrame.setLayout(new BorderLayout(10, 10));
 
-        backButton.addActionListener(e -> {
+        // 상단 환영 패널
+        JPanel welcomePanel = new JPanel();
+        welcomePanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 10, 20));
+        JLabel welcomeLabel = new JLabel("환영합니다, " + loggedInCustomer.getId() + "님!", JLabel.CENTER);
+        welcomeLabel.setFont(new Font("맑은 고딕", Font.BOLD, 18));
+        welcomePanel.add(welcomeLabel);
+        customerFrame.add(welcomePanel, BorderLayout.NORTH);
+
+        // 중앙 메뉴 버튼 패널
+        JPanel menuPanel = new JPanel(new GridLayout(5, 1, 10, 15));
+        menuPanel.setBorder(BorderFactory.createEmptyBorder(20, 40, 20, 40));
+
+        // 버튼 생성
+        JButton orderMenuButton = new JButton("메뉴 보기 및 주문");
+        JButton orderHistoryButton = new JButton("주문 내역 확인");
+        JButton recommendMenuButton = new JButton("오늘의 추천 메뉴");
+        JButton favoriteMenuButton = new JButton("나만의 메뉴 (찜)");
+        JButton logoutButton = new JButton("로그아웃");
+
+        // 버튼 폰트 설정
+        Font buttonFont = new Font("맑은 고딕", Font.PLAIN, 16);
+        orderMenuButton.setFont(buttonFont);
+        orderHistoryButton.setFont(buttonFont);
+        recommendMenuButton.setFont(buttonFont);
+        favoriteMenuButton.setFont(buttonFont);
+        logoutButton.setFont(buttonFont);
+
+        // 버튼 크기 설정
+        Dimension buttonSize = new Dimension(400, 60);
+        orderMenuButton.setPreferredSize(buttonSize);
+        orderHistoryButton.setPreferredSize(buttonSize);
+        recommendMenuButton.setPreferredSize(buttonSize);
+        favoriteMenuButton.setPreferredSize(buttonSize);
+        logoutButton.setPreferredSize(buttonSize);
+
+        // 버튼 패널에 추가
+        menuPanel.add(orderMenuButton);
+        menuPanel.add(orderHistoryButton);
+        menuPanel.add(recommendMenuButton);
+        menuPanel.add(favoriteMenuButton);
+        menuPanel.add(logoutButton);
+
+        customerFrame.add(menuPanel);
+
+        // === CONTROLLER ===
+
+        // 1. 메뉴 보기 및 주문
+        orderMenuButton.addActionListener(e -> {
             customerFrame.dispose();
-            showMainScreen();
         });
 
-        customerFrame.add(backButton);
-        customerFrame.setSize(400, 400);
-        customerFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        // 2. 주문 내역 확인
+        orderHistoryButton.addActionListener(e -> {
+            customerFrame.dispose();
+        });
+
+        // 3. 오늘의 추천 메뉴
+        recommendMenuButton.addActionListener(e -> {
+            customerFrame.dispose();
+            showRecommendMenuViewScreen(loggedInCustomer);
+        });
+
+        // 4. 나만의 메뉴 (찜)
+        favoriteMenuButton.addActionListener(e -> {
+            customerFrame.dispose();
+        });
+
+
+        // 5. 로그아웃
+        logoutButton.addActionListener(e -> {
+            int confirm = JOptionPane.showConfirmDialog(
+                    customerFrame,
+                    "로그아웃 하시겠습니까?",
+                    "로그아웃",
+                    JOptionPane.YES_NO_OPTION
+            );
+
+            if (confirm == JOptionPane.YES_OPTION) {
+                customerFrame.dispose();
+                showMainScreen();
+            }
+        });
+
         customerFrame.setVisible(true);
+    }
+
+    // [구매자] 3. 오늘의 추천 메뉴 화면
+    public static void showRecommendMenuViewScreen(User customer) {
+        // === VIEW ===
+        JFrame frame = new JFrame("오늘의 추천 메뉴");
+        frame.setSize(600, 500);
+        frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        frame.setLocationRelativeTo(null);
+        frame.setLayout(new BorderLayout(10, 10));
+
+        // 상단 타이틀
+        JPanel titlePanel = new JPanel();
+        titlePanel.setBorder(BorderFactory.createEmptyBorder(15, 15, 10, 15));
+        JLabel titleLabel = new JLabel("오늘의 추천 메뉴", JLabel.CENTER);
+        titleLabel.setFont(new Font("맑은 고딕", Font.BOLD, 20));
+        titlePanel.add(titleLabel);
+        frame.add(titlePanel, BorderLayout.NORTH);
+
+        // 중앙 추천 메뉴 패널
+        JPanel contentPanel = new JPanel();
+        contentPanel.setLayout(new BoxLayout(contentPanel, BoxLayout.Y_AXIS));
+        contentPanel.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20));
+
+        // 전체 메뉴 가져오기
+        ArrayList<Menu> allMenus = menuList.getManageableMenus();
+
+        // Best 메뉴 수집
+        ArrayList<Menu> bestMenus = new ArrayList<>();
+        ArrayList<Menu> newMenus = new ArrayList<>();
+
+        for (Menu menu : allMenus) {
+            String recommend = menu.getRecommend();
+            if ("Best".equals(recommend)) {
+                bestMenus.add(menu);
+            } else if ("New".equals(recommend)) {
+                newMenus.add(menu);
+            }
+        }
+
+        // Best 메뉴 표시
+        if (!bestMenus.isEmpty()) {
+            JLabel bestLabel = new JLabel("Best Menu");
+            bestLabel.setFont(new Font("맑은 고딕", Font.BOLD, 16));
+            contentPanel.add(bestLabel);
+            contentPanel.add(Box.createVerticalStrut(10));
+
+            for (Menu menu : bestMenus) {
+                JLabel menuLabel = new JLabel("  • " + menu.getName() + " - " + menu.getPrice() + "원");
+                menuLabel.setFont(new Font("맑은 고딕", Font.PLAIN, 14));
+                contentPanel.add(menuLabel);
+                contentPanel.add(Box.createVerticalStrut(5));
+            }
+            contentPanel.add(Box.createVerticalStrut(20));
+        }
+
+        // New 메뉴 표시
+        if (!newMenus.isEmpty()) {
+            JLabel newLabel = new JLabel("New Menu");
+            newLabel.setFont(new Font("맑은 고딕", Font.BOLD, 16));
+            contentPanel.add(newLabel);
+            contentPanel.add(Box.createVerticalStrut(10));
+
+            for (Menu menu : newMenus) {
+                JLabel menuLabel = new JLabel("  • " + menu.getName() + " - " + menu.getPrice() + "원");
+                menuLabel.setFont(new Font("맑은 고딕", Font.PLAIN, 14));
+                contentPanel.add(menuLabel);
+                contentPanel.add(Box.createVerticalStrut(5));
+            }
+        }
+
+        // 추천 메뉴가 없을 때
+        if (bestMenus.isEmpty() && newMenus.isEmpty()) {
+            JLabel noMenuLabel = new JLabel("현재 추천 메뉴가 없습니다.", JLabel.CENTER);
+            noMenuLabel.setFont(new Font("맑은 고딕", Font.PLAIN, 14));
+            contentPanel.add(noMenuLabel);
+        }
+
+        JScrollPane scrollPane = new JScrollPane(contentPanel);
+        frame.add(scrollPane, BorderLayout.CENTER);
+
+        // 하단 버튼
+        JPanel buttonPanel = new JPanel(new FlowLayout());
+        JButton backButton = new JButton("뒤로가기");
+
+        buttonPanel.add(backButton);
+        frame.add(buttonPanel, BorderLayout.SOUTH);
+
+        // === CONTROLLER ===
+        backButton.addActionListener(e -> {
+            frame.dispose();
+            openCustomerWindow(customer);
+        });
+
+        frame.setVisible(true);
     }
 
 
