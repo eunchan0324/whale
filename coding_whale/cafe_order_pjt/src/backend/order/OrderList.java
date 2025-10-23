@@ -23,6 +23,11 @@ public class OrderList {
     private StoreList storeList;
     private int nextWaitingNumber = 1;
 
+    // 전체 주문 리스트 반환 (매출 조회용)
+    public ArrayList<Order> getAllOrders() {
+        return new ArrayList<>(orderList); // 복사본 반환
+    }
+
     public OrderList(MenuList menuList, StoreList storeList) throws IOException {
         this.menuList = menuList;
         this.storeList = storeList;
@@ -516,5 +521,15 @@ public class OrderList {
         return data;
     }
 
+    // 특정 지점의 완료된 주문만 반환
+    public ArrayList<Order> getCompletedOrdersByStore(int storeId) {
+        ArrayList<Order> result = new ArrayList<>();
+        for (Order order : orderList) {
+            if (order.getStatus() == OrderStatus.COMPLETED && order.getStoreId() == storeId) {
+                result.add(order);
+            }
+        }
+        return result;
+    }
 }
 

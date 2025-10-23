@@ -2007,6 +2007,12 @@ public class Main {
             showSellingMenuManagementScreen(loggedInSeller);
         });
 
+        // 4. 매출 조회 버튼
+        salesButton.addActionListener(e -> {
+            sellerFrame.dispose();
+            showSalesViewScreen(loggedInSeller);
+        });
+
         // 로그 아웃 버튼
         backButton.addActionListener(e -> {
             sellerFrame.dispose();
@@ -2663,6 +2669,105 @@ public class Main {
 
         // 뒤로가기 버튼
         backBButton.addActionListener(e -> {
+            frame.dispose();
+            openSellerWindow(seller);
+        });
+
+        frame.setVisible(true);
+    }
+
+    // [판매자] 4. 매출 조회 화면
+    public static void showSalesViewScreen(User seller) {
+        int storeId = seller.getStoreId();
+        String storeName = storeList.findStoreById(storeId).getStoreName();
+
+        // === VIEW ===
+        JFrame frame = new JFrame("매출 조회 - " + storeName);
+        frame.setSize(800, 600);
+        frame.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+        frame.setLocationRelativeTo(null);
+        frame.setLayout(new BorderLayout(10, 10));
+
+        // 완료된 주문 가져오기
+        ArrayList<Order> completedOrders = orderList.getCompletedOrdersByStore(storeId);
+
+        // 매출 데이터 계산
+        int totalSales = 0;
+        for (Order order : completedOrders) {
+            totalSales += order.getTotalPrice();
+        }
+
+        int completedOrderCount = completedOrders.size();
+        int avgOrderAmount = (completedOrderCount > 0) ? (totalSales / completedOrderCount) : 0;
+
+        // 상단 요약 패널
+        JPanel summaryPanel = new JPanel(new GridLayout(4, 1, 5, 5));
+        summaryPanel.setBorder(BorderFactory.createEmptyBorder(15, 15, 10, 15));
+
+        Font summayFont = new Font("맑은 고딕", Font.BOLD, 16);
+
+        JLabel totalLabel = new JLabel("총 매출액: " + String.format("%,d", totalSales) + "원", JLabel.CENTER);
+        totalLabel.setFont(summayFont);
+        summaryPanel.add(totalLabel);
+
+        JLabel countLabel = new JLabel("완료된 주문 수: " + completedOrderCount + "건", JLabel.CENTER);
+        countLabel.setFont(summayFont);
+        summaryPanel.add(countLabel);
+
+        JLabel avgLabel = new JLabel("평균 주문 금액: " + String.format("%,d", avgOrderAmount) + "원", JLabel.CENTER);
+        avgLabel.setFont(summayFont);
+        summaryPanel.add(avgLabel);
+
+        summaryPanel.add(new JLabel("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━", JLabel.CENTER));
+
+        frame.add(summaryPanel, BorderLayout.NORTH);
+
+        // 중앙 주문 내역 테이블
+        JPanel tablePanel = new JPanel(new BorderLayout());
+        tablePanel.setBorder(BorderFactory.createEmptyBorder(0, 15, 10, 15));
+
+        JLabel tableTitle = new JLabel("완료된 주문 내역");
+        tableTitle.setFont(new Font("맑은 고딕", Font.BOLD, 14));
+        tablePanel.add(tableTitle, BorderLayout.NORTH);
+
+        String[] columnNames = {"대기번호", "고객ID", "메뉴", "금액", "주문시간"};
+        Object[][] data = new Object[completedOrders.size()][5];
+
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MM-dd HH:mm");
+
+        for (int i = 0; i < completedOrders.size(); i++) {
+            Order order = completedOrders.get(i);
+            data[i][0] = order.getWaitingNumber();
+            data[i][1] = order.getCustomerId();
+
+            // 메뉴명
+            if (order.getItems().size() == 1) {
+                data[i][2] = order.getItems().get(0).getMenu().getName();
+            } else {
+                data[i][2] = order.getItems().get(0).getMenu().getName() + " 외 " + (order.getItems().size() - 1) + "건";
+            }
+
+            data[i][3] = String.format("%,d원", order.getTotalPrice());
+            data[i][4] = order.getOrderTime().format(formatter);
+        }
+
+        JTable salesTable = new JTable(data, columnNames);
+        salesTable.setRowHeight(25);
+        salesTable.setEnabled(false); // 읽기 전용
+        JScrollPane scrollPane = new JScrollPane(salesTable);
+        tablePanel.add(scrollPane, BorderLayout.CENTER);
+
+        frame.add(tablePanel, BorderLayout.CENTER);
+
+        // 하단 버튼 패널
+        JPanel buttonPanel = new JPanel(new FlowLayout());
+        JButton backButton = new JButton("뒤로가기");
+
+        buttonPanel.add(backButton);
+        frame.add(buttonPanel, BorderLayout.SOUTH);
+
+        // === CONTROLLER ===
+        backButton.addActionListener(e -> {
             frame.dispose();
             openSellerWindow(seller);
         });
