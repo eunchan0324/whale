@@ -958,6 +958,7 @@ public class Main {
         adminFrame.add(panel);
         adminFrame.setSize(400, 400);
         adminFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        adminFrame.setLocationRelativeTo(null);
 
 
         // ======= CONTROLLER =======
@@ -2037,7 +2038,8 @@ public class Main {
         String storeName = storeList.findStoreById(storeId).getStoreName();
 
         // === VIEW ===
-        JFrame frame = new JFrame("주문 관리 - " + storeName);
+//        JFrame frame = new JFrame("주문 관리 - " + storeName);
+        var frame = new JFrame("주문 관리 - " + storeName);
         frame.setSize(900, 600);
         frame.setLocationRelativeTo(null);
         frame.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
@@ -2047,7 +2049,8 @@ public class Main {
         ArrayList<Order> allPendingOrders = orderList.getPendingOrders();
 
         // 본인 지점 주문만 필터링
-        ArrayList<Order> myStorePendingOrders = new ArrayList<>();
+//        ArrayList<Order> myStorePendingOrders = new ArrayList<>();
+        var myStorePendingOrders = new ArrayList<Order>();
         for (Order order : allPendingOrders) {
             if (order.getStoreId() == storeId) {
                 myStorePendingOrders.add(order);
@@ -2112,10 +2115,12 @@ public class Main {
         JButton detailButton = new JButton("상세 보기");
         JButton changeButton = new JButton("상태 변경");
         JButton backButton = new JButton("뒤로가기");
+        JButton reloadButton = new JButton("새로고침");
 
         buttonPanel.add(detailButton);
         buttonPanel.add(changeButton);
         buttonPanel.add(backButton);
+        buttonPanel.add(reloadButton);
         frame.add(buttonPanel, BorderLayout.SOUTH);
 
         // === CONTROLLER ===
@@ -2147,6 +2152,13 @@ public class Main {
         backButton.addActionListener(e -> {
             frame.dispose();
             openSellerWindow(seller);
+        });
+
+        // 새로고침 버튼
+        reloadButton.addActionListener(e -> {
+            frame.dispose();
+            showOrderManagementScreen(seller);
+
         });
 
         frame.setVisible(true);
