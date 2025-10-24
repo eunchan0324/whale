@@ -3145,6 +3145,7 @@ public class Main {
         // 1. 메뉴 보기 및 주문
         orderMenuButton.addActionListener(e -> {
             customerFrame.dispose();
+            showOrderMenuScreen(loggedInCustomer);
         });
 
         // 2. 주문 내역 확인
@@ -3181,6 +3182,355 @@ public class Main {
 
         customerFrame.setVisible(true);
     }
+
+    // [구매자] 1. 메뉴 보기 및 주문 화면
+    public static void showOrderMenuScreen(User customer) {
+        // todo : 지점 선택 기능 (현재는 하드코딩)
+        int storeId = 1;
+        String storeName = storeList.findStoreById(storeId).getStoreName();
+
+        // === VIEW ===
+        JFrame frame = new JFrame("메뉴 보기 및 주문 - " + storeName);
+        frame.setSize(800, 600);
+        frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        frame.setLocationRelativeTo(null);
+        frame.setLayout(new BorderLayout(10, 10));
+
+        // 주문 가능한 메뉴 가져오기
+        ArrayList<Menu> orderableMenus = menuList.showAndGetOrderableMenus(storeId);
+
+        // 메뉴가 없을 때
+        if (orderableMenus.isEmpty()) {
+            JPanel emptyPanel = new JPanel(new GridLayout(2, 1));
+            emptyPanel.add(new JLabel("현재 주문 가능한 메뉴가 없습니다.", JLabel.CENTER));
+
+            JButton backButton = new JButton("뒤로가기");
+            backButton.addActionListener(e -> {
+                frame.dispose();
+                openCustomerWindow(customer);
+            });
+
+            JPanel buttonPanel = new JPanel(new FlowLayout());
+            buttonPanel.add(backButton);
+            emptyPanel.add(buttonPanel);
+
+            frame.add(emptyPanel, BorderLayout.CENTER);
+            frame.setVisible(true);
+            return;
+        }
+
+        // 장바구니 (전역 변수처럼 사용하기 위해 final ArrayList  사용)
+        final ArrayList<OrderItem> cart = new ArrayList<>();
+
+        // 상단 정보 패널
+        JPanel infoPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        infoPanel.setBorder(BorderFactory.createEmptyBorder(10, 15, 5, 15));
+        JLabel cartLabel = new JLabel("장바구니: 0개");
+        cartLabel.setFont(new Font("맑은 고딕", Font.BOLD, 14));
+        infoPanel.add(cartLabel);
+        frame.add(infoPanel, BorderLayout.NORTH);
+
+        // 중앙 메뉴 테이블
+        String[] columnNames = {"메뉴명", "가격", "카테고리", "재고 상태"};
+        Object[][] data = new Object[orderableMenus.size()][4];
+
+        for (int i = 0; i < orderableMenus.size(); i++) {
+            Menu menu = orderableMenus.get(i);
+            data[i][0] = menu.getName();
+            data[i][1] = menu.getPrice();
+            data[i][2] = menu.getOption();
+
+            // 재고 상태 확인
+            MenuStatus menuStatus = menuStatusList.findMenuStatus(storeId, menu.getId());
+            if (menuStatus != null) {
+                data[i][3] = menuStatus.getStatus().getDisplayStatus();
+            } else {
+                data[i][3] = "알 수 없음";
+            }
+        }
+
+        JTable menuTable = new JTable(data, columnNames);
+        menuTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        menuTable.setRowHeight(30);
+        JScrollPane scrollPane = new JScrollPane(menuTable);
+        frame.add(scrollPane, BorderLayout.CENTER);
+
+        // 하단 버튼 패널
+        JPanel buttonPanel = new JPanel(new FlowLayout());
+        JButton addToCartButton = new JButton("장바구니 담기");
+        JButton viewCartButton = new JButton("장바구니 보기");
+        JButton backButton = new JButton("뒤로가기");
+
+        buttonPanel.add(addToCartButton);
+        buttonPanel.add(viewCartButton);
+        buttonPanel.add(backButton);
+        frame.add(buttonPanel, BorderLayout.SOUTH);
+
+        // === CONTROLLER ===
+
+        // 장바구니 담기 버튼
+        addToCartButton.addActionListener(e -> {
+            int selectedRow = menuTable.getSelectedRow();
+            if (selectedRow == -1) {
+                JOptionPane.showMessageDialog(frame, "메뉴를 선택해주세요.", "알림", JOptionPane.WARNING_MESSAGE);
+                return;
+            }
+
+            Menu selectedMenu = orderableMenus.get(selectedRow);
+
+            // 재고 확인
+            if (!menuStatusList.isAvailable(storeId, selectedMenu.getId())) {
+                JOptionPane.showMessageDialog(frame,
+                        "죄송합니다. '" + selectedMenu.getName() + "' 메뉴는 현재 품절입니다.",
+                        "품절", JOptionPane.WARNING_MESSAGE);
+                return;
+            }
+
+            // 옵션 선택 다이얼로그 열기
+            OrderItem newItem = showOrderItemOptionsDialog(frame, selectedMenu);
+
+            if (newItem != null) {
+                cart.add(newItem);
+                cartLabel.setText("장바구니: " + cart.size() + "개");
+                JOptionPane.showMessageDialog(frame,
+                        "'" + selectedMenu.getName() + "' 메뉴가 장바구니에 담겼습니다.");
+            }
+        });
+
+        // 장바구니 보기 버튼
+        viewCartButton.addActionListener(e -> {
+            if (cart.isEmpty()) {
+                JOptionPane.showMessageDialog(frame,
+                        "장바구니가 비어있습니다.",
+                        "알림", JOptionPane.INFORMATION_MESSAGE);
+                return;
+            }
+
+            frame.dispose();
+//            showCartScreen(customer, cart, storeId);
+        });
+
+        // 뒤로가기 버튼
+        backButton.addActionListener(e -> {
+            if (!cart.isEmpty()) {
+                int confirm = JOptionPane.showConfirmDialog(frame,
+                        "장바구니에 담긴 메뉴가 있습니다. 정말 나가시겠습니까?",
+                        "확인", JOptionPane.YES_NO_OPTION);
+
+                if (confirm != JOptionPane.YES_OPTION) {
+                    return;
+                }
+            }
+
+            frame.dispose();
+            openCustomerWindow(customer);
+        });
+
+        frame.setVisible(true);
+    }
+
+    // [구매자] 1-1. 옵션 선택 다이얼로그
+    public static OrderItem showOrderItemOptionsDialog(JFrame parentFrame, Menu menu) {
+        // ======= VIEW =======
+        JDialog dialog = new JDialog(parentFrame, "옵션 선택 - " + menu.getName(), true);
+        dialog.setSize(400, 550);
+        dialog.setLayout(new BorderLayout(10, 10));
+        dialog.setLocationRelativeTo(parentFrame);
+
+        // 최종 선택값 저장용
+        final String[] finalOptions = {null}; // 추가 옵션
+        final int[] finalPrice = {menu.getPrice()};
+        final String[] finalTemp = {"ICE"}; // 기본값
+        final String[] finalCup = {"일회용컵"}; // 기본값
+
+        JPanel mainPanel = new JPanel();
+        mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
+        mainPanel.setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15));
+
+        // === 4. 최종 가격 표시 (먼저 선언해야 다른 곳에서 참조 가능) ===
+        JLabel priceLabel = new JLabel("최종 가격: " + finalPrice[0] + "원");
+        priceLabel.setFont(new Font("맑은 고딕", Font.BOLD, 16));
+
+        // === 1. 추가 옵션 (카테고리별) ===
+        if (menu.getOption() == MenuCategory.COFFEE) {
+            JLabel optionLabel = new JLabel("샷 옵션:");
+            optionLabel.setFont(new Font("맑은 고딕", Font.BOLD, 14));
+            mainPanel.add(optionLabel);
+            mainPanel.add(Box.createVerticalStrut(5));
+
+            String[] options = {"기본(2샷)", "연하게(1샷)", "샷추가(+500원)", "디카페인(+1000원)"};
+            JComboBox<String> optionCombo = new JComboBox<>(options);
+            mainPanel.add(optionCombo);
+            mainPanel.add(Box.createVerticalStrut(15));
+
+            optionCombo.addActionListener(e -> {
+                int selected = optionCombo.getSelectedIndex();
+                finalPrice[0] = menu.getPrice(); // 초기화
+
+                if (selected == 0) {
+                    finalOptions[0] = "기본(2샷)";
+                } else if (selected == 1) {
+                    finalOptions[0] = "연하게(1샷)";
+                } else if (selected == 2) {
+                    finalOptions[0] = "샷추가(3샷)";
+                    finalPrice[0] += 500;
+                } else if (selected == 3) {
+                    finalOptions[0] = "디카페인";
+                    finalPrice[0] += 1000;
+                }
+
+                priceLabel.setText("최종 가격: " + finalPrice[0] + "원");
+            });
+
+            // 기본값 설정
+            finalOptions[0] = "기본(2샷)";
+        } else if (menu.getOption() == MenuCategory.LATTE) {
+            JLabel optionLabel = new JLabel("우유 옵션:");
+            optionLabel.setFont(new Font("맑은 고딕", Font.BOLD, 14));
+            mainPanel.add(optionLabel);
+            mainPanel.add(Box.createVerticalStrut(15));
+
+            String[] options = {"일반 우유", "오트(귀리) (+1000원)"};
+            JComboBox<String> optionCombo = new JComboBox<>(options);
+            mainPanel.add(optionCombo);
+            mainPanel.add(Box.createVerticalStrut(15));
+
+            optionCombo.addActionListener(e -> {
+                int selected = optionCombo.getSelectedIndex();
+                finalPrice[0] = menu.getPrice();
+
+                if (selected == 0) {
+                    finalOptions[0] = "일반 우유";
+                } else if (selected == 1) {
+                    finalOptions[0] = "오트(귀리)";
+                    finalPrice[0] += 1000;
+                }
+
+                priceLabel.setText("최종 가격: " + finalPrice[0] + "원");
+            });
+
+            finalOptions[0] = "일반 우유";
+        } else if (menu.getOption() == MenuCategory.TEA) {
+            JLabel optionLabel = new JLabel("물 양:");
+            optionLabel.setFont(new Font("맑은 고딕", Font.BOLD, 14));
+            mainPanel.add(optionLabel);
+            mainPanel.add(Box.createVerticalStrut(5));
+
+            String[] options = {"보통", "적게"};
+            JComboBox<String> optionCombo = new JComboBox<>(options);
+            mainPanel.add(optionCombo);
+            mainPanel.add(Box.createVerticalStrut(15));
+
+            optionCombo.addActionListener(e -> {
+                int selected = optionCombo.getSelectedIndex();
+                if (selected == 0) {
+                    finalOptions[0] = "물 양 보통";
+                } else {
+                    finalOptions[0] = "물 양 적게";
+                }
+            });
+
+            finalOptions[0] = "물 양 보통";
+        } else {
+            finalOptions[0] = "선택안함";
+        }
+
+        // === 2. 온도 선택 (COFFEE, TEA만)
+        if (menu.getOption() == MenuCategory.COFFEE || menu.getOption() == MenuCategory.TEA) {
+            JLabel tempLabel = new JLabel("온도:");
+            tempLabel.setFont(new Font("맑은 고딕", Font.BOLD, 14));
+            mainPanel.add(tempLabel);
+            mainPanel.add(Box.createVerticalStrut(5));
+
+            String[] tempOptions = {"ICE", "HOT"};
+            JComboBox<String> tempCombo = new JComboBox<>(tempOptions);
+            mainPanel.add(tempCombo);
+            mainPanel.add(Box.createVerticalStrut(15));
+
+            tempCombo.addActionListener(e -> {
+                finalTemp[0] = (String) tempCombo.getSelectedItem();
+            });
+        }
+
+        // === 3. 컵 선택 ===
+        JLabel cupLabel = new JLabel("컵:");
+        cupLabel.setFont(new Font("맑은 고딕", Font.BOLD, 14));
+        mainPanel.add(cupLabel);
+        mainPanel.add(Box.createVerticalStrut(5));
+
+        String[] cupOptions = {"일회용컵", "매장컵", "개인컵 (-300원)"};
+        JComboBox<String> cupCombo = new JComboBox<>(cupOptions);
+        mainPanel.add(cupCombo);
+        mainPanel.add(Box.createVerticalStrut(15));
+
+        cupCombo.addActionListener(e -> {
+            int selected = cupCombo.getSelectedIndex();
+
+            // 먼저 기본 가격으로 쵝화 (중복 할인 방지)
+            finalPrice[0] = menu.getPrice();
+
+            // 추가 옵션 가격 다시 적용
+            if (menu.getOption() == MenuCategory.COFFEE) {
+                if (finalOptions[0].contains("샷추가")) {
+                    finalPrice[0] += 500;
+                } else if (finalOptions[0].contains("디카페인")) {
+                    finalPrice[0] += 1000;
+                }
+            } else if (menu.getOption() == MenuCategory.LATTE) {
+                if (finalOptions[0].contains("오트")) {
+                    finalPrice[0] += 1000;
+                }
+            }
+
+            if (selected == 0) {
+                finalCup[0] = "일회용컵";
+            } else if (selected == 1) {
+                finalCup[0] = "매장컵";
+            } else if (selected == 2) {
+                finalCup[0] = "개인컵";
+                finalPrice[0] -= 300;
+            }
+
+            priceLabel.setText("최종 가격: " + finalPrice[0] + "원");
+        });
+
+        // === 4. 최종 가격 표시 ===
+        mainPanel.add(Box.createVerticalStrut(10));
+        mainPanel.add(priceLabel);
+
+        JScrollPane scrollPane = new JScrollPane(mainPanel);
+        dialog.add(scrollPane, BorderLayout.CENTER);
+
+        // 버튼 패널
+        JPanel buttonPanel = new JPanel(new FlowLayout());
+        JButton confirmButton = new JButton("확인");
+        JButton cancelButton = new JButton("취소");
+
+        buttonPanel.add(confirmButton);
+        buttonPanel.add(cancelButton);
+        dialog.add(buttonPanel, BorderLayout.SOUTH);
+
+        // ======= CONTROLLER =======
+
+        // 결과 저장용
+        final OrderItem[] result = {null};
+
+        // 확인 버튼
+        confirmButton.addActionListener(e -> {
+            result[0] = new OrderItem(menu, finalPrice[0], finalOptions[0], finalCup[0], finalTemp[0]);
+            dialog.dispose();
+        });
+
+        // 취소 버튼
+        cancelButton.addActionListener(e -> {
+            dialog.dispose();
+        });
+
+        dialog.setVisible(true);
+        return result[0];
+    }
+
+    // [구매자] 1-2. 장바구니 보기 화면
 
     // [구매자] 3. 오늘의 추천 메뉴 화면
     public static void showRecommendMenuViewScreen(User customer) {
