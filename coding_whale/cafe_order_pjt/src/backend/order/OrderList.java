@@ -531,5 +531,16 @@ public class OrderList {
         }
         return result;
     }
+
+    // [구매자[ customerId로 Order 조회
+    public ArrayList<Order> getOrdersByCustomer(String customerId) {
+        ArrayList<Order> result = new ArrayList<>();
+        for (Order order : orderList) {
+            if (order.getCustomerId().equals(customerId)) {
+                result.add(order);
+            }
+        }
+        return result;
+    }
 }
 

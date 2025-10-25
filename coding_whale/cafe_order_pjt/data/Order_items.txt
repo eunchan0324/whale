@@ -1,4 +1,6 @@
 65b37881-5e8a-4de8-a5f9-6f242fb0074c,05cec724-b993-4911-8ead-2fa8ce3c5139,3500,ICE,매장컵,일반 우유
+f017ca7a-7f85-414d-bee7-fb240eec1b8e,d31f9be7-ec1e-41c3-9194-edb16a5fef5e,3000,ICE,일회용컵,기본(2샷)
+f017ca7a-7f85-414d-bee7-fb240eec1b8e,05cec724-b993-4911-8ead-2fa8ce3c5139,4200,ICE,개인컵,오트(귀리)
 950593b6-3c97-441c-8ece-b5adeb5df500,d31f9be7-ec1e-41c3-9194-edb16a5fef5e,3000,기본(2샷),매장컵,HOT
 950593b6-3c97-441c-8ece-b5adeb5df500,d31f9be7-ec1e-41c3-9194-edb16a5fef5e,3000,연하게(1샷),매장컵,HOT
 04aed293-df4c-4aeb-8ab1-4c338a69c346,d31f9be7-ec1e-41c3-9194-edb16a5fef5e,3000,ICE,매장컵,기본(2샷)
@@ -6,5 +8,4 @@
 04aed293-df4c-4aeb-8ab1-4c338a69c346,05cec724-b993-4911-8ead-2fa8ce3c5139,4500,ICE,매장컵,오트(귀리)
 b3b26b3b-ed4b-4d2b-b95d-d23401aa0a86,d31f9be7-ec1e-41c3-9194-edb16a5fef5e,3000,ICE,매장컵,기본(2샷)
 42fe777a-5231-4909-9a7b-7677e8f51288,d31f9be7-ec1e-41c3-9194-edb16a5fef5e,3000,연하게(1샷),매장컵,ICE
-f017ca7a-7f85-414d-bee7-fb240eec1b8e,d31f9be7-ec1e-41c3-9194-edb16a5fef5e,3000,ICE,일회용컵,기본(2샷)
-f017ca7a-7f85-414d-bee7-fb240eec1b8e,05cec724-b993-4911-8ead-2fa8ce3c5139,4200,ICE,개인컵,오트(귀리)
+e59013c1-f385-46aa-bac8-cc28ffbd1b5d,d31f9be7-ec1e-41c3-9194-edb16a5fef5e,3000,연하게(1샷),매장컵,ICE

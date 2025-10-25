@@ -3163,6 +3163,7 @@ public class Main {
     // 2. 주문 내역 확인
     orderHistoryButton.addActionListener(e -> {
       customerFrame.dispose();
+      showMyOrderScreen(loggedInCustomer);
     });
 
     // 3. 오늘의 추천 메뉴
@@ -3175,7 +3176,6 @@ public class Main {
     favoriteMenuButton.addActionListener(e -> {
       customerFrame.dispose();
     });
-
 
     // 5. 로그아웃
     logoutButton.addActionListener(e -> {
@@ -3706,6 +3706,163 @@ public class Main {
 
     frame.setVisible(true);
   }
+
+  // [구매자] 2. 주문 내역 확인
+  public static void showMyOrderScreen(User customer) {
+    // === VIEW ===
+    JFrame frame = new JFrame("나의 주문 내역 - " + customer.getId());
+    frame.setSize(800, 600);
+    frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+    frame.setLocationRelativeTo(null);
+    frame.setLayout(new BorderLayout(10, 10));
+
+    // 상단 제목
+    JPanel titlePanel = new JPanel();
+    JLabel titleLabel = new JLabel("나의 주문 내역", JLabel.CENTER);
+    titleLabel.setFont(new Font("맑은 고딕", Font.BOLD, 20));
+    titlePanel.add(titleLabel);
+    frame.add(titlePanel, BorderLayout.NORTH);
+
+    // 주문 목록 데이터 준비
+    ArrayList<Order> customerOrders = orderList.getOrdersByCustomer(customer.getId());
+
+    if (customerOrders.isEmpty()) {
+      JOptionPane.showMessageDialog(frame, "주문 내역이 없습니다", "알림", JOptionPane.INFORMATION_MESSAGE);
+      openCustomerWindow(customer);
+      return;
+    }
+
+    // 테이블 데이터 구성
+    String[] columnNames = {"대기번호", "주문시간", "상태", "총 결제 금액"};
+    Object[][] data = new Object[customerOrders.size()][4];
+
+    for (int i = 0; i < customerOrders.size(); i++) {
+      Order order = customerOrders.get(i);
+      data[i][0] = order.getWaitingNumber();
+      data[i][1] = order.getOrderTime();
+      data[i][2] = order.getStatus().name();
+      data[i][3] = String.format("%,d원", order.getTotalPrice());
+    }
+
+    JTable orderTable = new JTable(data, columnNames);
+    orderTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+    orderTable.setRowHeight(30);
+
+    JScrollPane scrollPane = new JScrollPane(orderTable);
+    frame.add(scrollPane, BorderLayout.CENTER);
+
+    // 하단 버튼 영역
+    JPanel buttonPanel = new JPanel(new FlowLayout());
+    JButton detailButton = new JButton("상세보기");
+    JButton backButton = new JButton("뒤로가기");
+
+    buttonPanel.add(detailButton);
+    buttonPanel.add(backButton);
+    frame.add(buttonPanel, BorderLayout.SOUTH);
+
+    // === CONTROLLER ===
+    // 상세보기 버튼
+    detailButton.addActionListener(e -> {
+      int selectedRow = orderTable.getSelectedRow();
+      if (selectedRow == -1) {
+        JOptionPane.showMessageDialog(frame, "상세보기할 주문을 선택해주세요.", "알림", JOptionPane.WARNING_MESSAGE);
+        return;
+      }
+
+      Order selectedOrder = customerOrders.get(selectedRow);
+      showCustomerOrderDetailDialog(frame, selectedOrder);
+    });
+
+
+    // 뒤로가기 버튼
+    backButton.addActionListener(e -> {
+      frame.dispose();
+      openCustomerWindow(customer);
+    });
+
+    frame.setVisible(true);
+  }
+
+  // [구매자] 2-1. 주문 확인 상세 다이얼로그
+  public static void showCustomerOrderDetailDialog(JFrame parentFrame, Order order) {
+    // === VIEW ===
+    JDialog dialog = new JDialog(parentFrame, "주문 상세 정보", true);
+    dialog.setSize(550, 420);
+    dialog.setLayout(new BorderLayout(10, 10));
+    dialog.setLocationRelativeTo(parentFrame);
+
+    // 상단 주문 정보 패널
+    JPanel infoPanel = new JPanel();
+    infoPanel.setLayout(new GridLayout(4, 1, 5, 5));
+    infoPanel.setBorder(BorderFactory.createEmptyBorder(15, 15, 10, 15));
+
+    // 상태 색상 표시 (시각적 구분)
+    Color statusColor = switch (order.getStatus()) {
+      case ORDER_PLACED -> new Color(0x007AFF); // 파랑 - 주문 접수
+      case PREPARING -> new Color(0xFFA500); // 주황 - 준비 중
+      case READY -> new Color(0x2ECC71); // 초록 - 픽업 준비 완료
+      case COMPLETED -> new Color(0x555555); // 회색 - 수령 완료
+    };
+
+    JLabel waitingLabel = new JLabel("대기번호 : " + order.getWaitingNumber());
+    waitingLabel.setFont(new Font("맑은 고딕", Font.BOLD, 15));
+
+    JLabel statusLabel = new JLabel("주문 상태 : " + order.getStatus());
+    statusLabel.setFont(new Font("맑은 고딕", Font.BOLD, 15));
+    statusLabel.setForeground(statusColor);
+
+    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+    JLabel timeLable = new JLabel("주문 시간 : " + order.getOrderTime().format(formatter));
+    timeLable.setFont(new Font("맑은 고딕", Font.PLAIN, 14));
+
+    JLabel totalLabel = new JLabel("총 결제 금액 : " + String.format("%,d원", order.getTotalPrice()));
+    totalLabel.setFont(new Font("맑은 고딕", Font.BOLD, 16));
+
+    infoPanel.add(waitingLabel);
+    infoPanel.add(statusLabel);
+    infoPanel.add(timeLable);
+    infoPanel.add(totalLabel);
+
+    dialog.add(infoPanel, BorderLayout.NORTH);
+
+    // 중앙 메뉴 목록 테이블
+    String[] columnNames = {"메뉴명", "온도", "컵", "옵션", "가격"};
+    ArrayList<OrderItem> items = order.getItems();
+    Object[][] data = new Object[items.size()][5];
+
+    for (int i = 0; i < items.size(); i++) {
+      OrderItem item = items.get(i);
+      data[i][0] = item.getMenu().getName();
+      data[i][1] = item.getFinalTemp();
+      data[i][2] = item.getFinalCup();
+      data[i][3] = item.getFinalOptions();
+      data[i][4] = String.format("%,d원", item.getFinalPrice());
+    }
+
+    JTable itemTable = new JTable(data, columnNames);
+    itemTable.setRowHeight(25);
+    itemTable.setEnabled(false);
+    JScrollPane scrollPane = new JScrollPane(itemTable);
+    dialog.add(scrollPane, BorderLayout.CENTER);
+
+    // 하단 닫기 버튼
+    JPanel buttonPanel = new JPanel(new FlowLayout());
+    JButton closeButton = new JButton("닫기");
+    closeButton.setFont(new Font("맑은 고딕", Font.PLAIN, 13));
+
+    buttonPanel.add(closeButton);
+    dialog.add(buttonPanel, BorderLayout.SOUTH);
+
+    // === CONTROLLER ===
+    // 닫기 버튼
+    closeButton.addActionListener(e -> {
+      dialog.dispose();
+    });
+
+    dialog.setVisible(true);
+  }
+
+
 
   // [구매자] 3. 오늘의 추천 메뉴 화면
   public static void showRecommendMenuViewScreen(User customer) {
