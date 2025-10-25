@@ -3176,6 +3176,7 @@ public class Main {
     // 4. 나만의 메뉴 (찜)
     favoriteMenuButton.addActionListener(e -> {
       customerFrame.dispose();
+      showFavoriteMenuScreen(loggedInCustomer);
     });
 
     // 5. 로그아웃
@@ -3823,7 +3824,6 @@ public class Main {
     });
 
 
-
     // 5. 뒤로가기 버튼
     backButton.addActionListener(e -> {
       frame.dispose();
@@ -3999,6 +3999,109 @@ public class Main {
     frame.add(buttonPanel, BorderLayout.SOUTH);
 
     // === CONTROLLER ===
+    backButton.addActionListener(e -> {
+      frame.dispose();
+      openCustomerWindow(customer);
+    });
+
+    frame.setVisible(true);
+  }
+
+  // [구매자] 4. 나만의 메뉴 (찜) 화면
+  public static void showFavoriteMenuScreen(User customer) {
+    // === VIEW ===
+    JFrame frame = new JFrame("나만의 메뉴 - " + customer.getId());
+    frame.setSize(800, 600);
+    frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+    frame.setLocationRelativeTo(null);
+    frame.setLayout(new BorderLayout(10, 10));
+
+    // 타이틀
+    JLabel titleLabel = new JLabel("나만의 메뉴 관리", JLabel.CENTER);
+    titleLabel.setFont(new Font("맑은 고딕", Font.BOLD, 20));
+    frame.add(titleLabel, BorderLayout.NORTH);
+
+    // 중앙 : 나만의 메뉴 테이블
+    String[] columnNames = {"메뉴명", "가격", "카테고리"};
+    DefaultTableModel model = new DefaultTableModel(columnNames, 0);
+    JTable table = new JTable(model);
+    table.setRowHeight(30);
+    table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+    JScrollPane scrollPane = new JScrollPane(table);
+    frame.add(scrollPane, BorderLayout.CENTER);
+
+    // 하단 버튼 패널
+    JPanel buttonPanel = new JPanel(new FlowLayout());
+    JButton addButton = new JButton("등록하기");
+    JButton deleteButton = new JButton("삭제하기");
+    JButton backButton = new JButton("뒤로가기");
+    buttonPanel.add(addButton);
+    buttonPanel.add(deleteButton);
+    buttonPanel.add(backButton);
+    frame.add(buttonPanel, BorderLayout.SOUTH);
+
+    // === CONTROLLER ===
+
+    // 1. 테이블 갱신 함수
+    Runnable refreshTable = () -> {
+      model.setRowCount(0);
+      for (Menu menu : myMenu.myMenu) {
+        model.addRow(new Object[]{
+            menu.getName(),
+            String.format("%,d원", menu.getPrice()),
+            menu.getOption()
+        });
+      }
+    };
+    refreshTable.run();
+
+    // 2. 등록 버튼
+    addButton.addActionListener(e -> {
+      // 메뉴 전체 목록 불러오기
+      ArrayList<Menu> allMenus = menuList.getManageableMenus();
+
+      // 메뉴 선택 다이얼로그
+      String[] menuNames = allMenus.stream()
+          .map(Menu::getName)
+          .toArray(String[]::new);
+
+      String selected = (String) JOptionPane.showInputDialog(
+          frame,
+          "등록할 메뉴를 선택하세요:",
+          "나만의 메뉴 등록",
+          JOptionPane.PLAIN_MESSAGE,
+          null,
+          menuNames,
+          null
+      );
+
+      if (selected != null) {
+        Menu found = menuList.findMenu(selected);
+        if (found != null && !myMenu.myMenu.contains(found)) {
+          myMenu.myMenu.add(found);
+          JOptionPane.showMessageDialog(frame, "나만의 메뉴에 등록되었습니다!");
+          refreshTable.run();
+        } else {
+          JOptionPane.showMessageDialog(frame, "이미 등록된 메뉴입니다.");
+        }
+      }
+    });
+
+    // 3. 삭제 버튼
+    deleteButton.addActionListener(e -> {
+      int selectedRow = table.getSelectedRow();
+      if (selectedRow == -1) {
+        JOptionPane.showMessageDialog(frame, "삭제할 메뉴를 선택해주세요.");
+        return;
+      }
+
+      String menuName = (String) model.getValueAt(selectedRow, 0);
+      myMenu.myMenu.removeIf(m -> m.getName().equals(menuName));
+      JOptionPane.showMessageDialog(frame, "삭제되었습니다.");
+      refreshTable.run();
+    });
+
+    // 4. 뒤로가기
     backButton.addActionListener(e -> {
       frame.dispose();
       openCustomerWindow(customer);

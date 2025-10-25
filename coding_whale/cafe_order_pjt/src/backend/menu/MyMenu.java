@@ -5,7 +5,7 @@ import java.util.Scanner;
 
 // 나만의 메뉴 (찜하기) 기능
 public class MyMenu {
-    ArrayList<Menu> myMenu = new ArrayList<>();
+    public ArrayList<Menu> myMenu = new ArrayList<>();
     Scanner sc = new Scanner(System.in);
 
     // 나만의 메뉴 등록하기
