@@ -12,6 +12,7 @@ import backend.user.UserRole;
 
 import javax.swing.*;
 import javax.swing.border.Border;
+import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.io.*;
 import java.time.format.DateTimeFormatter;
@@ -3716,52 +3717,89 @@ public class Main {
     frame.setLocationRelativeTo(null);
     frame.setLayout(new BorderLayout(10, 10));
 
-    // 상단 제목
-    JPanel titlePanel = new JPanel();
+    // 타이틀
     JLabel titleLabel = new JLabel("나의 주문 내역", JLabel.CENTER);
     titleLabel.setFont(new Font("맑은 고딕", Font.BOLD, 20));
-    titlePanel.add(titleLabel);
-    frame.add(titlePanel, BorderLayout.NORTH);
+    frame.add(titleLabel, BorderLayout.NORTH);
 
-    // 주문 목록 데이터 준비
-    ArrayList<Order> customerOrders = orderList.getOrdersByCustomer(customer.getId());
-
-    if (customerOrders.isEmpty()) {
-      JOptionPane.showMessageDialog(frame, "주문 내역이 없습니다", "알림", JOptionPane.INFORMATION_MESSAGE);
-      openCustomerWindow(customer);
-      return;
-    }
-
-    // 테이블 데이터 구성
+    // 테이블 초기 생성
     String[] columnNames = {"대기번호", "주문시간", "상태", "총 결제 금액"};
-    Object[][] data = new Object[customerOrders.size()][4];
-
-    for (int i = 0; i < customerOrders.size(); i++) {
-      Order order = customerOrders.get(i);
-      data[i][0] = order.getWaitingNumber();
-      data[i][1] = order.getOrderTime();
-      data[i][2] = order.getStatus().name();
-      data[i][3] = String.format("%,d원", order.getTotalPrice());
-    }
-
-    JTable orderTable = new JTable(data, columnNames);
-    orderTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+    DefaultTableModel model = new DefaultTableModel(columnNames, 0);
+    JTable orderTable = new JTable(model);
     orderTable.setRowHeight(30);
+    orderTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+
+    // 테이블 정렬 기능
+    orderTable.setAutoCreateRowSorter(true);
 
     JScrollPane scrollPane = new JScrollPane(orderTable);
     frame.add(scrollPane, BorderLayout.CENTER);
 
-    // 하단 버튼 영역
+    // 하단 버튼
     JPanel buttonPanel = new JPanel(new FlowLayout());
     JButton detailButton = new JButton("상세보기");
+    JButton refreshButton = new JButton("새로고침");
     JButton backButton = new JButton("뒤로가기");
-
     buttonPanel.add(detailButton);
+    buttonPanel.add(refreshButton);
     buttonPanel.add(backButton);
     frame.add(buttonPanel, BorderLayout.SOUTH);
 
     // === CONTROLLER ===
-    // 상세보기 버튼
+
+    // 1. 데이터 로드 (별도 메서드 분리)
+    Runnable loadOrders = () -> {
+      try {
+        orderList.loadOrderFile(); // 파일 다시 읽기
+      } catch (IOException exception) {
+        exception.printStackTrace();
+      }
+
+      ArrayList<Order> orders = orderList.getOrdersByCustomer(customer.getId());
+
+      SwingUtilities.invokeLater(() -> {
+        // 기존 테이블 비우기
+        model.setRowCount(0);
+
+        // 데이터 다시 채우기
+        for (Order order : orders) {
+          model.addRow(new Object[]{
+              order.getWaitingNumber(),
+              order.getOrderTime(),
+              order.getStatus(),
+              String.format("%,d원", order.getTotalPrice())
+          });
+        }
+
+        if (orders.isEmpty()) {
+          JOptionPane.showMessageDialog(frame, "주문 내역이 없습니다.", "알림", JOptionPane.INFORMATION_MESSAGE);
+        }
+      });
+    };
+
+    // 2. 초기 로딩
+    new Thread(loadOrders).start();
+
+    // 3. 새로 고침 버튼 동작
+    refreshButton.addActionListener(e -> {
+      refreshButton.setEnabled(false);
+      refreshButton.setText("불러오는 중...");
+      new Thread(() -> {
+        try {
+          Thread.sleep(300); // 로딩 효과용 (필수 아님)
+          loadOrders.run();
+        } catch (InterruptedException ex) {
+          Thread.currentThread().interrupt();
+        } finally {
+          SwingUtilities.invokeLater(() -> {
+            refreshButton.setEnabled(true);
+            refreshButton.setText("새로고침");
+          });
+        }
+      }).start();
+    });
+
+    // 4. 상세보기
     detailButton.addActionListener(e -> {
       int selectedRow = orderTable.getSelectedRow();
       if (selectedRow == -1) {
@@ -3769,12 +3807,24 @@ public class Main {
         return;
       }
 
-      Order selectedOrder = customerOrders.get(selectedRow);
-      showCustomerOrderDetailDialog(frame, selectedOrder);
+      // model에서 해당 row 데이터 가져오기
+      int waitingNumber = (int) model.getValueAt(selectedRow, 0);
+      Order selectedOrder = null;
+      for (Order o : orderList.getOrdersByCustomer(customer.getId())) {
+        if (o.getWaitingNumber() == waitingNumber) {
+          selectedOrder = o;
+          break;
+        }
+      }
+
+      if (selectedOrder != null) {
+        showCustomerOrderDetailDialog(frame, selectedOrder);
+      }
     });
 
 
-    // 뒤로가기 버튼
+
+    // 5. 뒤로가기 버튼
     backButton.addActionListener(e -> {
       frame.dispose();
       openCustomerWindow(customer);
@@ -3861,8 +3911,6 @@ public class Main {
 
     dialog.setVisible(true);
   }
-
-
 
   // [구매자] 3. 오늘의 추천 메뉴 화면
   public static void showRecommendMenuViewScreen(User customer) {

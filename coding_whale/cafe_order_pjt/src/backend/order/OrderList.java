@@ -80,6 +80,8 @@ public class OrderList {
     }
 
     public void loadOrderFile() throws IOException {
+        orderList.clear(); // 기존 데이터 초기화 (중복 방지)
+
         Path orderFilePath = Constants.BASE_PATH.resolve("Orders.txt");
 
         // 파일이 없으면 종료
