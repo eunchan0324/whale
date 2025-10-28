@@ -50,8 +50,6 @@ public class Main {
         OrderList orderList = new OrderList(menuList, storeList);
         MyMenu myMenu = new MyMenu();
 
-        showMainScreen();
-
         Scanner sc = new Scanner(System.in);
 
         // 프로그램 시작
@@ -813,91 +811,6 @@ public class Main {
         System.out.println("\n-> [선택 완료] " + menu.getName() + " (온도: " + finalTemp + ", 컵: " + finalCup + ", 옵션: " + finalOptions + ")");
 
         return new OrderItem(menu, finalPrice, finalTemp, finalCup, finalOptions);
-    }
-
-    public static void showMainScreen() {
-        // view
-        JFrame frame = new JFrame("카페 주문 프로그램");
-
-        JButton adminButton = new JButton("관리자");
-        JButton sellerButton = new JButton("판매자");
-        JButton customerButton = new JButton("구매자");
-
-        JPanel panel = new JPanel();
-        panel.setLayout(new GridLayout(3, 1, 10, 10));
-
-        panel.add(adminButton);
-        panel.add(sellerButton);
-        panel.add(customerButton);
-
-        frame.add(panel);
-        frame.setSize(400, 300);
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setVisible(true);
-
-
-        // logic
-        adminButton.addActionListener(e -> {
-            frame.dispose(); // 현재 창 닫기
-            openAdminWindow(); // 관리자 창 열기
-        });
-
-        sellerButton.addActionListener(e -> {
-            frame.dispose(); // 현재 창 닫기
-            openSellerWindow(); // 판매자 창 열기
-        });
-
-        customerButton.addActionListener(e -> {
-            frame.dispose(); // 현재 창 닫기
-            openCustomerWindow(); // 구매자 창 열기
-        });
-    }
-
-    public static void openAdminWindow() {
-        // view
-        JFrame adminFrame = new JFrame("관리자 메뉴");
-        JButton backButton = new JButton("뒤로가기");
-
-        adminFrame.add(backButton);
-        adminFrame.setSize(400, 400);
-        adminFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        adminFrame.setVisible(true);
-
-        // logic
-        backButton.addActionListener(e -> {
-            adminFrame.dispose();
-            showMainScreen();
-        });
-    }
-
-    public static void openSellerWindow() {
-        JFrame sellerFrame = new JFrame("판매자 메뉴");
-        JButton backButton = new JButton("뒤로가기");
-
-        backButton.addActionListener(e -> {
-            sellerFrame.dispose();
-            showMainScreen();
-        });
-
-        sellerFrame.add(backButton);
-        sellerFrame.setSize(400, 400);
-        sellerFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        sellerFrame.setVisible(true);
-    }
-
-    public static void openCustomerWindow() {
-        JFrame customerFrame = new JFrame("구매자 메뉴");
-        JButton backButton = new JButton("뒤로가기");
-
-        backButton.addActionListener(e -> {
-            customerFrame.dispose();
-            showMainScreen();
-        });
-
-        customerFrame.add(backButton);
-        customerFrame.setSize(400, 400);
-        customerFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        customerFrame.setVisible(true);
     }
 }
 

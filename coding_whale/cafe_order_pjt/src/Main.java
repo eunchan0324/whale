@@ -37,7 +37,6 @@ public class Main {
     orderList = new OrderList(menuList, storeList);
     myMenu = new MyMenu();
 
-
     showMainScreen();
 
     Scanner sc = new Scanner(System.in);

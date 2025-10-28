@@ -1,3 +1,4 @@
 1d270bb8-3f4e-4980-9224-b2e9021e4361,d31f9be7-ec1e-41c3-9194-edb16a5fef5e,3000,기본(2샷),일회용컵,ICE
 1c104c1a-644f-4ce6-8ef0-14db8ede26ae,d31f9be7-ec1e-41c3-9194-edb16a5fef5e,3000,기본(2샷),일회용컵,ICE
 1c104c1a-644f-4ce6-8ef0-14db8ede26ae,05cec724-b993-4911-8ead-2fa8ce3c5139,3200,일반 우유,개인컵,ICE
+9cd68f49-0b29-4c2a-8a66-b968c167bf1b,d31f9be7-ec1e-41c3-9194-edb16a5fef5e,3000,기본(2샷),일회용컵,ICE
