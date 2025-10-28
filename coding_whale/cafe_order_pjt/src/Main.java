@@ -9,6 +9,8 @@ import backend.store.StoreList;
 import backend.user.User;
 import backend.user.UserList;
 import backend.user.UserRole;
+import frontend.cli.CliClientUi;
+import frontend.gui.GuiClientUi;
 
 import javax.swing.*;
 import javax.swing.border.Border;
@@ -44,18 +46,21 @@ public class Main {
         switch (mode) {
             case "cli":
                 System.out.println("=== CLI 모드로 실행합니다 ===");
-                startCliMode();
+                CliClientUi cliClient = new CliClientUi(storeList, userList, menuStatusList, menuList, orderList, myMenu);
+                cliClient.start();
                 break;
 
             case "gui":
                 System.out.println("=== GUI 모드로 실행합니다 ===");
-                showMainScreen();
+                GuiClientUi guiClient = new GuiClientUi(storeList, userList, menuStatusList, menuList, orderList, myMenu);
+                guiClient.start();
                 break;
 
             default:
                 System.out.println("사용법: java Main [cli|gui]");
                 System.out.println("기본값(GUI)으로 실행합니다.");
-                showMainScreen();
+                GuiClientUi defaultGuiClient = new GuiClientUi(storeList, userList, menuStatusList, menuList, orderList, myMenu);
+                defaultGuiClient.start();
         }
     }
 
