@@ -11,7 +11,9 @@ import java.util.Scanner;
 
 /**
  * CLI 클라이언트 UI
+ *
  * 콘솔 기반 사용자 인터페이스
+ * Scanner를 통한 텍스트 입출력 방식
  */
 public class CliClientUi {
     // 백엔드 객체 (의존성 주입)
