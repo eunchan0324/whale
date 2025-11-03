@@ -1,12 +1,16 @@
 package Study.Thread.practice;
 
-public class BakeryStpe2_RaceCondition {
+public class BakeryStep3_Synchronized {
     static int dough = 0;
+
+    public static synchronized void addDough() {
+        dough++;
+    }
 
     public static void main(String[] args) throws InterruptedException {
         Runnable worker = () -> {
             for (int i = 0; i < 10_000; i++) {
-                dough++;
+                addDough();
             }
         };
 
@@ -21,6 +25,7 @@ public class BakeryStpe2_RaceCondition {
 
         System.out.println("예상 반죽량 : 20000");
         System.out.println("실제 반죽량 : " + dough);
-    }
-}
 
+    }
+
+}
