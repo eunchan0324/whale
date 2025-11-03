@@ -1,9 +1,5 @@
 package Study.Thread;
 
-import java.util.function.Consumer;
-import java.util.function.Function;
-import java.util.function.Supplier;
-
 public class BakeryStep1 {
     public static void main(String[] args) {
         // 직원 1 : 반죽 담당
