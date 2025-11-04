@@ -1,6 +1,6 @@
 package Study.Thread.practice;
 
-public class BakeryStep_1_practice {
+public class BakeryStep1_practice {
     public static void main(String[] args) throws InterruptedException {
         Runnable runnable = () -> {
             for (int i = 1; i <= 5; i++) {

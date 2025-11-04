@@ -1,6 +1,6 @@
 package Study.Thread.practice;
 
-public class BakeryStpe2_RaceCondition {
+public class BakeryStep2_RaceCondition {
     static int dough = 0;
 
     public static void main(String[] args) throws InterruptedException {
@@ -13,11 +13,16 @@ public class BakeryStpe2_RaceCondition {
         Thread workerA = new Thread(worker);
         Thread workerB = new Thread(worker);
 
+        long start = System.nanoTime();
+
         workerA.start();
         workerB.start();
 
         workerA.join();
         workerB.join();
+
+        long end = System.nanoTime();
+        System.out.println("실행시간 : " + (end-start)/1_000_000.0 + "ms");
 
         System.out.println("예상 반죽량 : 20000");
         System.out.println("실제 반죽량 : " + dough);

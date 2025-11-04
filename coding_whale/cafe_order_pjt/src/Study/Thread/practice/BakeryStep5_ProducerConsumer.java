@@ -1,13 +1,14 @@
-package Study.Thread;
+package Study.Thread.practice;
 
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
 
 public class BakeryStep5_ProducerConsumer {
     public static void main(String[] args) throws InterruptedException {
         BlockingQueue<String> shelf = new ArrayBlockingQueue<>(5);
 
-        // 생산자 스레드
+        // 생산자 쓰레드
         Thread baker = new Thread(() -> {
             try {
                 for (int i = 1; i <= 10; i++) {
@@ -22,7 +23,7 @@ public class BakeryStep5_ProducerConsumer {
             }
         });
 
-        // 소비자 스레드
+        // 소비자 쓰레드
         Thread clerk = new Thread(() -> {
             try {
                 while (true) {
@@ -32,7 +33,7 @@ public class BakeryStep5_ProducerConsumer {
                         break;
                     }
                     System.out.println("소비 : " + bread);
-                    Thread.sleep(500);
+                    Thread.sleep(700);
                 }
             } catch (InterruptedException e) {
                 e.printStackTrace();
@@ -50,4 +51,3 @@ public class BakeryStep5_ProducerConsumer {
 
     }
 }
-
