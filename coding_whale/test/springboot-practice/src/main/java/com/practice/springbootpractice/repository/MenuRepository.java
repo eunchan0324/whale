@@ -43,5 +43,15 @@ public class MenuRepository {
         }
     }
 
+    // 특정 메뉴 찾기
+    public Menu findByName(String name) {
+        for (Menu menu : menuList) {
+            if (menu.getName().equals(name)) {
+                return menu;
+            }
+        }
+        return null; // 찾지 못한 경우
+    }
+
 
 }

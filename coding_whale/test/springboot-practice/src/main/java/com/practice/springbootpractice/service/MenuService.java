@@ -43,4 +43,9 @@ public class MenuService {
         menuRepository.updatePrice(name, newPrice);
     }
 
+    // 특정 메뉴 조회
+    public Menu getMenuByName(String name) {
+        return menuRepository.findByName(name);
+    }
+
 }
