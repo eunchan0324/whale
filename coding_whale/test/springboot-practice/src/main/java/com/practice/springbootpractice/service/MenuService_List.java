@@ -1,19 +1,19 @@
 package com.practice.springbootpractice.service;
 
 import com.practice.springbootpractice.model.Menu;
-import com.practice.springbootpractice.repository.MenuRepository;
+import com.practice.springbootpractice.repository.MenuRepository_List;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
-public class MenuService {
+public class MenuService_List {
 
-    private final MenuRepository menuRepository;
+    private final MenuRepository_List menuRepository;
 
     // 생성자 주입
-    public MenuService(MenuRepository menuRepository) {
+    public MenuService_List(MenuRepository_List menuRepository) {
         this.menuRepository = menuRepository;
     }
 
@@ -29,7 +29,18 @@ public class MenuService {
 
     // 메뉴 추가 로직
     public void addMenu(String name, int price) {
-        menuRepository.save(new Menu(name, price));
+        Menu newMenu = new Menu(name, price);
+        menuRepository.save(newMenu);
+    }
+
+    // 메뉴 삭제 로직
+    public void deleteMenu(String name) {
+        menuRepository.deleteByName(name);
+    }
+
+    // 메뉴 수정 로직
+    public void updateMenuPrice(String name, int newPrice) {
+        menuRepository.updatePrice(name, newPrice);
     }
 
     // 특정 메뉴 조회
@@ -37,21 +48,4 @@ public class MenuService {
         return menuRepository.findByName(name);
     }
 
-    // 메뉴 수정 로직
-    public void updateMenuPrice(String name, int newPrice) {
-        Menu menu = menuRepository.findByName(name);
-        if (menu != null) {
-            menu.setPrice(newPrice);
-            menuRepository.save(menu);
-        }
-    }
-
-
-    // 메뉴 삭제 로직
-    public void deleteMenu(String name) {
-        Menu menu = menuRepository.findByName(name);
-        if (menu != null) {
-            menuRepository.delete(menu);
-        }
-    }
 }

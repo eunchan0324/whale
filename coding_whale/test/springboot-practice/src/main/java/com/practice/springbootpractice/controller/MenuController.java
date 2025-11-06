@@ -1,23 +1,22 @@
 package com.practice.springbootpractice.controller;
 
 import com.practice.springbootpractice.model.Menu;
-import com.practice.springbootpractice.service.MenuService;
+import com.practice.springbootpractice.service.MenuService_List;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Controller
 public class MenuController {
 
-    private final MenuService menuService;
+    private final MenuService_List menuService;
 
     // 생성자 주입
-    public MenuController(MenuService menuService) {
+    public MenuController(MenuService_List menuService) {
         this.menuService = menuService;
     }
 
