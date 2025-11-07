@@ -7,12 +7,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Repository
-public class MenuRepository_List {
+public class MenuListRepository {
 
     private final List<Menu> menuList = new ArrayList<>();
 
     // 생성자에서 기본 메뉴 등록
-    public MenuRepository_List() {
+    public MenuListRepository() {
         menuList.add(new Menu("아메리카노", 4000));
         menuList.add(new Menu("카페라떼", 4500));
         menuList.add(new Menu("바닐라라떼", 4800));

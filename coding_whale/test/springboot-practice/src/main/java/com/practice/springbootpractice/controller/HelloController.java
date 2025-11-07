@@ -10,6 +10,6 @@ public class HelloController {
     @GetMapping("/hello")
     public String hello(Model model) {
         model.addAttribute("msg", "Hello, Spring MVC!");
-        return "hello"; // templates/hello.html
+        return "hello"; // resources.templates.hello.html
     }
 }

@@ -1,7 +1,7 @@
 package com.practice.springbootpractice.controller;
 
 import com.practice.springbootpractice.model.Menu;
-import com.practice.springbootpractice.service.MenuService_List;
+import com.practice.springbootpractice.service.MenuListService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -13,15 +13,15 @@ import java.util.List;
 @Controller
 public class MenuController {
 
-    private final MenuService_List menuService;
+    private final MenuListService menuService;
 
     // 생성자 주입
-    public MenuController(MenuService_List menuService) {
+    public MenuController(MenuListService menuService) {
         this.menuService = menuService;
     }
 
     @GetMapping("/menu")
-    public String showMenu(Model model) {
+    public String showMenuList(Model model) {
         List<Menu> menuList = menuService.getAllMenus();
         model.addAttribute("menus", menuList);
         model.addAttribute("title", "전체 메뉴");

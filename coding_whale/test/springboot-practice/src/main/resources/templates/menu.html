@@ -14,14 +14,14 @@
     </tr>
 
     <!-- th:each 반복문 -->
-    <tr th:each="menu : ${menus}">
-        <td th:text="${menu.name}"></td>
-        <td th:text="${menu.price} + 원"></td>
+    <tr th:each="m : ${menus}">
+        <td th:text="${m.name}"></td>
+        <td th:text="${m.price} + 원"></td>
 
         <!-- 삭제 버튼 form-->
         <td>
             <form th:action="@{/menu/delete}" method="post">
-                <input type="hidden" name="name" th:value="${menu.name}"/>
+                <input type="hidden" name="name" th:value="${m.name}"/>
                 <button type="submit">삭제</button>
             </form>
         </td>
@@ -29,7 +29,7 @@
         <td>
             <!--수정-->
             <form th:action="@{/menu/edit}" method="get">
-                <input type="hidden" name="name" th:value="${menu.name}">
+                <input type="hidden" name="name" th:value="${m.name}">
                 <button type="submit">수정</button>
             </form>
         </td>

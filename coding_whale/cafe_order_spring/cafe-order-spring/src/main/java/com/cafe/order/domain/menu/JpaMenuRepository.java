@@ -8,7 +8,7 @@ import java.util.UUID;
 
 // Menu 엔티티를 UUID 키로 관리할 수 있는 CRUD 기능을 가진 저장소를 의미
 @Repository
-public interface MenuRepository extends JpaRepository<Menu, UUID> {
+public interface JpaMenuRepository extends JpaRepository<Menu, UUID> {
 
     // 이름으로 메뉴 찾기
     List<Menu> findByName(String name);
@@ -18,4 +18,5 @@ public interface MenuRepository extends JpaRepository<Menu, UUID> {
 
     // 추천 메뉴 조회
     List<Menu> findByRecommend(String recommend);
+
 }
