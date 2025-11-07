@@ -1,0 +1,33 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>메뉴 목록</title>
+</head>
+<body>
+<h1>현재 등록된 전체 메뉴 목록</h1>
+
+<div th:if="${menus.isEmpty()}">
+    <p>등록된 메뉴가 없습니다.</p>
+</div>
+
+<table th:unless="${menus.isEmpty()}">
+    <tr>
+        <th>이름</th>
+        <th>가격</th>
+        <th>카테고리</th>
+        <th>ID</th>
+        <th>설명</th>
+    </tr>
+    <tr th:each="m : ${menus}">
+        <td th:text="${m.name}"></td>
+        <td th:text="${m.price}"></td>
+        <td th:text="${m.category}"></td>
+        <td th:text="${m.id}"></td>
+        <td th:text="${m.description}"></td>
+    </tr>
+</table>
+
+
+</body>
+</html>
