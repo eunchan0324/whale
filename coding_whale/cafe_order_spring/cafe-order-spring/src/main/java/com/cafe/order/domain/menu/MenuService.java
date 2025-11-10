@@ -2,6 +2,7 @@ package com.cafe.order.domain.menu;
 
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -11,18 +12,32 @@ public class MenuService {
 //  private final JpaMenuRepository menuRepository;
 
   // SQL
-  private final SqlMenuRepository menuRepository;
+//  private final SqlMenuRepository menuRepository;
+
+  // InMemory
+  private final InMemoryMenuRepository menuRepository;
 
 
-  public MenuService(SqlMenuRepository menuRepository) {
+  public MenuService(InMemoryMenuRepository menuRepository) {
     this.menuRepository = menuRepository;
   }
 
+  // 메뉴 전체 조회
   public List<Menu> findAll() {
     return menuRepository.findAll();
   }
 
+  // 메뉴 생성
+  public Menu create(String name, Integer price, Category category, String description) {
+    Menu menu;
 
+    if (description == null || description.isEmpty()) {
+      menu = new Menu(name, price, category);
+    } else {
+      menu = new Menu(name, price, category, description);
+    }
 
+    return menuRepository.save(menu);
+  }
 
 }

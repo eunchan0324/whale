@@ -7,7 +7,7 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 import java.util.UUID;
 
-@Repository
+//@Repository
 public class SqlMenuRepository {
 
   private final JdbcTemplate jdbcTemplate;
@@ -23,6 +23,19 @@ public class SqlMenuRepository {
 
     // 2. 쿼리 실행 + RowMapper로 변환
     return jdbcTemplate.query(sql, menuRowMapper());
+  }
+
+  public Menu save(Menu menu) {
+    // SQL 작성
+    String sql = "INSERT INTO menus (id, name, price, category, description, recommend)" +
+            "VALUES (?, ?, ?, ?, ?, ?)";
+
+    // UUID 변환
+    byte[] idBytes = convertUUIDToBytes(menu.getId());
+
+    jdbcTemplate.update(sql, idBytes, menu.getName(), menu.getPrice(), menu.getCategory().name(), menu.getDescription(), menu.getRecommend());
+
+    return menu;
   }
 
   // ResultSet을 Menu 객체로 변환하는 메서드
@@ -45,8 +58,8 @@ public class SqlMenuRepository {
     };
   }
 
-  // byte[] -> UUID 변환 헬퍼
-  public UUID convertBytesToUUID(byte[] bytes) {
+  // byte[] -> UUID 변환 헬퍼 (읽기용)
+  private UUID convertBytesToUUID(byte[] bytes) {
     if (bytes == null || bytes.length != 16) {
       return null;
     }
@@ -63,6 +76,28 @@ public class SqlMenuRepository {
     }
 
     return new UUID(mostSigBits, leastSigBits);
+  }
+
+  // UUID -> byte[] 변환 헬퍼 (쓰기용)
+  private byte[] convertUUIDToBytes(UUID uuid) {
+    if (uuid == null) {
+      return null;
+    }
+
+    byte[] bytes = new byte[16];
+    long mostSigBits = uuid.getMostSignificantBits();
+    long leastSigBits = uuid.getLeastSignificantBits();
+
+    // mostSigBits를 앞 8바이트에
+    for (int i = 0; i < 8; i++) {
+      bytes[i] = (byte) (mostSigBits >> (8 * (7 - i)));
+    }
+
+    for (int i = 0; i < 8; i++) {
+      bytes[8 + i] = (byte) (leastSigBits >> (8 * (7 - i)));
+    }
+
+    return bytes;
   }
 
 
