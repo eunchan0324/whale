@@ -2,10 +2,9 @@ package com.cafe.order.domain.menu;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.UUID;
 
 @Controller
 @RequestMapping("/menus")
@@ -26,7 +25,7 @@ public class MenuController {
 
   // 메뉴 생성 폼
   @GetMapping("/new")
-  public String createForm(Model model) {
+  public String createForm() {
     return "menu/new";
   }
 
@@ -41,6 +40,16 @@ public class MenuController {
     return "redirect:/menus";
   }
 
+  // 메뉴 상세 조회
+  @GetMapping("/{id}")
+  public String detail(@PathVariable UUID id, Model model) {
+    // Service 호출
+    Menu menu = menuService.findById(id);
+
+    // Model에 담기
+    model.addAttribute("menu", menu);
+    return "menu/detail";
+  }
 
 
 }

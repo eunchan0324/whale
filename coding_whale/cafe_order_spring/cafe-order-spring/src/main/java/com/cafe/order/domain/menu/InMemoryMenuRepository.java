@@ -4,6 +4,8 @@ import org.springframework.stereotype.Repository;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
 @Repository
 public class InMemoryMenuRepository {
@@ -36,6 +38,17 @@ public class InMemoryMenuRepository {
         menus.add(menu);
         return menu;
     }
+
+    // 메뉴 id로 상세 조회
+    public Optional<Menu> findById(UUID uuid) {
+        for (Menu menu : menus) {
+            if (menu.getId().equals(uuid)) {
+                return Optional.of(menu);
+            }
+        }
+        return Optional.empty();
+    }
+
 
 
 }

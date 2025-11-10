@@ -14,18 +14,24 @@
 
 <table th:unless="${menus.isEmpty()}">
     <tr>
+        <th>ID</th>
         <th>이름</th>
         <th>가격</th>
         <th>카테고리</th>
-        <th>ID</th>
         <th>설명</th>
+        <th>상세</th>
     </tr>
+
     <tr th:each="m : ${menus}">
+        <td th:text="${m.id}"></td>
         <td th:text="${m.name}"></td>
         <td th:text="${m.price}"></td>
         <td th:text="${m.category}"></td>
-        <td th:text="${m.id}"></td>
         <td th:text="${m.description}"></td>
+        <td>
+            <a th:href="@{/menus/{id}(id=${m.id})}">상세</a>
+
+        </td>
     </tr>
 </table>
 
