@@ -50,5 +50,21 @@ public class MenuService {
         return menuRepository.findById(uuid).orElse(null);
     }
 
+    // 메뉴 수정
+    public Menu update(UUID id, String name, Integer price, Category category, String description) {
+        Menu menu = menuRepository.findById(id).orElse(null);
+
+        if (menu == null) {
+            throw new IllegalArgumentException("메뉴를 찾을 수 없습니다.");
+        }
+
+        menu.setName(name);
+        menu.setPrice(price);
+        menu.setCategory(category);
+        menu.setDescription(description);
+
+        return menuRepository.update(menu);
+    }
+
 
 }

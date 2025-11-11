@@ -28,18 +28,18 @@ public class InMemoryMenuRepository {
         menus.add(new Menu("티라미수", 6500, Category.DESSERT, "이탈리아 전통 디저트"));
     }
 
-    // 메뉴 전체 조회
-    public List<Menu> findAll() {
-        return new ArrayList<>(menus);
-    }
-
-    // 메뉴 추가
+    // CREATE : 메뉴 추가
     public Menu save(Menu menu) {
         menus.add(menu);
         return menu;
     }
 
-    // 메뉴 id로 상세 조회
+    // READ : 메뉴 전체 조회
+    public List<Menu> findAll() {
+        return new ArrayList<>(menus);
+    }
+
+    // READ : 메뉴 id로 상세 조회
     public Optional<Menu> findById(UUID uuid) {
         for (Menu menu : menus) {
             if (menu.getId().equals(uuid)) {
@@ -48,6 +48,23 @@ public class InMemoryMenuRepository {
         }
         return Optional.empty();
     }
+
+    // UPDATTE : 메뉴 수정
+    public Menu update(Menu menu) {
+        for (Menu m : menus) {
+            if (m.getId().equals(menu.getId())) {
+                m.setName(menu.getName());
+                m.setPrice(menu.getPrice());
+                m.setCategory(menu.getCategory());
+                m.setDescription(menu.getDescription());
+                m.setRecommend(menu.getRecommend());
+                break;
+            }
+        }
+        return menu;
+    }
+
+
 
 
 

@@ -20,6 +20,7 @@
         <th>카테고리</th>
         <th>설명</th>
         <th>상세</th>
+        <th>수정</th>
     </tr>
 
     <tr th:each="m : ${menus}">
@@ -31,6 +32,9 @@
         <td>
             <a th:href="@{/menus/{id}(id=${m.id})}">상세</a>
 
+        </td>
+        <td>
+            <a th:href="@{/menus/edit/{id}(id=${m.id})}">수정</a>
         </td>
     </tr>
 </table>

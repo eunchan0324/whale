@@ -40,6 +40,21 @@ public class SqlMenuRepository {
         return menu;
     }
 
+    // 메뉴 수정
+    public Menu update(Menu menu) {
+        String sql = "UPDATE menus " +
+                "SET name = ?, price = ?, category = ?, description = ?, recommend = ? " +
+                "WHERE id = ?";
+
+        // UUID 변환
+        byte[] idBytes = convertUUIDToBytes(menu.getId());
+
+        jdbcTemplate.update(sql, menu.getName(), menu.getPrice(), menu.getCategory().name(), menu.getDescription(), menu.getRecommend(), idBytes);
+
+        return menu;
+    }
+
+
     // ResultSet을 Menu 객체로 변환하는 메서드
     private RowMapper<Menu> menuRowMapper() {
         return (rs, rowNum) -> {
