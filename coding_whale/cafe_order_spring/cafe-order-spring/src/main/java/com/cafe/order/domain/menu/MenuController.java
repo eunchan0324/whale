@@ -17,19 +17,13 @@ public class MenuController {
         this.menuService = menuService;
     }
 
-    @GetMapping
-    public String showAllMenus(Model model) {
-        model.addAttribute("menus", menuService.findAll());
-        return "menu/list";
-    }
-
-    // 메뉴 생성 폼
+    // CREATE : 메뉴 생성 폼
     @GetMapping("/new")
     public String createForm() {
         return "menu/new";
     }
 
-    // 메뉴 저장 처리
+    // CREATE : 메뉴 저장 처리
     @PostMapping("/new")
     public String create(
             @RequestParam String name,
@@ -40,7 +34,14 @@ public class MenuController {
         return "redirect:/menus";
     }
 
-    // 메뉴 상세 조회
+    // READ : 메뉴 전체 조회
+    @GetMapping
+    public String showAllMenus(Model model) {
+        model.addAttribute("menus", menuService.findAll());
+        return "menu/list";
+    }
+
+    // READ : 메뉴 상세 조회
     @GetMapping("/{id}")
     public String detail(@PathVariable UUID id, Model model) {
         // Service 호출
@@ -51,14 +52,14 @@ public class MenuController {
         return "menu/detail";
     }
 
-    // 메뉴 수정 폼
+    // UPDATE : 메뉴 수정 폼
     @GetMapping("/edit/{id}")
     public String editForm(@PathVariable UUID id, Model model) {
         model.addAttribute("menu", menuService.findById(id));
         return "menu/edit";
     }
 
-    // 메뉴 수정 로직
+    // UPDATE : 메뉴 수정 로직
     @PostMapping("/edit/{id}")
     public String edit(
             @PathVariable UUID id,
@@ -69,6 +70,15 @@ public class MenuController {
         menuService.update(id, name, price, category, description);
         return "redirect:/menus";
     }
+
+
+    // DELETE : 메뉴 id로 메뉴 삭제
+    @PostMapping("/delete/{id}")
+    public String delete(@PathVariable UUID id) {
+        menuService.delete(id);
+        return "redirect:/menus";
+    }
+
 
 
 }

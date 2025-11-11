@@ -24,12 +24,7 @@ public class MenuService {
         this.menuRepository = menuRepository;
     }
 
-    // 메뉴 전체 조회
-    public List<Menu> findAll() {
-        return menuRepository.findAll();
-    }
-
-    // 메뉴 생성
+    // CREATE : 메뉴 생성
     public Menu create(String name, Integer price, Category category, String description) {
         Menu menu;
 
@@ -42,7 +37,12 @@ public class MenuService {
         return menuRepository.save(menu);
     }
 
-    // 메뉴 id로 상세 조회
+    // READ : 메뉴 전체 조회
+    public List<Menu> findAll() {
+        return menuRepository.findAll();
+    }
+
+    // READ : 메뉴 id로 상세 조회
     public Menu findById(UUID uuid) {
 //    Optional<Menu> optional = menuRepository.findById(uuid);
 //    return optional.orElse(null); // 없으면 null 반환
@@ -50,7 +50,7 @@ public class MenuService {
         return menuRepository.findById(uuid).orElse(null);
     }
 
-    // 메뉴 수정
+    // UPDATE : 메뉴 수정
     public Menu update(UUID id, String name, Integer price, Category category, String description) {
         Menu menu = menuRepository.findById(id).orElse(null);
 
@@ -63,7 +63,13 @@ public class MenuService {
         menu.setCategory(category);
         menu.setDescription(description);
 
-        return menuRepository.update(menu);
+        return menuRepository.save(menu); // JPA
+//        return menuRepository.update(menu); // SQL, InMemory
+    }
+
+    // DELETE : 메뉴 삭제
+    public void delete(UUID uuid) {
+        menuRepository.deleteById(uuid);
     }
 
 

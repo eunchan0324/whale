@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.function.Predicate;
 
 @Repository
 public class InMemoryMenuRepository {
@@ -49,7 +50,7 @@ public class InMemoryMenuRepository {
         return Optional.empty();
     }
 
-    // UPDATTE : 메뉴 수정
+    // UPDATE : 메뉴 수정
     public Menu update(Menu menu) {
         for (Menu m : menus) {
             if (m.getId().equals(menu.getId())) {
@@ -62,6 +63,11 @@ public class InMemoryMenuRepository {
             }
         }
         return menu;
+    }
+
+    // DELETE : 메뉴 삭제
+    public void deleteById(UUID uuid) {
+        menus.removeIf(menu -> menu.getId().equals(uuid));
     }
 
 

@@ -21,6 +21,7 @@
         <th>설명</th>
         <th>상세</th>
         <th>수정</th>
+        <th>삭제</th>
     </tr>
 
     <tr th:each="m : ${menus}">
@@ -35,6 +36,11 @@
         </td>
         <td>
             <a th:href="@{/menus/edit/{id}(id=${m.id})}">수정</a>
+        </td>
+        <td>
+            <form method="post" th:action="@{/menus/delete/{id}(id=${m.id})}" style="display: inline">
+                <button type="submit">삭제</button>
+            </form>
         </td>
     </tr>
 </table>

@@ -9,6 +9,9 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import static com.cafe.order.common.util.UUIDUtils.convertBytesToUUID;
+import static com.cafe.order.common.util.UUIDUtils.convertUUIDToBytes;
+
 //@Repository
 public class SqlMenuRepository {
 
@@ -19,6 +22,23 @@ public class SqlMenuRepository {
         this.jdbcTemplate = jdbcTemplate;
     }
 
+    // CREATE : 메뉴 추가
+    public Menu save(Menu menu) {
+        // 데이터 준비 : UUID 변환
+        byte[] idBytes = convertUUIDToBytes(menu.getId());
+
+        // 데이터 전달 : SQL 작성
+        String sql = "INSERT INTO menus (id, name, price, category, description, recommend)" +
+                "VALUES (?, ?, ?, ?, ?, ?)";
+
+        // 데이터 저장
+        jdbcTemplate.update(sql, idBytes, menu.getName(), menu.getPrice(), menu.getCategory().name(), menu.getDescription(), menu.getRecommend());
+
+        // 데이터 반환
+        return menu;
+    }
+
+    // READ : 메뉴 전체 조회
     public List<Menu> findAll() {
         // 1. SQL 직접 작성
         String sql = "SELECT id, name, price, category, description, recommend FROM menus";
@@ -27,20 +47,24 @@ public class SqlMenuRepository {
         return jdbcTemplate.query(sql, menuRowMapper());
     }
 
-    public Menu save(Menu menu) {
-        // SQL 작성
-        String sql = "INSERT INTO menus (id, name, price, category, description, recommend)" +
-                "VALUES (?, ?, ?, ?, ?, ?)";
+    // READ : 메뉴 id로 상세 조회
+    public Optional<Menu> findById(UUID uuid) {
+        // SQL 준비
+        String sql = "SELECT id, name, price, category, description, recommend FROM menus WHERE id = ?";
 
         // UUID 변환
-        byte[] idBytes = convertUUIDToBytes(menu.getId());
+        byte[] idBytes = convertUUIDToBytes(uuid);
 
-        jdbcTemplate.update(sql, idBytes, menu.getName(), menu.getPrice(), menu.getCategory().name(), menu.getDescription(), menu.getRecommend());
-
-        return menu;
+        // DB에 요청
+        try {
+            Menu menu = jdbcTemplate.queryForObject(sql, menuRowMapper(), idBytes);
+            return Optional.of(menu); // 성공
+        } catch (EmptyResultDataAccessException e) {
+            return Optional.empty(); // 실패
+        }
     }
 
-    // 메뉴 수정
+    // UPDATE : 메뉴 수정
     public Menu update(Menu menu) {
         String sql = "UPDATE menus " +
                 "SET name = ?, price = ?, category = ?, description = ?, recommend = ? " +
@@ -54,9 +78,23 @@ public class SqlMenuRepository {
         return menu;
     }
 
+    // DELETE : 메뉴 삭제
+    public void deleteById(UUID uuid) {
+        // UUID 변환
+        byte[] idBytes = convertUUIDToBytes(uuid);
+
+        // SQL 작성
+        String sql = "DELETE FROM menus WHERE id = ?";
+
+        // 삭제 실행
+        jdbcTemplate.update(sql, idBytes);
+    }
+
+
 
     // ResultSet을 Menu 객체로 변환하는 메서드
     private RowMapper<Menu> menuRowMapper() {
+
         return (rs, rowNum) -> {
             Menu menu = new Menu();
 
@@ -75,64 +113,7 @@ public class SqlMenuRepository {
         };
     }
 
-    // byte[] -> UUID 변환 헬퍼 (읽기용)
-    private UUID convertBytesToUUID(byte[] bytes) {
-        if (bytes == null || bytes.length != 16) {
-            return null;
-        }
 
-        long mostSigBits = 0;
-        long leastSigBits = 0;
-
-        for (int i = 0; i < 8; i++) {
-            mostSigBits = (mostSigBits << 8) | (bytes[i] & 0xff);
-        }
-
-        for (int i = 8; i < 16; i++) {
-            leastSigBits = (leastSigBits << 8) | (bytes[i] & 0xff);
-        }
-
-        return new UUID(mostSigBits, leastSigBits);
-    }
-
-    // UUID -> byte[] 변환 헬퍼 (쓰기용)
-    private byte[] convertUUIDToBytes(UUID uuid) {
-        if (uuid == null) {
-            return null;
-        }
-
-        byte[] bytes = new byte[16];
-        long mostSigBits = uuid.getMostSignificantBits();
-        long leastSigBits = uuid.getLeastSignificantBits();
-
-        // mostSigBits를 앞 8바이트에
-        for (int i = 0; i < 8; i++) {
-            bytes[i] = (byte) (mostSigBits >> (8 * (7 - i)));
-        }
-
-        for (int i = 0; i < 8; i++) {
-            bytes[8 + i] = (byte) (leastSigBits >> (8 * (7 - i)));
-        }
-
-        return bytes;
-    }
-
-    // 메뉴 id로 상세 조회
-    public Optional<Menu> findById(UUID uuid) {
-        // SQL 준비
-        String sql = "SELECT id, name, price, category, description, recommend FROM menus WHERE id = ?";
-
-        // UUID 변환
-        byte[] idBytes = convertUUIDToBytes(uuid);
-
-        // DB에 요청
-        try {
-            Menu menu = jdbcTemplate.queryForObject(sql, menuRowMapper(), idBytes);
-            return Optional.of(menu); // 성공
-        } catch (EmptyResultDataAccessException e) {
-            return Optional.empty(); // 실패
-        }
-    }
 
 
 }
