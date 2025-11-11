@@ -35,19 +35,7 @@ public class MenuList {
         loadFile();
     }
 
-    // Menu 생성 (GUI)
-    public void menuCreate(String name, int price, MenuCategory category) throws IOException {
-        // 새 Menu 객체 생성 (UUID는 자동 생성됨)
-        Menu newMenu = new Menu(name, price, category);
-
-        // 리스트에 추가
-        menus.add(newMenu);
-
-        // 파일 저장
-        saveFile();
-    }
-
-    // backend.menu.Menu Create (CLI)
+    // Menu Create (CLI)
     public void menuCreate() throws IOException {
         Scanner sc = new Scanner(System.in);
 
@@ -80,7 +68,7 @@ public class MenuList {
         System.out.println();
     }
 
-    // backend.menu.Menu Read - 관리자용
+    // Menu Read - 관리자용
     public void showAllMenus() {
         // 메뉴가 아무것도 등록되지 않았다면
         if (menus.isEmpty()) {
@@ -100,7 +88,7 @@ public class MenuList {
         System.out.println("---------------------------------");
     }
 
-    // backend.menu.Menu Read - 구매자용
+    // Menu Read - 구매자용
     public ArrayList<Menu> showAndGetOrderableMenus(int storeId) {
         ArrayList<Menu> orderableMenus = new ArrayList<>();
         for (Menu menu : menus) {
@@ -165,34 +153,12 @@ public class MenuList {
 
     }
 
-    // backend.menu.Menu Stock Read - 재고 확인 판매자용
+    // Menu Stock Read - 재고 확인 판매자용
     public void showStockStatusForSeller(int storeId) {
         showAndGetSellableMenus((storeId));
     }
 
-    // Menu Update (GUI)
-    public void menuEdit(UUID menuId, String newName, int newPrice, MenuCategory newCategory) throws IOException {
-        // 1. 수정할 메뉴를 UUID로 찾기
-        Menu targetMenu = null;
-        for (Menu menu : menus) {
-            if (menu.getId().equals(menuId)) {
-                targetMenu = menu;
-                break;
-            }
-        }
-
-        // 2. 찾았으면 정보 업데이트 *못찾는 경우는 JTable에서 선택했기 때문에 거의 발생하지 않음
-        if (targetMenu != null) {
-            targetMenu.setName(newName);
-            targetMenu.setPrice(newPrice);
-            targetMenu.setOption(newCategory);
-
-            // 3. 파일에 저장
-            saveFile();
-        }
-    }
-
-    // backend.menu.Menu Update (CLI)
+    // Menu Update (CLI)
     public void menuEdit(Menu 수정할메뉴) throws IOException {
         Scanner sc = new Scanner(System.in);
         boolean checker = false;
@@ -254,26 +220,7 @@ public class MenuList {
         }
     }
 
-    // Menu Delete (GUI)
-    public void menuDelete(UUID menuId) throws IOException {
-        // 1. menus 리스트에서 해당 UUID를 가진 Menu 객체를 찾아 제거
-        Menu menuToRemove = null;
-        for (Menu menu : menus) {
-            if (menu.getId().equals(menuId)) {
-                menuToRemove = menu;
-                break;
-            }
-        }
-
-        if (menuToRemove != null) {
-            menus.remove(menuToRemove);
-        }
-
-        // 2. 파일 저장
-        saveFile();
-    }
-
-    // backend.menu.Menu Delete (CLI)
+    // Menu Delete (CLI)
     public void menuDelete(Menu 삭제할메뉴) throws IOException {
         boolean checker = false;
 
@@ -296,7 +243,7 @@ public class MenuList {
 
     }
 
-    // backend.menu.Menu Empty Check
+    // Menu Empty Check
     public boolean menuIsEmpty() {
         if (menus.isEmpty()) {
             return true;
@@ -304,7 +251,7 @@ public class MenuList {
         return false;
     }
 
-    // find backend.menu.Menu - 매개변수와 같은 이름의 _객체 반환
+    // find Menu - 매개변수와 같은 이름의 _객체 반환
     public Menu findMenu(String 주문할메뉴) {
         for (Menu menu : menus) {
             if (menu.getName().equals(주문할메뉴)) {
@@ -498,6 +445,59 @@ public class MenuList {
      */
     public ArrayList<Menu> getManageableMenus() {
         return new ArrayList<>(menus);
+    }
+
+    // Menu 생성 (GUI)
+    public void menuCreate(String name, int price, MenuCategory category) throws IOException {
+        // 새 Menu 객체 생성 (UUID는 자동 생성됨)
+        Menu newMenu = new Menu(name, price, category);
+
+        // 리스트에 추가
+        menus.add(newMenu);
+
+        // 파일 저장
+        saveFile();
+    }
+
+    // Menu Update (GUI)
+    public void menuEdit(UUID menuId, String newName, int newPrice, MenuCategory newCategory) throws IOException {
+        // 1. 수정할 메뉴를 UUID로 찾기
+        Menu targetMenu = null;
+        for (Menu menu : menus) {
+            if (menu.getId().equals(menuId)) {
+                targetMenu = menu;
+                break;
+            }
+        }
+
+        // 2. 찾았으면 정보 업데이트 *못찾는 경우는 JTable에서 선택했기 때문에 거의 발생하지 않음
+        if (targetMenu != null) {
+            targetMenu.setName(newName);
+            targetMenu.setPrice(newPrice);
+            targetMenu.setOption(newCategory);
+
+            // 3. 파일에 저장
+            saveFile();
+        }
+    }
+
+    // Menu Delete (GUI)
+    public void menuDelete(UUID menuId) throws IOException {
+        // 1. menus 리스트에서 해당 UUID를 가진 Menu 객체를 찾아 제거
+        Menu menuToRemove = null;
+        for (Menu menu : menus) {
+            if (menu.getId().equals(menuId)) {
+                menuToRemove = menu;
+                break;
+            }
+        }
+
+        if (menuToRemove != null) {
+            menus.remove(menuToRemove);
+        }
+
+        // 2. 파일 저장
+        saveFile();
     }
 
 
