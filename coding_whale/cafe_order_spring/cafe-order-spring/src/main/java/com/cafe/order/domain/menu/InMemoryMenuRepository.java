@@ -8,7 +8,7 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Predicate;
 
-@Repository
+//@Repository
 public class InMemoryMenuRepository {
     // List 타입으로 선언 (인터페이스 타입)
     private final List<Menu> menus;

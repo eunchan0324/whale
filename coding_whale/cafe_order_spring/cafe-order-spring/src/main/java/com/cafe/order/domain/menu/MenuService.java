@@ -11,16 +11,16 @@ import java.util.UUID;
 public class MenuService {
 
     // JPA
-//    private final JpaMenuRepository menuRepository;
+    private final JpaMenuRepository menuRepository;
 
     // SQL
 //  private final SqlMenuRepository menuRepository;
 
     // InMemory
-  private final InMemoryMenuRepository menuRepository;
+//  private final InMemoryMenuRepository menuRepository;
 
 
-    public MenuService(InMemoryMenuRepository menuRepository) {
+    public MenuService(JpaMenuRepository menuRepository) {
         this.menuRepository = menuRepository;
     }
 
