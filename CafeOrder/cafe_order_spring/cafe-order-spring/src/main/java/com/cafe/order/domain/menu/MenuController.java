@@ -7,11 +7,10 @@ import org.springframework.web.bind.annotation.*;
 import java.util.UUID;
 
 @Controller
-@RequestMapping("/menus")
+@RequestMapping("/admin/menus")
 public class MenuController {
 
     private final MenuService menuService;
-
 
     public MenuController(MenuService menuService) {
         this.menuService = menuService;
@@ -31,7 +30,7 @@ public class MenuController {
             @RequestParam Category category,
             @RequestParam(required = false) String description) {
         menuService.create(name, price, category, description);
-        return "redirect:/menus";
+        return "redirect:/admin/menus";
     }
 
     // READ : 메뉴 전체 조회
@@ -68,7 +67,7 @@ public class MenuController {
             @RequestParam Category category,
             @RequestParam(required = false) String description) {
         menuService.update(id, name, price, category, description);
-        return "redirect:/menus";
+        return "redirect:/admin/menus";
     }
 
 
@@ -76,7 +75,7 @@ public class MenuController {
     @PostMapping("/delete/{id}")
     public String delete(@PathVariable UUID id) {
         menuService.delete(id);
-        return "redirect:/menus";
+        return "redirect:/admin/menus";
     }
 
 
