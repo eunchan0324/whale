@@ -10,3 +10,12 @@ VALUES (RANDOM_UUID(), '아메리카노', 4500, 'COFFEE', '깊고 진한 에스�
        (RANDOM_UUID(), '딸기스무디', 6000, 'BEVERAGE', '신선한 딸기로 만든 스무디'),
        (RANDOM_UUID(), '치즈케이크', 6000, 'DESSERT', '부드러운 크림치즈 케이크'),
        (RANDOM_UUID(), '티라미수', 6500, 'DESSERT', '이탈리아 전통 디저트');
+
+
+-- 지점 테스트 데이터
+INSERT INTO stores (name)
+VALUES ('강남점'),
+       ('홍대점'),
+       ('신촌점'),
+       ('잠실점'),
+       ('판교점');
