@@ -7,16 +7,19 @@ import java.util.List;
 @Service
 public class StoreService {
 
-    private final JpaStoreRepository storeRepository;
+//    private final JpaStoreRepository storeRepository;
 
-    public StoreService(JpaStoreRepository storeRepository) {
+//    private final SqlStoreRepository storeRepository;
+
+    private final InMemoryStoreRepository storeRepository;
+
+    public StoreService(InMemoryStoreRepository storeRepository) {
         this.storeRepository = storeRepository;
     }
 
     // CREATE : 지점 생성
     public Store create(String name) {
         Store store = new Store(name);
-
         return storeRepository.save(store);
     }
 
@@ -40,7 +43,8 @@ public class StoreService {
 
         store.setName(name);
 
-        return storeRepository.save(store); // JPA
+//        return storeRepository.save(store); // JPA
+        return storeRepository.update(store); // SQL, InMemory
     }
 
     // DELETE : 지점 삭제
