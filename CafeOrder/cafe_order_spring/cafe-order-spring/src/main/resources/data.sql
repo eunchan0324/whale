@@ -19,3 +19,21 @@ VALUES ('강남점'),
        ('신촌점'),
        ('잠실점'),
        ('판교점');
+
+
+-- 사용자 테스트 데이터
+
+-- 관리자 계정
+INSERT INTO users (username, password, role, store_id)
+VALUES ('admin', 'admin1234', 'ADMIN', NULL);
+
+-- 판매자 계정
+INSERT INTO users (username, password, role, store_id)
+VALUES ('seller1', 'qwer1234', 'SELLER', 1),
+       ('seller2', 'qwer1234', 'SELLER', 2),
+       ('seller3', 'qwer1234', 'SELLER', 3);
+
+-- 고객 계정
+INSERT INTO users (username, password, role, store_id)
+VALUES ('customer1', 'qwer1234', 'CUSTOMER', NULL),
+       ('customer2', 'qwer1234', 'CUSTOMER', NULL);

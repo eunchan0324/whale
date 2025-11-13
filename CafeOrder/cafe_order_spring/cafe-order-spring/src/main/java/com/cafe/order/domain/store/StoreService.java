@@ -3,17 +3,18 @@ package com.cafe.order.domain.store;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class StoreService {
 
-//    private final JpaStoreRepository storeRepository;
+    private final JpaStoreRepository storeRepository;
 
 //    private final SqlStoreRepository storeRepository;
 
-    private final InMemoryStoreRepository storeRepository;
+//    private final InMemoryStoreRepository storeRepository;
 
-    public StoreService(InMemoryStoreRepository storeRepository) {
+    public StoreService(JpaStoreRepository storeRepository) {
         this.storeRepository = storeRepository;
     }
 
@@ -43,8 +44,8 @@ public class StoreService {
 
         store.setName(name);
 
-//        return storeRepository.save(store); // JPA
-        return storeRepository.update(store); // SQL, InMemory
+        return storeRepository.save(store); // JPA
+//        return storeRepository.update(store); // SQL, InMemory
     }
 
     // DELETE : 지점 삭제
@@ -52,6 +53,15 @@ public class StoreService {
         storeRepository.deleteById(id);
     }
 
+
+    // 특정 ID를 제외한 지점 목록
+    public List<Store> findAvailableStores(List<Integer> excludeIds) {
+        List<Store> allStores = storeRepository.findAll();
+
+        return allStores.stream()
+                .filter(store -> !excludeIds.contains(store.getId()))
+                .collect(Collectors.toList());
+    }
 
 
 }
