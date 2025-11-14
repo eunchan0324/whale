@@ -1,4 +1,4 @@
-package com.cafe.order.domain.store;
+package com.cafe.order.domain.store.repo;
 
 import com.cafe.order.domain.store.dto.Store;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -33,7 +33,7 @@ public class SqlStoreRepository {
         return jdbcTemplate.query(sql, storeRowMapper());
     }
 
-    // READ : id로 store 객체 반환 / 상세보기
+    // READ : id로 store 객체 반환
     public Optional<Store> findById(Integer id) {
         String sql = "SELECT id, name FROM stores WHERE id = ?";
 

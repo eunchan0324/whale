@@ -1,4 +1,4 @@
-package com.cafe.order.domain.menu;
+package com.cafe.order.domain.menu.repo;
 
 import com.cafe.order.domain.menu.dto.Category;
 import com.cafe.order.domain.menu.dto.Menu;

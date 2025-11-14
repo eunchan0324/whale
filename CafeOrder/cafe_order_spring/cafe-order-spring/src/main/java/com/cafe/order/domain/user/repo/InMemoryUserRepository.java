@@ -1,4 +1,4 @@
-package com.cafe.order.domain.user;
+package com.cafe.order.domain.user.repo;
 
 import org.springframework.stereotype.Repository;
 
