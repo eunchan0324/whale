@@ -1,5 +1,7 @@
 package com.cafe.order.domain.menu;
 
+import com.cafe.order.domain.menu.dto.Category;
+import com.cafe.order.domain.menu.dto.Menu;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

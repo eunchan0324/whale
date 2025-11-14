@@ -1,4 +1,4 @@
-package com.cafe.order.domain.menu;
+package com.cafe.order.domain.menu.dto;
 
 public enum Category {
     COFFEE("커피"),

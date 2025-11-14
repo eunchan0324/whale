@@ -1,6 +1,10 @@
-package com.cafe.order.domain.user;
+package com.cafe.order.domain.user.service;
 
-import com.cafe.order.domain.store.StoreService;
+import com.cafe.order.domain.store.service.StoreService;
+import com.cafe.order.domain.user.JpaUserRepository;
+import com.cafe.order.domain.user.dto.SellerDto;
+import com.cafe.order.domain.user.dto.User;
+import com.cafe.order.domain.user.dto.UserRole;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -79,7 +83,7 @@ public class UserService {
 
         return sellers.stream()
                 .filter(seller -> !seller.getId().equals(excludeSellerId)) // 현재 판매자 제외
-                .map(User::getStoreId)
+                .map(seller -> seller.getStoreId())
                 .filter(storeId -> storeId != null)
                 .distinct()
                 .collect(Collectors.toList());

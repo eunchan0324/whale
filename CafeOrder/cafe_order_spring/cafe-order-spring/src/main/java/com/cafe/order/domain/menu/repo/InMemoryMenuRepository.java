@@ -1,12 +1,12 @@
 package com.cafe.order.domain.menu;
 
-import org.springframework.stereotype.Repository;
+import com.cafe.order.domain.menu.dto.Category;
+import com.cafe.order.domain.menu.dto.Menu;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.function.Predicate;
 
 //@Repository
 public class InMemoryMenuRepository {

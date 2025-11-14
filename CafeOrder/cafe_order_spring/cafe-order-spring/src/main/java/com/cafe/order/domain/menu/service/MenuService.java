@@ -1,10 +1,11 @@
-package com.cafe.order.domain.menu;
+package com.cafe.order.domain.menu.service;
 
+import com.cafe.order.domain.menu.JpaMenuRepository;
+import com.cafe.order.domain.menu.dto.Category;
+import com.cafe.order.domain.menu.dto.Menu;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 @Service

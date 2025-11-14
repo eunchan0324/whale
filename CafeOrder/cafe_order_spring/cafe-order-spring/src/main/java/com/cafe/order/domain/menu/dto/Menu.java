@@ -1,4 +1,4 @@
-package com.cafe.order.domain.menu;
+package com.cafe.order.domain.menu.dto;
 
 import jakarta.persistence.*;
 import lombok.Getter;

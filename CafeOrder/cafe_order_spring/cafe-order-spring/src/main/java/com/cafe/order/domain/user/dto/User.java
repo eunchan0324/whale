@@ -1,4 +1,4 @@
-package com.cafe.order.domain.user;
+package com.cafe.order.domain.user.dto;
 
 import jakarta.persistence.*;
 import lombok.Getter;

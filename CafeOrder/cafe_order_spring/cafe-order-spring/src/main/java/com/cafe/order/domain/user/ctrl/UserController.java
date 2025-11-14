@@ -1,7 +1,9 @@
-package com.cafe.order.domain.user;
+package com.cafe.order.domain.user.ctrl;
 
-import com.cafe.order.domain.store.Store;
-import com.cafe.order.domain.store.StoreService;
+import com.cafe.order.domain.store.dto.Store;
+import com.cafe.order.domain.store.service.StoreService;
+import com.cafe.order.domain.user.dto.User;
+import com.cafe.order.domain.user.service.UserService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;

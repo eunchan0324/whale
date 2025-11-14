@@ -1,5 +1,6 @@
-package com.cafe.order.domain.store;
+package com.cafe.order.domain.store.ctrl;
 
+import com.cafe.order.domain.store.service.StoreService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
